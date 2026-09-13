@@ -1,0 +1,136 @@
+:root {
+  --color-canvas: #eeefe9;
+  --color-surface-card: #ffffff;
+  --color-surface-soft: #e5e7e0;
+  --color-surface-doc: #fcfcfa;
+  --color-ink: #23251d;
+  --color-body: #4d4f46;
+  --color-mute: #6c6e63;
+  --color-ash: #9b9c92;
+  --color-hairline: #bfc1b7;
+  --color-hairline-soft: #dcdfd2;
+  --color-primary: #f7a501;
+  --color-primary-pressed: #dd9001;
+  --color-on-primary: #23251d;
+  --color-on-dark: #ffffff;
+  --color-link-teal: #1078a3;
+  --color-accent-blue: #2c84e0;
+  --color-accent-blue-soft: #dceaf6;
+  --color-accent-red: #cd4239;
+  --color-accent-red-soft: #f7d6d3;
+  --color-accent-green: #2c8c66;
+  --color-accent-green-soft: #d9eddf;
+  --color-accent-purple: #7c44a6;
+  --color-accent-purple-soft: #e7d8ee;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-full: 9999px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans KR", "IBM Plex Sans", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-body);
+  line-height: 1.5;
+}
+
+a { color: var(--color-link-teal); }
+
+/* Buttons: bare <button> and .btn (for anchor tags styled as buttons) share the same default look */
+button, .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  height: 40px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  text-decoration: none;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+button:hover, .btn:hover { background: var(--color-primary-pressed); }
+button.danger, .btn-danger { background: var(--color-accent-red); color: var(--color-on-dark); }
+button.danger:hover, .btn-danger:hover { background: #a83527; }
+.btn-secondary { background: var(--color-surface-soft); color: var(--color-ink); }
+.btn-secondary:hover { background: var(--color-hairline-soft); }
+
+/* Callout banners */
+.banner {
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  margin: 16px 0;
+  font-size: 15px;
+}
+.banner-blue { background: var(--color-accent-blue-soft); color: var(--color-ink); }
+.banner-green { background: var(--color-accent-green-soft); color: var(--color-accent-green); font-weight: 600; }
+.banner-red { background: var(--color-accent-red-soft); color: var(--color-accent-red); font-weight: 600; }
+.banner-purple { background: var(--color-accent-purple-soft); color: var(--color-ink); }
+
+/* Data / content tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface-card);
+  margin: 16px 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 14px;
+}
+.data-table th, .data-table td {
+  border-bottom: 1px solid var(--color-hairline-soft);
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--color-body);
+}
+.data-table th {
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: 13px;
+}
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Inline code */
+code {
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+  font-family: ui-monospace, "Source Code Pro", monospace;
+  font-size: 0.9em;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.hint { color: var(--color-mute); font-size: 14px; }
+
+/* Pill tabs: shared by the voucher-settlement app, the doc viewer, and the hub page */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tab-btn {
+  background: transparent;
+  color: var(--color-body);
+  border: none;
+  border-radius: var(--radius-full);
+  height: auto;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tab-btn:hover { background: var(--color-surface-soft); }
+.tab-btn.active { background: var(--color-ink); color: var(--color-on-dark); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }

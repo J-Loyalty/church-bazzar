@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바자회 교환권 정산 도구</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>김포남현교회 바자회 · 교환권 정산 도구</h1>
+  <p class="app-sub">모든 데이터는 이 브라우저(localStorage)에만 저장됩니다. 정기적으로 [데이터 관리] 탭에서 백업(JSON 내보내기)을 받아두세요.</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="booths">부스 관리</button>
+  <button class="tab-btn" data-tab="floats">초기 지급(플로트)</button>
+  <button class="tab-btn" data-tab="finals">마감 정산 제출</button>
+  <button class="tab-btn" data-tab="desk">교환권 부스</button>
+  <button class="tab-btn" data-tab="report">대사 리포트</button>
+  <button class="tab-btn" data-tab="data">데이터 관리</button>
+</nav>
+
+<main>
+  <!-- 부스 관리 -->
+  <section class="tab-panel active" id="panel-booths">
+    <h2>판매 부스 목록</h2>
+    <form id="booth-form" class="inline-form">
+      <input type="text" id="booth-name" placeholder="부스 이름 (예: 의류1)" required>
+      <select id="booth-category">
+        <option value="의류">의류</option>
+        <option value="생활용품">생활용품</option>
+        <option value="도서">도서</option>
+        <option value="먹거리">먹거리</option>
+        <option value="수공예품">수공예품</option>
+        <option value="기타">기타</option>
+      </select>
+      <button type="submit">부스 추가</button>
+    </form>
+    <table class="data-table">
+      <thead><tr><th>부스명</th><th>분류</th><th></th></tr></thead>
+      <tbody id="booth-list"></tbody>
+    </table>
+  </section>
+
+  <!-- 초기 지급 -->
+  <section class="tab-panel" id="panel-floats">
+    <h2>부스별 초기 지급 교환권 (잔돈용 플로트)</h2>
+    <p class="hint">개장 전 각 부스에 거스름돈 용도로 미리 나눠준 교환권 수량을 권종별로 입력하세요.</p>
+    <table class="data-table" id="float-table">
+      <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
+      <tbody id="float-body"></tbody>
+    </table>
+  </section>
+
+  <!-- 마감 정산 제출 -->
+  <section class="tab-panel" id="panel-finals">
+    <h2>부스별 마감 시 보유 교환권 (제출 내역)</h2>
+    <p class="hint">판매 종료 후 각 부스가 실제로 보유하고 있는(=받은) 교환권 수량을 권종별로 집계해 입력하세요. 초기 지급분도 포함된 수량입니다.</p>
+    <table class="data-table" id="final-table">
+      <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
+      <tbody id="final-body"></tbody>
+    </table>
+  </section>
+
+  <!-- 교환권 부스 -->
+  <section class="tab-panel" id="panel-desk">
+    <h2>교환권 부스(입구) 판매 내역</h2>
+    <p class="hint">교환권 부스에서 고객에게 실제로 판매(현금/계좌이체 수령)한 내역과, 하루 동안 지급/발행한 교환권 총 수량을 입력하세요. 발행 수량에는 각 부스에 나눠준 초기 지급분도 포함됩니다.</p>
+    <div class="desk-grid">
+      <label>현금 판매액 (원)
+        <input type="number" id="desk-cash" min="0" step="1">
+      </label>
+      <label>계좌이체 판매액 (원)
+        <input type="number" id="desk-transfer" min="0" step="1">
+      </label>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>권종</th><th>발행(지급) 수량</th></tr></thead>
+      <tbody>
+        <tr><td>1,000원</td><td><input type="number" id="desk-issued-1000" min="0" step="1"></td></tr>
+        <tr><td>5,000원</td><td><input type="number" id="desk-issued-5000" min="0" step="1"></td></tr>
+        <tr><td>10,000원</td><td><input type="number" id="desk-issued-10000" min="0" step="1"></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 대사 리포트 -->
+  <section class="tab-panel" id="panel-report">
+    <h2>대사(검증) 리포트</h2>
+
+    <h3>1. 부스별 매출 (제출 보유액 − 초기 지급액)</h3>
+    <table class="data-table" id="report-booth-table">
+      <thead><tr><th>부스</th><th>초기 지급액</th><th>제출 보유액</th><th>매출(추정)</th></tr></thead>
+      <tbody id="report-booth-body"></tbody>
+    </table>
+    <p><strong>부스 매출 합계: <span id="report-booth-total">0</span>원</strong></p>
+
+    <h3>2. 교환권 부스 대사 (발행액 vs 실제 판매 수령액)</h3>
+    <table class="data-table" id="report-desk-table">
+      <tbody>
+        <tr><th>총 발행액 (초기 지급 + 추가 판매분 포함)</th><td id="report-desk-issued">0원</td></tr>
+        <tr><th>부스 초기 지급액 합계</th><td id="report-desk-float">0원</td></tr>
+        <tr><th>발행액 중 실제 판매분 (발행액 − 초기 지급액 합계)</th><td id="report-desk-expected">0원</td></tr>
+        <tr><th>교환권 부스 실수령액 (현금+계좌이체)</th><td id="report-desk-actual">0원</td></tr>
+        <tr><th>차이 (실수령액 − 실제 판매분)</th><td id="report-desk-diff">0원</td></tr>
+      </tbody>
+    </table>
+    <p id="report-desk-status" class="status"></p>
+
+    <h3>3. 전체 요약</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><th>부스 매출 합계</th><td id="report-summary-booth">0원</td></tr>
+        <tr><th>교환권 부스 실수령액</th><td id="report-summary-desk">0원</td></tr>
+        <tr><th>차이 (미사용 교환권 등으로 발생 가능)</th><td id="report-summary-diff">0원</td></tr>
+      </tbody>
+    </table>
+    <p class="hint">※ 부스 매출 합계와 교환권 부스 실수령액은 원칙적으로 비슷해야 합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류 등을 확인하세요.</p>
+  </section>
+
+  <!-- 데이터 관리 -->
+  <section class="tab-panel" id="panel-data">
+    <h2>데이터 관리</h2>
+    <div class="data-actions">
+      <button id="btn-export">JSON으로 내보내기 (백업)</button>
+      <label class="file-btn">JSON 불러오기
+        <input type="file" id="import-file" accept="application/json" hidden>
+      </label>
+      <button id="btn-export-csv">리포트 CSV로 내보내기</button>
+      <button id="btn-reset" class="danger">전체 초기화</button>
+    </div>
+    <p class="hint">불러오기를 실행하면 현재 브라우저에 저장된 데이터를 덮어씁니다. 초기화는 되돌릴 수 없으니 먼저 내보내기로 백업하세요.</p>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

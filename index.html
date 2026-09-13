@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바자회 준비 허브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+  header {
+    padding: 32px 20px 20px;
+    background: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--color-ink);
+  }
+  header p { margin: 0; color: var(--color-mute); font-size: 14px; }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .cta {
+    display: block;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    text-decoration: none;
+    padding: 18px 20px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    font-weight: 700;
+    font-size: 16px;
+    height: auto;
+  }
+  .cta:hover { background: var(--color-primary-pressed); }
+  .cta .sub { display: block; font-weight: 400; font-size: 13px; margin-top: 4px; opacity: 0.85; }
+
+  .alert {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 28px;
+  }
+  .alert:hover { filter: brightness(0.97); }
+
+  .tabs {
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  ul.doc-list { list-style: none; margin: 0; padding: 0; }
+  ul.doc-list li {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+  }
+  ul.doc-list a {
+    display: block;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  ul.doc-list a:hover { background: var(--color-surface-soft); }
+  ul.doc-list .desc {
+    display: block;
+    color: var(--color-mute);
+    font-weight: 400;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--color-mute);
+    font-size: 13px;
+    margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>대한예수교장로회 김포남현교회 바자회</h1>
+  <p>2026년 10월 9일(금) · 준비 허브 페이지</p>
+</header>
+
+<main>
+  <a class="cta" href="voucher-settlement/index.html">
+    교환권 정산 도구 열기
+    <span class="sub">부스 등록 · 초기 지급 · 마감 정산 · 대사 리포트</span>
+  </a>
+
+  <a class="alert banner banner-red" href="doc.html?src=docs/확인_필요_체크리스트.md">
+    ⚠ 아직 결정되지 않은 사항이 있습니다 — 확인 필요 체크리스트 보기
+  </a>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="overview">기획 개요</button>
+    <button class="tab-btn" data-tab="ops">운영 문서</button>
+    <button class="tab-btn" data-tab="check">기준 및 점검</button>
+  </nav>
+
+  <div class="tab-panel active" id="panel-overview">
+    <ul class="doc-list">
+      <li><a href="doc.html?src=바자회_기획안.md">바자회 기획안<span class="desc">전체 개요 및 각 문서 링크 모음</span></a></li>
+    </ul>
+  </div>
+
+  <div class="tab-panel" id="panel-ops">
+    <ul class="doc-list">
+      <li><a href="doc.html?src=docs/타임라인.md">타임라인<span class="desc">행사 당일 시간대별 진행 (안)</span></a></li>
+      <li><a href="doc.html?src=docs/운영_역할.md">운영 역할<span class="desc">접수/진열/판매/정산/정리 조 및 설거지 봉사조</span></a></li>
+      <li><a href="doc.html?src=docs/부스_배치.md">부스 배치<span class="desc">부스 위치 배치도 (안)</span></a></li>
+      <li><a href="doc.html?src=docs/교환권_운영.md">교환권 운영<span class="desc">발행/판매/재환전/거스름돈 처리 절차</span></a></li>
+      <li><a href="doc.html?src=docs/정산_절차.md">정산 절차<span class="desc">사후 정산 실행 절차</span></a></li>
+      <li><a href="doc.html?src=docs/우천_대책.md">우천 대책<span class="desc">우천 대비 방안 (안)</span></a></li>
+    </ul>
+  </div>
+
+  <div class="tab-panel" id="panel-check">
+    <ul class="doc-list">
+      <li><a href="doc.html?src=docs/가치_기준.md">가치 기준<span class="desc">섬김·교제·지역사회 이바지 점검 기준</span></a></li>
+      <li><a href="doc.html?src=docs/확인_필요_체크리스트.md">확인 필요 체크리스트<span class="desc">아직 결정되지 않은 사항 모음</span></a></li>
+    </ul>
+  </div>
+
+  <footer>본 페이지는 각 문서로 이동하기 위한 허브입니다.</footer>
+</main>
+
+<script>
+  document.getElementById("tabs").addEventListener("click", function (e) {
+    var btn = e.target.closest(".tab-btn");
+    if (!btn) return;
+    document.querySelectorAll("#tabs .tab-btn").forEach(function (b) { b.classList.remove("active"); });
+    document.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문서 보기 · 바자회 준비 허브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar .back {
+    display: block;
+    color: var(--color-mute);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .sidebar .back:hover { color: var(--color-ink); }
+
+  .sidebar h2 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-mute);
+    margin: 20px 0 8px;
+  }
+  .sidebar h2:first-of-type { margin-top: 0; }
+
+  .sidebar ul { list-style: none; margin: 0; padding: 0; }
+  .sidebar li a {
+    display: block;
+    padding: 6px 8px;
+    margin-bottom: 2px;
+    border-radius: var(--radius-sm);
+    color: var(--color-body);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .sidebar li a:hover { background: var(--color-surface-soft); }
+  .sidebar li a.active {
+    background: var(--color-surface-card);
+    color: var(--color-ink);
+    font-weight: 700;
+    border: 1px solid var(--color-hairline);
+  }
+
+  .article-wrap {
+    flex: 1;
+    min-width: 0;
+    padding: 32px 24px 80px;
+  }
+
+  .doc-card {
+    max-width: 720px;
+    background: var(--color-surface-doc);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 32px;
+  }
+
+  .doc-card h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--color-ink);
+    margin: 0 0 16px;
+  }
+  .doc-card h2 {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--color-ink);
+    margin: 28px 0 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-hairline-soft);
+  }
+  .doc-card h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .doc-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 20px 0 8px;
+  }
+  .doc-card p { margin: 0 0 12px; font-size: 15px; }
+  .doc-card ul, .doc-card ol { margin: 0 0 12px; padding-left: 22px; font-size: 15px; }
+  .doc-card li { margin-bottom: 4px; }
+  .doc-card li.checkbox-item { list-style: none; margin-left: -22px; }
+  .doc-card li.checkbox-item input { margin-right: 6px; }
+  .doc-card hr { border: none; border-top: 1px solid var(--color-hairline); margin: 24px 0; }
+  .doc-card strong { color: var(--color-ink); font-weight: 700; }
+  .doc-card a { color: var(--color-link-teal); }
+  .doc-card del { color: var(--color-mute); }
+
+  .doc-loading, .doc-error { color: var(--color-mute); font-size: 15px; }
+  .doc-error { color: var(--color-accent-red); }
+
+  /* .tabs / .tab-btn / .tab-panel base styles live in assets/tokens.css */
+  .doc-card .tabs {
+    margin: 20px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-hairline-soft);
+  }
+  .doc-card .tab-panel > h2:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+
+  @media (max-width: 860px) {
+    .layout { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      position: static;
+      max-height: none;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .article-wrap { padding: 24px 16px 60px; }
+    .doc-card { max-width: none; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="article-wrap">
+    <article class="doc-card" id="content">
+      <p class="doc-loading">불러오는 중…</p>
+    </article>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var NAV = [
+    { group: "기획 개요", items: [
+      { path: "바자회_기획안.md", label: "바자회 기획안" }
+    ]},
+    { group: "운영 문서", items: [
+      { path: "docs/타임라인.md", label: "타임라인" },
+      { path: "docs/운영_역할.md", label: "운영 역할" },
+      { path: "docs/부스_배치.md", label: "부스 배치" },
+      { path: "docs/교환권_운영.md", label: "교환권 운영" },
+      { path: "docs/정산_절차.md", label: "정산 절차" },
+      { path: "docs/우천_대책.md", label: "우천 대책" }
+    ]},
+    { group: "기준 및 점검", items: [
+      { path: "docs/가치_기준.md", label: "가치 기준" },
+      { path: "docs/확인_필요_체크리스트.md", label: "확인 필요 체크리스트" }
+    ]}
+  ];
+
+  var params = new URLSearchParams(location.search);
+  var src = params.get("src") || "바자회_기획안.md";
+
+  renderSidebar(src);
+  loadDoc(src);
+
+  function renderSidebar(currentSrc) {
+    var nav = document.getElementById("sidebar");
+    var html = '<a class="back" href="index.html">&larr; 허브로</a>';
+    NAV.forEach(function (group) {
+      html += "<h2>" + escapeHtml(group.group) + "</h2><ul>";
+      group.items.forEach(function (item) {
+        var isActive = item.path === currentSrc;
+        html += '<li><a href="doc.html?src=' + encodeURIComponent(item.path) + '"' +
+          (isActive ? ' class="active"' : "") + ">" + escapeHtml(item.label) + "</a></li>";
+      });
+      html += "</ul>";
+    });
+    nav.innerHTML = html;
+  }
+
+  function loadDoc(path) {
+    var content = document.getElementById("content");
+    fetch(path)
+      .then(function (res) {
+        if (!res.ok) throw new Error("문서를 찾을 수 없습니다 (" + res.status + ")");
+        return res.text();
+      })
+      .then(function (text) {
+        var baseDir = path.indexOf("/") >= 0 ? path.slice(0, path.lastIndexOf("/")) : "";
+        var html = renderMarkdown(text, baseDir);
+        content.innerHTML = html;
+        var h1 = content.querySelector("h1");
+        document.title = (h1 ? h1.textContent : path) + " · 바자회 준비 허브";
+        splitIntoTabs(content);
+      })
+      .catch(function (err) {
+        content.innerHTML = '<p class="doc-error">문서를 불러오지 못했습니다: ' + escapeHtml(err.message) + "</p>" +
+          '<p class="hint">경로: ' + escapeHtml(path) + "</p>";
+      });
+  }
+
+  // Long documents get hard to scan as one continuous scroll, so once a doc has
+  // 2+ top-level (##) sections, split it into clickable tabs (one section visible
+  // at a time). Content before the first ## (the H1 + intro paragraph) stays
+  // visible above the tabs. Docs with 0-1 sections are left as a flat page.
+  function splitIntoTabs(container) {
+    var children = Array.prototype.slice.call(container.children);
+    var h2Indices = [];
+    children.forEach(function (el, i) { if (el.tagName === "H2") h2Indices.push(i); });
+    if (h2Indices.length < 2) return;
+
+    var introNodes = children.slice(0, h2Indices[0]);
+    var sections = h2Indices.map(function (startIdx, idx) {
+      var endIdx = idx + 1 < h2Indices.length ? h2Indices[idx + 1] : children.length;
+      var nodes = children.slice(startIdx, endIdx);
+      return { title: nodes[0].textContent.trim(), nodes: nodes };
+    });
+
+    container.innerHTML = "";
+    introNodes.forEach(function (n) { container.appendChild(n); });
+
+    var tabBar = document.createElement("div");
+    tabBar.className = "tabs";
+    var panelsWrap = document.createElement("div");
+    panelsWrap.className = "tab-panels";
+
+    sections.forEach(function (sec, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tab-btn" + (i === 0 ? " active" : "");
+      btn.textContent = sec.title;
+      btn.dataset.tabIndex = String(i);
+      tabBar.appendChild(btn);
+
+      var panel = document.createElement("div");
+      panel.className = "tab-panel" + (i === 0 ? " active" : "");
+      panel.dataset.tabIndex = String(i);
+      sec.nodes.forEach(function (n) { panel.appendChild(n); });
+      panelsWrap.appendChild(panel);
+    });
+
+    tabBar.addEventListener("click", function (e) {
+      var btn = e.target.closest(".tab-btn");
+      if (!btn) return;
+      tabBar.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      panelsWrap.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      panelsWrap.querySelector('.tab-panel[data-tab-index="' + btn.dataset.tabIndex + '"]').classList.add("active");
+      panelsWrap.scrollIntoView({ block: "nearest" });
+    });
+
+    container.appendChild(tabBar);
+    container.appendChild(panelsWrap);
+  }
+
+  // ---- Minimal Markdown renderer (headings, paragraphs, lists incl. checkboxes,
+  // tables, blockquotes as callouts, hr, bold/code/strike/links) ----
+
+  function renderMarkdown(md, baseDir) {
+    var lines = md.replace(/\r\n/g, "\n").split("\n");
+    var out = [];
+    var i = 0;
+
+    while (i < lines.length) {
+      var line = lines[i];
+
+      if (/^\s*$/.test(line)) { i++; continue; }
+
+      // Heading
+      var headingMatch = /^(#{1,6})\s+(.*)$/.exec(line);
+      if (headingMatch) {
+        var level = headingMatch[1].length;
+        out.push("<h" + level + ">" + inline(headingMatch[2], baseDir) + "</h" + level + ">");
+        i++;
+        continue;
+      }
+
+      // Horizontal rule
+      if (/^-{3,}$/.test(line.trim()) || /^\*{3,}$/.test(line.trim())) {
+        out.push("<hr>");
+        i++;
+        continue;
+      }
+
+      // Table
+      if (/^\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/.test(lines[i + 1])) {
+        var headerCells = splitTableRow(line);
+        i += 2;
+        var bodyRows = [];
+        while (i < lines.length && /^\|.*\|\s*$/.test(lines[i])) {
+          bodyRows.push(splitTableRow(lines[i]));
+          i++;
+        }
+        var table = "<table class=\"data-table\"><thead><tr>";
+        headerCells.forEach(function (c) { table += "<th>" + inline(c, baseDir) + "</th>"; });
+        table += "</tr></thead><tbody>";
+        bodyRows.forEach(function (row) {
+          table += "<tr>";
+          row.forEach(function (c) { table += "<td>" + inline(c, baseDir) + "</td>"; });
+          table += "</tr>";
+        });
+        table += "</tbody></table>";
+        out.push(table);
+        continue;
+      }
+
+      // Blockquote (rendered as an info callout)
+      if (/^>\s?/.test(line)) {
+        var quoteLines = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) {
+          quoteLines.push(lines[i].replace(/^>\s?/, ""));
+          i++;
+        }
+        out.push('<div class="banner banner-blue">' + inline(quoteLines.join(" "), baseDir) + "</div>");
+        continue;
+      }
+
+      // Unordered list (with optional checkboxes)
+      if (/^[-*]\s+/.test(line)) {
+        var ulItems = [];
+        while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+          ulItems.push(lines[i].replace(/^[-*]\s+/, ""));
+          i++;
+        }
+        out.push(renderList(ulItems, false, baseDir));
+        continue;
+      }
+
+      // Ordered list
+      if (/^\d+\.\s+/.test(line)) {
+        var olItems = [];
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+          olItems.push(lines[i].replace(/^\d+\.\s+/, ""));
+          i++;
+        }
+        out.push(renderList(olItems, true, baseDir));
+        continue;
+      }
+
+      // Paragraph: consume consecutive plain lines
+      var paraLines = [];
+      while (
+        i < lines.length &&
+        !/^\s*$/.test(lines[i]) &&
+        !/^#{1,6}\s+/.test(lines[i]) &&
+        !/^[-*]\s+/.test(lines[i]) &&
+        !/^\d+\.\s+/.test(lines[i]) &&
+        !/^>\s?/.test(lines[i]) &&
+        !/^\|.*\|\s*$/.test(lines[i]) &&
+        !/^-{3,}$/.test(lines[i].trim())
+      ) {
+        paraLines.push(lines[i]);
+        i++;
+      }
+      if (paraLines.length) {
+        out.push("<p>" + inline(paraLines.join(" "), baseDir) + "</p>");
+      } else {
+        i++;
+      }
+    }
+
+    return out.join("\n");
+  }
+
+  function renderList(items, ordered, baseDir) {
+    var tag = ordered ? "ol" : "ul";
+    var html = "<" + tag + ">";
+    items.forEach(function (item) {
+      var checkboxMatch = /^\[( |x|X)\]\s+(.*)$/.exec(item);
+      if (checkboxMatch) {
+        var checked = checkboxMatch[1].toLowerCase() === "x";
+        html += '<li class="checkbox-item"><input type="checkbox" disabled' + (checked ? " checked" : "") + "> " +
+          inline(checkboxMatch[2], baseDir) + "</li>";
+      } else {
+        html += "<li>" + inline(item, baseDir) + "</li>";
+      }
+    });
+    html += "</" + tag + ">";
+    return html;
+  }
+
+  function splitTableRow(row) {
+    var trimmed = row.trim().replace(/^\|/, "").replace(/\|$/, "");
+    return trimmed.split("|").map(function (c) { return c.trim(); });
+  }
+
+  function inline(text, baseDir) {
+    var escaped = escapeHtml(text);
+    // inline code
+    escaped = escaped.replace(/`([^`]+)`/g, "<code>$1</code>");
+    // bold
+    escaped = escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    // strikethrough
+    escaped = escaped.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+    // links
+    escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (match, label, href) {
+      var resolved = resolveHref(baseDir, href);
+      return '<a href="' + resolved + '">' + label + "</a>";
+    });
+    return escaped;
+  }
+
+  function resolveHref(baseDir, href) {
+    if (/^([a-z][a-z0-9+.-]*:)/i.test(href) || href.charAt(0) === "#") {
+      return href; // absolute URL, mailto:, or in-page anchor
+    }
+    var baseParts = baseDir ? baseDir.split("/") : [];
+    var parts = href.split("/");
+    parts.forEach(function (p) {
+      if (p === "" || p === ".") return;
+      if (p === "..") baseParts.pop();
+      else baseParts.push(p);
+    });
+    var resolved = baseParts.join("/");
+    if (/\.md(#.*)?$/i.test(resolved)) {
+      var hashIndex = resolved.indexOf("#");
+      var pathPart = hashIndex >= 0 ? resolved.slice(0, hashIndex) : resolved;
+      return "doc.html?src=" + pathPart;
+    }
+    return resolved;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>
