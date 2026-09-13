@@ -133,6 +133,40 @@
   .doc-loading, .doc-error { color: var(--color-mute); font-size: 15px; }
   .doc-error { color: var(--color-accent-red); }
 
+  .prev-next {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 720px;
+    margin-top: 20px;
+  }
+  .prev-next a {
+    flex: 0 1 auto;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    text-decoration: none;
+    color: var(--color-ink);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .prev-next a:hover { background: var(--color-surface-soft); }
+  .prev-next .label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-mute);
+    margin-bottom: 2px;
+  }
+  .prev-next .next { text-align: right; }
+  .prev-next .progress {
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: var(--color-mute);
+  }
+
   /* .tabs / .tab-btn / .tab-panel base styles live in assets/tokens.css */
   .doc-card .tabs {
     margin: 20px 0 16px;
@@ -173,24 +207,31 @@
 (function () {
   "use strict";
 
+  // Order here is the reading order for someone seeing this for the first time.
+  // It drives the sidebar, the step numbers, and the prev/next links.
   var NAV = [
-    { group: "기획 개요", items: [
+    { group: "1단계 · 왜 하는가", items: [
       { path: "docs/목적_목표.md", label: "목적과 목표" },
       { path: "바자회_기획안.md", label: "바자회 기획안" }
     ]},
-    { group: "운영 문서", items: [
+    { group: "2단계 · 당일 운영", items: [
+      { path: "docs/부스_배치.md", label: "부스 배치" },
       { path: "docs/타임라인.md", label: "타임라인" },
       { path: "docs/운영_역할.md", label: "운영 역할" },
-      { path: "docs/부스_배치.md", label: "부스 배치" },
-      { path: "docs/교환권_운영.md", label: "교환권 운영" },
-      { path: "docs/정산_절차.md", label: "정산 절차" },
-      { path: "docs/우천_대책.md", label: "우천 대책" }
+      { path: "docs/교환권_운영.md", label: "교환권 운영" }
     ]},
-    { group: "기준 및 점검", items: [
+    { group: "3단계 · 마무리", items: [
+      { path: "docs/정산_절차.md", label: "정산 절차" }
+    ]},
+    { group: "참고", items: [
+      { path: "docs/우천_대책.md", label: "우천 대책" },
       { path: "docs/가치_기준.md", label: "가치 기준" },
       { path: "docs/확인_필요_체크리스트.md", label: "확인 필요 체크리스트" }
     ]}
   ];
+
+  // Flat reading sequence for the prev/next footer.
+  var SEQUENCE = NAV.reduce(function (acc, group) { return acc.concat(group.items); }, []);
 
   var params = new URLSearchParams(location.search);
   var src = params.get("src") || "바자회_기획안.md";
@@ -243,11 +284,38 @@
         var h1 = content.querySelector("h1");
         document.title = (h1 ? h1.textContent : path) + " · 바자회 준비 허브";
         splitIntoTabs(content);
+        renderPrevNext(path);
       })
       .catch(function (err) {
         content.innerHTML = '<p class="doc-error">문서를 불러오지 못했습니다: ' + escapeHtml(err.message) + "</p>" +
           '<p class="hint">경로: ' + escapeHtml(path) + "</p>";
       });
+  }
+
+  // Footer links that walk the reading order, so a first-time reader can go
+  // through every document in sequence without returning to the hub each time.
+  function renderPrevNext(currentSrc) {
+    var index = -1;
+    SEQUENCE.forEach(function (item, i) { if (item.path === currentSrc) index = i; });
+    if (index < 0) return;
+
+    var prev = index > 0 ? SEQUENCE[index - 1] : null;
+    var next = index < SEQUENCE.length - 1 ? SEQUENCE[index + 1] : null;
+
+    var nav = document.createElement("nav");
+    nav.className = "prev-next";
+    nav.innerHTML =
+      (prev
+        ? '<a class="prev" href="doc.html?src=' + encodeURIComponent(prev.path) + '">' +
+          '<span class="label">이전</span>' + escapeHtml(prev.label) + "</a>"
+        : "<span></span>") +
+      '<span class="progress">' + (index + 1) + " / " + SEQUENCE.length + "</span>" +
+      (next
+        ? '<a class="next" href="doc.html?src=' + encodeURIComponent(next.path) + '">' +
+          '<span class="label">다음</span>' + escapeHtml(next.label) + "</a>"
+        : "<span></span>");
+
+    document.querySelector(".article-wrap").appendChild(nav);
   }
 
   // Long documents get hard to scan as one continuous scroll, so once a doc has
@@ -377,14 +445,16 @@
         continue;
       }
 
-      // Ordered list
+      // Ordered list — the first item's number becomes the list's start, so a
+      // sequence split across sections keeps counting instead of resetting to 1.
       if (/^\d+\.\s+/.test(line)) {
         var olItems = [];
+        var olStart = parseInt(/^(\d+)\./.exec(line)[1], 10);
         while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
           olItems.push(lines[i].replace(/^\d+\.\s+/, ""));
           i++;
         }
-        out.push(renderList(olItems, true, baseDir));
+        out.push(renderList(olItems, true, baseDir, olStart));
         continue;
       }
 
@@ -413,9 +483,9 @@
     return out.join("\n");
   }
 
-  function renderList(items, ordered, baseDir) {
+  function renderList(items, ordered, baseDir, start) {
     var tag = ordered ? "ol" : "ul";
-    var html = "<" + tag + ">";
+    var html = "<" + tag + (ordered && start > 1 ? ' start="' + start + '"' : "") + ">";
     items.forEach(function (item) {
       var checkboxMatch = /^\[( |x|X)\]\s+(.*)$/.exec(item);
       if (checkboxMatch) {

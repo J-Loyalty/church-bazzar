@@ -52,10 +52,32 @@
   }
   .alert:hover { filter: brightness(0.97); }
 
+  .lead {
+    font-size: 14px;
+    color: var(--color-mute);
+    margin: 0 0 12px;
+  }
+  .lead strong { color: var(--color-ink); }
+
   .tabs {
     padding-bottom: 12px;
     margin-bottom: 16px;
     border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-ink);
+    color: var(--color-on-dark);
+    font-size: 11px;
+    font-weight: 700;
+    vertical-align: 1px;
   }
 
   ul.doc-list { list-style: none; margin: 0; padding: 0; }
@@ -107,34 +129,43 @@
     ⚠ 아직 결정되지 않은 사항이 있습니다 — 확인 필요 체크리스트 보기
   </a>
 
+  <p class="lead">처음이시면 <strong>1단계부터 순서대로</strong> 보세요.</p>
+
   <nav class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="overview">기획 개요</button>
-    <button class="tab-btn" data-tab="ops">운영 문서</button>
-    <button class="tab-btn" data-tab="check">기준 및 점검</button>
+    <button class="tab-btn active" data-tab="why">1단계 · 왜 하는가</button>
+    <button class="tab-btn" data-tab="ops">2단계 · 당일 운영</button>
+    <button class="tab-btn" data-tab="after">3단계 · 마무리</button>
+    <button class="tab-btn" data-tab="ref">참고</button>
   </nav>
 
-  <div class="tab-panel active" id="panel-overview">
+  <div class="tab-panel active" id="panel-why">
     <ul class="doc-list">
-      <li><a href="doc.html?src=docs/목적_목표.md">목적과 목표<span class="desc">왜 이 행사를 하는가 · 무엇으로 달성을 확인하는가</span></a></li>
-      <li><a href="doc.html?src=바자회_기획안.md">바자회 기획안<span class="desc">전체 개요 및 각 문서 링크 모음</span></a></li>
+      <li><a href="doc.html?src=docs/목적_목표.md"><span class="step">1</span>목적과 목표<span class="desc">이 행사를 왜 하는가 · 무엇으로 달성을 확인하는가</span></a></li>
+      <li><a href="doc.html?src=바자회_기획안.md"><span class="step">2</span>바자회 기획안<span class="desc">일시·장소, 판매 품목, 기본 운영 규칙, 용어</span></a></li>
     </ul>
   </div>
 
   <div class="tab-panel" id="panel-ops">
     <ul class="doc-list">
-      <li><a href="doc.html?src=docs/타임라인.md">타임라인<span class="desc">행사 당일 시간대별 진행 (안)</span></a></li>
-      <li><a href="doc.html?src=docs/운영_역할.md">운영 역할<span class="desc">접수/진열/판매/정산/정리 조 및 설거지 봉사조</span></a></li>
-      <li><a href="doc.html?src=docs/부스_배치.md">부스 배치<span class="desc">부스 위치 배치도 (안)</span></a></li>
-      <li><a href="doc.html?src=docs/교환권_운영.md">교환권 운영<span class="desc">발행/판매/재환전/거스름돈 처리 절차</span></a></li>
-      <li><a href="doc.html?src=docs/정산_절차.md">정산 절차<span class="desc">사후 정산 실행 절차</span></a></li>
-      <li><a href="doc.html?src=docs/우천_대책.md">우천 대책<span class="desc">우천 대비 방안 (안)</span></a></li>
+      <li><a href="doc.html?src=docs/부스_배치.md"><span class="step">3</span>부스 배치<span class="desc">어디에 무엇이 있는가</span></a></li>
+      <li><a href="doc.html?src=docs/타임라인.md"><span class="step">4</span>타임라인<span class="desc">몇 시에 무엇을 하는가</span></a></li>
+      <li><a href="doc.html?src=docs/운영_역할.md"><span class="step">5</span>운영 역할<span class="desc">누가 무엇을 맡는가</span></a></li>
+      <li><a href="doc.html?src=docs/교환권_운영.md"><span class="step">6</span>교환권 운영<span class="desc">돈이 어떻게 오가는가 — 가장 낯선 규칙이므로 꼭 확인</span></a></li>
     </ul>
   </div>
 
-  <div class="tab-panel" id="panel-check">
+  <div class="tab-panel" id="panel-after">
     <ul class="doc-list">
-      <li><a href="doc.html?src=docs/가치_기준.md">가치 기준<span class="desc">섬김·교제·지역사회 이바지 점검 기준</span></a></li>
-      <li><a href="doc.html?src=docs/확인_필요_체크리스트.md">확인 필요 체크리스트<span class="desc">아직 결정되지 않은 사항 모음</span></a></li>
+      <li><a href="doc.html?src=docs/정산_절차.md"><span class="step">7</span>정산 절차<span class="desc">매출을 어떻게 검증하고 보고하는가</span></a></li>
+      <li><a href="voucher-settlement/index.html"><span class="step">8</span>교환권 정산 도구<span class="desc">정산을 실제로 입력·검증하는 웹 도구</span></a></li>
+    </ul>
+  </div>
+
+  <div class="tab-panel" id="panel-ref">
+    <ul class="doc-list">
+      <li><a href="doc.html?src=docs/우천_대책.md">우천 대책<span class="desc">비가 올 경우</span></a></li>
+      <li><a href="doc.html?src=docs/가치_기준.md">가치 기준<span class="desc">결정이 애매할 때의 판단 기준</span></a></li>
+      <li><a href="doc.html?src=docs/확인_필요_체크리스트.md">확인 필요 체크리스트<span class="desc">아직 정해지지 않은 것들</span></a></li>
     </ul>
   </div>
 
