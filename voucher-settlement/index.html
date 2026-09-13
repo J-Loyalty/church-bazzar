@@ -41,30 +41,36 @@
       </select>
       <button type="submit">부스 추가</button>
     </form>
-    <table class="data-table">
-      <thead><tr><th>부스명</th><th>분류</th><th></th></tr></thead>
-      <tbody id="booth-list"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>부스명</th><th>분류</th><th></th></tr></thead>
+        <tbody id="booth-list"></tbody>
+      </table>
+    </div>
   </section>
 
   <!-- 초기 지급 -->
   <section class="tab-panel" id="panel-floats">
     <h2>부스별 초기 지급 교환권 (잔돈용 플로트)</h2>
     <p class="hint">개장 전 각 부스에 거스름돈 용도로 미리 나눠준 교환권 수량을 권종별로 입력하세요.</p>
-    <table class="data-table" id="float-table">
-      <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
-      <tbody id="float-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table" id="float-table">
+        <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
+        <tbody id="float-body"></tbody>
+      </table>
+    </div>
   </section>
 
   <!-- 마감 정산 제출 -->
   <section class="tab-panel" id="panel-finals">
     <h2>부스별 마감 시 보유 교환권 (제출 내역)</h2>
     <p class="hint">판매 종료 후 각 부스가 실제로 보유하고 있는(=받은) 교환권 수량을 권종별로 집계해 입력하세요. 초기 지급분도 포함된 수량입니다.</p>
-    <table class="data-table" id="final-table">
-      <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
-      <tbody id="final-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table" id="final-table">
+        <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
+        <tbody id="final-body"></tbody>
+      </table>
+    </div>
   </section>
 
   <!-- 교환권 부스 -->
@@ -79,14 +85,16 @@
         <input type="number" id="desk-transfer" min="0" step="1">
       </label>
     </div>
-    <table class="data-table">
-      <thead><tr><th>권종</th><th>발행(지급) 수량</th></tr></thead>
-      <tbody>
-        <tr><td>1,000원</td><td><input type="number" id="desk-issued-1000" min="0" step="1"></td></tr>
-        <tr><td>5,000원</td><td><input type="number" id="desk-issued-5000" min="0" step="1"></td></tr>
-        <tr><td>10,000원</td><td><input type="number" id="desk-issued-10000" min="0" step="1"></td></tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>권종</th><th>발행(지급) 수량</th></tr></thead>
+        <tbody>
+          <tr><td>1,000원</td><td><input type="number" id="desk-issued-1000" min="0" step="1"></td></tr>
+          <tr><td>5,000원</td><td><input type="number" id="desk-issued-5000" min="0" step="1"></td></tr>
+          <tr><td>10,000원</td><td><input type="number" id="desk-issued-10000" min="0" step="1"></td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- 대사 리포트 -->
@@ -94,32 +102,38 @@
     <h2>대사(검증) 리포트</h2>
 
     <h3>1. 부스별 매출 (제출 보유액 − 초기 지급액)</h3>
-    <table class="data-table" id="report-booth-table">
-      <thead><tr><th>부스</th><th>초기 지급액</th><th>제출 보유액</th><th>매출(추정)</th></tr></thead>
-      <tbody id="report-booth-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table" id="report-booth-table">
+        <thead><tr><th>부스</th><th>초기 지급액</th><th>제출 보유액</th><th>매출(추정)</th></tr></thead>
+        <tbody id="report-booth-body"></tbody>
+      </table>
+    </div>
     <p><strong>부스 매출 합계: <span id="report-booth-total">0</span>원</strong></p>
 
     <h3>2. 교환권 부스 대사 (발행액 vs 실제 판매 수령액)</h3>
-    <table class="data-table" id="report-desk-table">
-      <tbody>
-        <tr><th>총 발행액 (초기 지급 + 추가 판매분 포함)</th><td id="report-desk-issued">0원</td></tr>
-        <tr><th>부스 초기 지급액 합계</th><td id="report-desk-float">0원</td></tr>
-        <tr><th>발행액 중 실제 판매분 (발행액 − 초기 지급액 합계)</th><td id="report-desk-expected">0원</td></tr>
-        <tr><th>교환권 부스 실수령액 (현금+계좌이체)</th><td id="report-desk-actual">0원</td></tr>
-        <tr><th>차이 (실수령액 − 실제 판매분)</th><td id="report-desk-diff">0원</td></tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table" id="report-desk-table">
+        <tbody>
+          <tr><th>총 발행액 (초기 지급 + 추가 판매분 포함)</th><td id="report-desk-issued">0원</td></tr>
+          <tr><th>부스 초기 지급액 합계</th><td id="report-desk-float">0원</td></tr>
+          <tr><th>발행액 중 실제 판매분 (발행액 − 초기 지급액 합계)</th><td id="report-desk-expected">0원</td></tr>
+          <tr><th>교환권 부스 실수령액 (현금+계좌이체)</th><td id="report-desk-actual">0원</td></tr>
+          <tr><th>차이 (실수령액 − 실제 판매분)</th><td id="report-desk-diff">0원</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p id="report-desk-status" class="status"></p>
 
     <h3>3. 전체 요약</h3>
-    <table class="data-table">
-      <tbody>
-        <tr><th>부스 매출 합계</th><td id="report-summary-booth">0원</td></tr>
-        <tr><th>교환권 부스 실수령액</th><td id="report-summary-desk">0원</td></tr>
-        <tr><th>차이 (미사용 교환권 등으로 발생 가능)</th><td id="report-summary-diff">0원</td></tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data-table">
+        <tbody>
+          <tr><th>부스 매출 합계</th><td id="report-summary-booth">0원</td></tr>
+          <tr><th>교환권 부스 실수령액</th><td id="report-summary-desk">0원</td></tr>
+          <tr><th>차이 (미사용 교환권 등으로 발생 가능)</th><td id="report-summary-diff">0원</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p class="hint">※ 부스 매출 합계와 교환권 부스 실수령액은 원칙적으로 비슷해야 합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류 등을 확인하세요.</p>
   </section>
 

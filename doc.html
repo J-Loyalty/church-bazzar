@@ -303,7 +303,7 @@
           bodyRows.push(splitTableRow(lines[i]));
           i++;
         }
-        var table = "<table class=\"data-table\"><thead><tr>";
+        var table = "<div class=\"table-scroll\"><table class=\"data-table\"><thead><tr>";
         headerCells.forEach(function (c) { table += "<th>" + inline(c, baseDir) + "</th>"; });
         table += "</tr></thead><tbody>";
         bodyRows.forEach(function (row) {
@@ -311,7 +311,7 @@
           row.forEach(function (c) { table += "<td>" + inline(c, baseDir) + "</td>"; });
           table += "</tr>";
         });
-        table += "</tbody></table>";
+        table += "</tbody></table></div>";
         out.push(table);
         continue;
       }

@@ -100,6 +100,15 @@ button.danger:hover, .btn-danger:hover { background: #a83527; }
 }
 .data-table tr:last-child td { border-bottom: none; }
 
+/* Safety net: if a table (or anything else) is wider than its container on a
+   narrow screen, it scrolls inside this box instead of overflowing the page. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 16px 0;
+}
+.table-scroll .data-table { margin: 0; }
+
 /* Inline code */
 code {
   background: var(--color-surface-soft);
