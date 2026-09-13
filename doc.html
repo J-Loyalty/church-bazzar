@@ -65,6 +65,24 @@
     border: 1px solid var(--color-hairline);
   }
 
+  /* On narrow screens the doc list collapses behind this toggle so the
+     document itself is visible without scrolling past every doc first. */
+  .sidebar-toggle {
+    display: none;
+    width: 100%;
+    text-align: left;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 14px;
+    height: auto;
+    margin-bottom: 12px;
+  }
+  .sidebar-toggle .chevron { float: right; transition: transform 0.15s; }
+  .sidebar-toggle.open .chevron { transform: rotate(180deg); }
+
   .article-wrap {
     flex: 1;
     min-width: 0;
@@ -130,7 +148,11 @@
       position: static;
       max-height: none;
       border-bottom: 1px solid var(--color-hairline);
+      padding: 16px;
     }
+    .sidebar-toggle { display: block; }
+    .sidebar-groups { display: none; }
+    .sidebar-groups.open { display: block; }
     .article-wrap { padding: 24px 16px 60px; }
     .doc-card { max-width: none; padding: 20px; }
   }
@@ -177,7 +199,17 @@
 
   function renderSidebar(currentSrc) {
     var nav = document.getElementById("sidebar");
+    var currentLabel = "문서 목록";
+    NAV.forEach(function (group) {
+      group.items.forEach(function (item) {
+        if (item.path === currentSrc) currentLabel = item.label;
+      });
+    });
+
     var html = '<a class="back" href="index.html">&larr; 허브로</a>';
+    html += '<button type="button" class="sidebar-toggle" id="sidebar-toggle">' +
+      escapeHtml(currentLabel) + ' <span class="chevron">&#9662;</span></button>';
+    html += '<div class="sidebar-groups" id="sidebar-groups">';
     NAV.forEach(function (group) {
       html += "<h2>" + escapeHtml(group.group) + "</h2><ul>";
       group.items.forEach(function (item) {
@@ -187,7 +219,13 @@
       });
       html += "</ul>";
     });
+    html += "</div>";
     nav.innerHTML = html;
+
+    document.getElementById("sidebar-toggle").addEventListener("click", function () {
+      document.getElementById("sidebar-groups").classList.toggle("open");
+      this.classList.toggle("open");
+    });
   }
 
   function loadDoc(path) {
