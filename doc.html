@@ -31,14 +31,15 @@
     display: block;
     color: var(--color-mute);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 20px;
+    padding: 6px 0;
   }
   .sidebar .back:hover { color: var(--color-ink); }
 
   .sidebar h2 {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -50,12 +51,12 @@
   .sidebar ul { list-style: none; margin: 0; padding: 0; }
   .sidebar li a {
     display: block;
-    padding: 6px 8px;
-    margin-bottom: 2px;
+    padding: 11px 12px;
+    margin-bottom: 3px;
     border-radius: var(--radius-sm);
     color: var(--color-body);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 16px;
   }
   .sidebar li a:hover { background: var(--color-surface-soft); }
   .sidebar li a.active {
@@ -74,9 +75,9 @@
     background: var(--color-surface-card);
     border: 1px solid var(--color-hairline);
     color: var(--color-ink);
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 700;
-    padding: 10px 14px;
+    padding: 14px 16px;
     height: auto;
     margin-bottom: 12px;
   }
@@ -90,7 +91,7 @@
   }
 
   .doc-card {
-    max-width: 720px;
+    max-width: 760px;
     background: var(--color-surface-doc);
     border: 1px solid var(--color-hairline);
     border-radius: var(--radius-md);
@@ -98,39 +99,46 @@
   }
 
   .doc-card h1 {
-    font-size: 24px;
+    font-size: 29px;
     font-weight: 800;
     letter-spacing: -0.6px;
+    line-height: 1.35;
     color: var(--color-ink);
-    margin: 0 0 16px;
+    margin: 0 0 18px;
   }
   .doc-card h2 {
-    font-size: 21px;
+    font-size: 24px;
     font-weight: 700;
     letter-spacing: -0.5px;
+    line-height: 1.4;
     color: var(--color-ink);
-    margin: 28px 0 12px;
-    padding-top: 12px;
+    margin: 34px 0 14px;
+    padding-top: 16px;
     border-top: 1px solid var(--color-hairline-soft);
   }
   .doc-card h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
   .doc-card h3 {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 19px;
+    font-weight: 700;
     color: var(--color-ink);
-    margin: 20px 0 8px;
+    margin: 26px 0 10px;
   }
-  .doc-card p { margin: 0 0 12px; font-size: 15px; }
-  .doc-card ul, .doc-card ol { margin: 0 0 12px; padding-left: 22px; font-size: 15px; }
-  .doc-card li { margin-bottom: 4px; }
-  .doc-card li.checkbox-item { list-style: none; margin-left: -22px; }
-  .doc-card li.checkbox-item input { margin-right: 6px; }
+  .doc-card p { margin: 0 0 16px; font-size: 17px; line-height: 1.75; }
+  .doc-card ul, .doc-card ol { margin: 0 0 16px; padding-left: 24px; font-size: 17px; line-height: 1.75; }
+  .doc-card li { margin-bottom: 9px; }
+  .doc-card li.checkbox-item { list-style: none; margin-left: -24px; }
+  .doc-card li.checkbox-item input {
+    margin-right: 9px;
+    width: 17px;
+    height: 17px;
+    vertical-align: -2px;
+  }
   .doc-card hr { border: none; border-top: 1px solid var(--color-hairline); margin: 24px 0; }
   .doc-card strong { color: var(--color-ink); font-weight: 700; }
   .doc-card a { color: var(--color-link-teal); }
   .doc-card del { color: var(--color-mute); }
 
-  .doc-loading, .doc-error { color: var(--color-mute); font-size: 15px; }
+  .doc-loading, .doc-error { color: var(--color-mute); font-size: 17px; }
   .doc-error { color: var(--color-accent-red); }
 
   .prev-next {
@@ -138,42 +146,34 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    max-width: 720px;
-    margin-top: 20px;
+    max-width: 760px;
+    margin-top: 24px;
   }
   .prev-next a {
     flex: 0 1 auto;
     background: var(--color-surface-card);
     border: 1px solid var(--color-hairline);
     border-radius: var(--radius-md);
-    padding: 10px 14px;
+    padding: 14px 18px;
     text-decoration: none;
     color: var(--color-ink);
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 600;
   }
   .prev-next a:hover { background: var(--color-surface-soft); }
   .prev-next .label {
     display: block;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--color-mute);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
   }
   .prev-next .next { text-align: right; }
   .prev-next .progress {
     flex: 0 0 auto;
-    font-size: 12px;
+    font-size: 15px;
     color: var(--color-mute);
   }
-
-  /* .tabs / .tab-btn / .tab-panel base styles live in assets/tokens.css */
-  .doc-card .tabs {
-    margin: 20px 0 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--color-hairline-soft);
-  }
-  .doc-card .tab-panel > h2:first-child { margin-top: 0; border-top: none; padding-top: 0; }
 
   @media (max-width: 860px) {
     .layout { flex-direction: column; }
@@ -285,7 +285,6 @@
         content.innerHTML = html;
         var h1 = content.querySelector("h1");
         document.title = (h1 ? h1.textContent : path) + " · 바자회 준비 허브";
-        splitIntoTabs(content);
         renderPrevNext(path);
       })
       .catch(function (err) {
@@ -318,60 +317,6 @@
         : "<span></span>");
 
     document.querySelector(".article-wrap").appendChild(nav);
-  }
-
-  // Long documents get hard to scan as one continuous scroll, so once a doc has
-  // 2+ top-level (##) sections, split it into clickable tabs (one section visible
-  // at a time). Content before the first ## (the H1 + intro paragraph) stays
-  // visible above the tabs. Docs with 0-1 sections are left as a flat page.
-  function splitIntoTabs(container) {
-    var children = Array.prototype.slice.call(container.children);
-    var h2Indices = [];
-    children.forEach(function (el, i) { if (el.tagName === "H2") h2Indices.push(i); });
-    if (h2Indices.length < 2) return;
-
-    var introNodes = children.slice(0, h2Indices[0]);
-    var sections = h2Indices.map(function (startIdx, idx) {
-      var endIdx = idx + 1 < h2Indices.length ? h2Indices[idx + 1] : children.length;
-      var nodes = children.slice(startIdx, endIdx);
-      return { title: nodes[0].textContent.trim(), nodes: nodes };
-    });
-
-    container.innerHTML = "";
-    introNodes.forEach(function (n) { container.appendChild(n); });
-
-    var tabBar = document.createElement("div");
-    tabBar.className = "tabs";
-    var panelsWrap = document.createElement("div");
-    panelsWrap.className = "tab-panels";
-
-    sections.forEach(function (sec, i) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "tab-btn" + (i === 0 ? " active" : "");
-      btn.textContent = sec.title;
-      btn.dataset.tabIndex = String(i);
-      tabBar.appendChild(btn);
-
-      var panel = document.createElement("div");
-      panel.className = "tab-panel" + (i === 0 ? " active" : "");
-      panel.dataset.tabIndex = String(i);
-      sec.nodes.forEach(function (n) { panel.appendChild(n); });
-      panelsWrap.appendChild(panel);
-    });
-
-    tabBar.addEventListener("click", function (e) {
-      var btn = e.target.closest(".tab-btn");
-      if (!btn) return;
-      tabBar.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
-      panelsWrap.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
-      btn.classList.add("active");
-      panelsWrap.querySelector('.tab-panel[data-tab-index="' + btn.dataset.tabIndex + '"]').classList.add("active");
-      panelsWrap.scrollIntoView({ block: "nearest" });
-    });
-
-    container.appendChild(tabBar);
-    container.appendChild(panelsWrap);
   }
 
   // ---- Minimal Markdown renderer (headings, paragraphs, lists incl. checkboxes,
