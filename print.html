@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인쇄용 전체 문서 · 바자회 준비</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<script src="assets/markdown.js"></script>
+<script src="assets/nav.js"></script>
+<style>
+  /* ---- Screen: a preview of what will come out of the printer ---- */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+    padding: 16px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .toolbar .title { font-weight: 700; font-size: 19px; color: var(--color-ink); margin-right: auto; }
+  .toolbar .note { flex: 1 0 100%; margin: 0; font-size: 16px; color: var(--color-mute); }
+  .toolbar a.back { color: var(--color-mute); font-weight: 600; text-decoration: none; font-size: 16px; }
+
+  .sheet {
+    max-width: 800px;
+    margin: 24px auto 80px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 40px 44px;
+  }
+
+  .cover { text-align: center; padding: 40px 0 32px; border-bottom: 2px solid var(--color-ink); }
+  .cover h1 { font-size: 30px; font-weight: 800; color: var(--color-ink); margin: 0 0 12px; letter-spacing: -0.6px; }
+  .cover .when { font-size: 20px; font-weight: 700; color: var(--color-ink); margin: 0 0 6px; }
+  .cover .where { font-size: 17px; color: var(--color-body); margin: 0 0 20px; }
+  .cover .printed { font-size: 15px; color: var(--color-mute); margin: 0; }
+
+  .toc { margin: 28px 0 0; }
+  .toc h2 { font-size: 21px; color: var(--color-ink); margin: 0 0 12px; }
+  .toc .group { font-size: 15px; font-weight: 700; color: var(--color-mute); margin: 16px 0 6px; }
+  .toc ol { margin: 0; padding-left: 26px; font-size: 17px; }
+  .toc li { margin-bottom: 5px; }
+
+  .doc { margin-top: 40px; padding-top: 28px; border-top: 2px solid var(--color-hairline); }
+  .doc:first-of-type { border-top: none; }
+  .doc h1 { font-size: 26px; font-weight: 800; color: var(--color-ink); margin: 0 0 16px; letter-spacing: -0.5px; }
+  .doc h2 {
+    font-size: 21px; font-weight: 700; color: var(--color-ink);
+    margin: 28px 0 12px; padding-top: 14px; border-top: 1px solid var(--color-hairline-soft);
+  }
+  .doc h3 { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 22px 0 8px; }
+  .doc p { margin: 0 0 14px; font-size: 16px; line-height: 1.7; }
+  .doc ul, .doc ol { margin: 0 0 14px; padding-left: 24px; font-size: 16px; line-height: 1.7; }
+  .doc li { margin-bottom: 7px; }
+  .doc li.checkbox-item { list-style: none; margin-left: -24px; }
+  .doc li.checkbox-item input { margin-right: 8px; width: 15px; height: 15px; vertical-align: -2px; }
+  .doc strong { color: var(--color-ink); font-weight: 700; }
+  .doc hr { border: none; border-top: 1px solid var(--color-hairline); margin: 22px 0; }
+  .doc del { color: var(--color-mute); }
+
+  .load-error { color: var(--color-accent-red); font-weight: 600; }
+
+  /* ---- Print: A4, ink-friendly, one document per sheet ---- */
+  @page { size: A4; margin: 17mm 15mm 15mm; }
+
+  @media print {
+    .toolbar { display: none !important; }
+
+    body { background: #fff; color: #000; font-size: 11pt; line-height: 1.55; }
+    .sheet { max-width: none; margin: 0; padding: 0; border: none; border-radius: 0; background: #fff; }
+
+    .cover { padding: 0 0 20pt; border-bottom: 1.5pt solid #000; break-after: page; }
+    .cover h1 { font-size: 22pt; color: #000; }
+    .cover .when { font-size: 14pt; color: #000; }
+    .cover .where, .cover .printed { color: #000; }
+
+    .toc { break-after: page; }
+    .toc h2 { font-size: 15pt; color: #000; }
+    .toc .group { color: #000; font-size: 10.5pt; }
+    .toc ol { font-size: 11pt; }
+
+    /* Every document starts its own sheet, so pages can be pulled out and handed
+       to one team without carrying a neighbouring document's tail. */
+    .doc { break-before: page; margin-top: 0; padding-top: 0; border-top: none; }
+    .doc h1 { font-size: 17pt; color: #000; margin: 0 0 10pt; }
+    .doc h2 { font-size: 13.5pt; color: #000; margin: 16pt 0 7pt; padding-top: 7pt; border-top: 0.5pt solid #999; }
+    .doc h3 { font-size: 11.5pt; color: #000; margin: 12pt 0 5pt; }
+    .doc p, .doc ul, .doc ol { font-size: 11pt; margin-bottom: 8pt; line-height: 1.55; }
+    .doc li { margin-bottom: 3pt; }
+    .doc strong { color: #000; }
+    .doc del { color: #555; }
+
+    h1, h2, h3 { break-after: avoid; }
+    tr, li, .banner { break-inside: avoid; }
+    thead { display: table-header-group; }
+    p { orphans: 2; widows: 2; }
+
+    /* Links point inside this bundle, so a printed URL would be noise. */
+    a { color: #000; text-decoration: none; }
+
+    /* Background fills often do not print; carry the meaning on borders instead. */
+    .data-table { font-size: 10pt; border: 0.5pt solid #000; }
+    .data-table th, .data-table td { border: 0.5pt solid #999; padding: 4pt 6pt; color: #000; }
+    .data-table th { background: #eee; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 700; }
+    .table-scroll { overflow: visible; margin: 8pt 0; }
+    .banner { border: 0.5pt solid #666; border-left: 2.5pt solid #000; background: none; color: #000; padding: 7pt 10pt; font-size: 10.5pt; }
+    code { background: none; border: 0.5pt solid #999; color: #000; font-size: 10pt; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="title">인쇄용 전체 문서</span>
+  <a class="back" href="index.html">← 허브로</a>
+  <button type="button" id="btn-print">인쇄하기</button>
+  <p class="note" id="status">문서를 불러오는 중…</p>
+</div>
+
+<div class="sheet">
+  <div class="cover">
+    <h1>2026년 이웃돕기 사랑의 바자회</h1>
+    <p class="when">2026년 10월 9일 (금) 07:00 ~ 16:00</p>
+    <p class="where">대한예수교장로회 김포남현교회 마당</p>
+    <p class="printed" id="printed"></p>
+  </div>
+
+  <nav class="toc" id="toc"></nav>
+  <div id="docs"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  document.getElementById("printed").textContent =
+    "인쇄일 " + new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+
+  // The table of contents mirrors the reading order, numbered straight through so
+  // a printed copy can be referred to by number.
+  (function renderToc() {
+    var html = "<h2>차례</h2>";
+    var n = 0;
+    window.NAV.forEach(function (group) {
+      html += '<p class="group">' + MD.escapeHtml(group.group) + '</p><ol start="' + (n + 1) + '">';
+      group.items.forEach(function (item) {
+        n++;
+        html += "<li>" + MD.escapeHtml(item.label) + "</li>";
+      });
+      html += "</ol>";
+    });
+    document.getElementById("toc").innerHTML = html;
+  })();
+
+  // Fetch every document at once but write them out in reading order, so the
+  // printed bundle is never shuffled by whichever request happened to finish first.
+  Promise.all(window.SEQUENCE.map(function (item) {
+    return fetch(item.path)
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        var dir = item.path.indexOf("/") >= 0 ? item.path.slice(0, item.path.lastIndexOf("/")) : "";
+        return { ok: true, html: MD.render(text, dir) };
+      })
+      .catch(function (err) {
+        return {
+          ok: false,
+          html: '<p class="load-error">' + MD.escapeHtml(item.label) +
+            " 문서를 불러오지 못했습니다 (" + MD.escapeHtml(err.message) + ")</p>"
+        };
+      });
+  })).then(function (results) {
+    document.getElementById("docs").innerHTML = results.map(function (r) {
+      return '<section class="doc">' + r.html + "</section>";
+    }).join("");
+
+    var failed = results.filter(function (r) { return !r.ok; }).length;
+    document.getElementById("status").textContent = failed
+      ? "문서 " + results.length + "개 중 " + failed + "개를 불러오지 못했습니다."
+      : "문서 " + results.length + "개를 한 묶음으로 준비했습니다. 한 문서가 한 장에서 시작하도록 인쇄됩니다.";
+  });
+
+  document.getElementById("btn-print").addEventListener("click", function () { window.print(); });
+})();
+</script>
+</body>
+</html>

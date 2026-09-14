@@ -45,6 +45,48 @@
   .cta:hover { background: var(--color-primary-pressed); }
   .cta .sub { display: block; font-weight: 400; font-size: 16px; margin-top: 5px; opacity: 0.9; }
 
+  .summary-link {
+    display: block;
+    background: var(--color-surface-card);
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    text-decoration: none;
+    color: var(--color-ink);
+    font-weight: 700;
+    font-size: 19px;
+  }
+  .summary-link:hover { background: var(--color-surface-soft); }
+  .summary-link .sub {
+    display: block;
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--color-mute);
+    margin-top: 5px;
+  }
+
+  .print-link {
+    display: block;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    text-decoration: none;
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .print-link:hover { background: var(--color-surface-soft); }
+  .print-link .sub {
+    display: block;
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--color-mute);
+    margin-top: 4px;
+  }
+
   .alert {
     display: block;
     text-decoration: none;
@@ -121,9 +163,19 @@
 </header>
 
 <main>
+  <a class="summary-link" href="doc.html?src=docs/한장_요약.md">
+    한 장 요약 보기
+    <span class="sub">기본 정보 · 조 편성 · 부스 자리 · 시간표 · 교환권 규칙을 한 번에</span>
+  </a>
+
   <a class="cta" href="voucher-settlement/index.html">
     교환권 정산 도구 열기
     <span class="sub">부스 등록 · 초기 지급 · 마감 정산 · 대사 리포트</span>
+  </a>
+
+  <a class="print-link" href="print.html">
+    인쇄용 전체 문서
+    <span class="sub">문서 전체를 한 묶음으로 — 보관용으로 인쇄하실 때</span>
   </a>
 
   <a class="alert banner banner-red" href="doc.html?src=docs/확인_필요_체크리스트.md">

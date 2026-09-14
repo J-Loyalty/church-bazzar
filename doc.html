@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
+<script src="assets/markdown.js"></script>
+<script src="assets/nav.js"></script>
 <style>
   .layout {
     display: flex;
@@ -207,34 +209,6 @@
 (function () {
   "use strict";
 
-  // Order here is the reading order for someone seeing this for the first time.
-  // It drives the sidebar, the step numbers, and the prev/next links.
-  var NAV = [
-    { group: "1단계 · 왜 하는가", items: [
-      { path: "docs/목적_목표.md", label: "목적과 목표" },
-      { path: "바자회_기획안.md", label: "바자회 기획안" }
-    ]},
-    { group: "2단계 · 당일 운영", items: [
-      { path: "docs/부스_배치.md", label: "부스 배치" },
-      { path: "docs/타임라인.md", label: "타임라인" },
-      { path: "docs/운영_역할.md", label: "운영 역할" },
-      { path: "docs/교환권_운영.md", label: "교환권 운영" },
-      { path: "docs/사전_구매_신청.md", label: "사전 구매 신청" }
-    ]},
-    { group: "3단계 · 마무리", items: [
-      { path: "docs/정산_절차.md", label: "정산 절차" }
-    ]},
-    { group: "참고", items: [
-      { path: "docs/우천_대책.md", label: "우천 대책" },
-      { path: "docs/과거_실적.md", label: "과거 실적" },
-      { path: "docs/가치_기준.md", label: "가치 기준" },
-      { path: "docs/확인_필요_체크리스트.md", label: "확인 필요 체크리스트" }
-    ]}
-  ];
-
-  // Flat reading sequence for the prev/next footer.
-  var SEQUENCE = NAV.reduce(function (acc, group) { return acc.concat(group.items); }, []);
-
   var params = new URLSearchParams(location.search);
   var src = params.get("src") || "바자회_기획안.md";
 
@@ -252,14 +226,14 @@
 
     var html = '<a class="back" href="index.html">&larr; 허브로</a>';
     html += '<button type="button" class="sidebar-toggle" id="sidebar-toggle">' +
-      escapeHtml(currentLabel) + ' <span class="chevron">&#9662;</span></button>';
+      MD.escapeHtml(currentLabel) + ' <span class="chevron">&#9662;</span></button>';
     html += '<div class="sidebar-groups" id="sidebar-groups">';
     NAV.forEach(function (group) {
-      html += "<h2>" + escapeHtml(group.group) + "</h2><ul>";
+      html += "<h2>" + MD.escapeHtml(group.group) + "</h2><ul>";
       group.items.forEach(function (item) {
         var isActive = item.path === currentSrc;
         html += '<li><a href="doc.html?src=' + encodeURIComponent(item.path) + '"' +
-          (isActive ? ' class="active"' : "") + ">" + escapeHtml(item.label) + "</a></li>";
+          (isActive ? ' class="active"' : "") + ">" + MD.escapeHtml(item.label) + "</a></li>";
       });
       html += "</ul>";
     });
@@ -281,15 +255,15 @@
       })
       .then(function (text) {
         var baseDir = path.indexOf("/") >= 0 ? path.slice(0, path.lastIndexOf("/")) : "";
-        var html = renderMarkdown(text, baseDir);
+        var html = MD.render(text, baseDir);
         content.innerHTML = html;
         var h1 = content.querySelector("h1");
         document.title = (h1 ? h1.textContent : path) + " · 바자회 준비 허브";
         renderPrevNext(path);
       })
       .catch(function (err) {
-        content.innerHTML = '<p class="doc-error">문서를 불러오지 못했습니다: ' + escapeHtml(err.message) + "</p>" +
-          '<p class="hint">경로: ' + escapeHtml(path) + "</p>";
+        content.innerHTML = '<p class="doc-error">문서를 불러오지 못했습니다: ' + MD.escapeHtml(err.message) + "</p>" +
+          '<p class="hint">경로: ' + MD.escapeHtml(path) + "</p>";
       });
   }
 
@@ -308,191 +282,17 @@
     nav.innerHTML =
       (prev
         ? '<a class="prev" href="doc.html?src=' + encodeURIComponent(prev.path) + '">' +
-          '<span class="label">이전</span>' + escapeHtml(prev.label) + "</a>"
+          '<span class="label">이전</span>' + MD.escapeHtml(prev.label) + "</a>"
         : "<span></span>") +
       '<span class="progress">' + (index + 1) + " / " + SEQUENCE.length + "</span>" +
       (next
         ? '<a class="next" href="doc.html?src=' + encodeURIComponent(next.path) + '">' +
-          '<span class="label">다음</span>' + escapeHtml(next.label) + "</a>"
+          '<span class="label">다음</span>' + MD.escapeHtml(next.label) + "</a>"
         : "<span></span>");
 
     document.querySelector(".article-wrap").appendChild(nav);
   }
 
-  // ---- Minimal Markdown renderer (headings, paragraphs, lists incl. checkboxes,
-  // tables, blockquotes as callouts, hr, bold/code/strike/links) ----
-
-  function renderMarkdown(md, baseDir) {
-    var lines = md.replace(/\r\n/g, "\n").split("\n");
-    var out = [];
-    var i = 0;
-
-    while (i < lines.length) {
-      var line = lines[i];
-
-      if (/^\s*$/.test(line)) { i++; continue; }
-
-      // Heading
-      var headingMatch = /^(#{1,6})\s+(.*)$/.exec(line);
-      if (headingMatch) {
-        var level = headingMatch[1].length;
-        out.push("<h" + level + ">" + inline(headingMatch[2], baseDir) + "</h" + level + ">");
-        i++;
-        continue;
-      }
-
-      // Horizontal rule
-      if (/^-{3,}$/.test(line.trim()) || /^\*{3,}$/.test(line.trim())) {
-        out.push("<hr>");
-        i++;
-        continue;
-      }
-
-      // Table
-      if (/^\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/.test(lines[i + 1])) {
-        var headerCells = splitTableRow(line);
-        i += 2;
-        var bodyRows = [];
-        while (i < lines.length && /^\|.*\|\s*$/.test(lines[i])) {
-          bodyRows.push(splitTableRow(lines[i]));
-          i++;
-        }
-        var table = "<div class=\"table-scroll\"><table class=\"data-table\"><thead><tr>";
-        headerCells.forEach(function (c) { table += "<th>" + inline(c, baseDir) + "</th>"; });
-        table += "</tr></thead><tbody>";
-        bodyRows.forEach(function (row) {
-          table += "<tr>";
-          row.forEach(function (c) { table += "<td>" + inline(c, baseDir) + "</td>"; });
-          table += "</tr>";
-        });
-        table += "</tbody></table></div>";
-        out.push(table);
-        continue;
-      }
-
-      // Blockquote (rendered as an info callout)
-      if (/^>\s?/.test(line)) {
-        var quoteLines = [];
-        while (i < lines.length && /^>\s?/.test(lines[i])) {
-          quoteLines.push(lines[i].replace(/^>\s?/, ""));
-          i++;
-        }
-        out.push('<div class="banner banner-blue">' + inline(quoteLines.join(" "), baseDir) + "</div>");
-        continue;
-      }
-
-      // Unordered list (with optional checkboxes)
-      if (/^[-*]\s+/.test(line)) {
-        var ulItems = [];
-        while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
-          ulItems.push(lines[i].replace(/^[-*]\s+/, ""));
-          i++;
-        }
-        out.push(renderList(ulItems, false, baseDir));
-        continue;
-      }
-
-      // Ordered list — the first item's number becomes the list's start, so a
-      // sequence split across sections keeps counting instead of resetting to 1.
-      if (/^\d+\.\s+/.test(line)) {
-        var olItems = [];
-        var olStart = parseInt(/^(\d+)\./.exec(line)[1], 10);
-        while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
-          olItems.push(lines[i].replace(/^\d+\.\s+/, ""));
-          i++;
-        }
-        out.push(renderList(olItems, true, baseDir, olStart));
-        continue;
-      }
-
-      // Paragraph: consume consecutive plain lines
-      var paraLines = [];
-      while (
-        i < lines.length &&
-        !/^\s*$/.test(lines[i]) &&
-        !/^#{1,6}\s+/.test(lines[i]) &&
-        !/^[-*]\s+/.test(lines[i]) &&
-        !/^\d+\.\s+/.test(lines[i]) &&
-        !/^>\s?/.test(lines[i]) &&
-        !/^\|.*\|\s*$/.test(lines[i]) &&
-        !/^-{3,}$/.test(lines[i].trim())
-      ) {
-        paraLines.push(lines[i]);
-        i++;
-      }
-      if (paraLines.length) {
-        out.push("<p>" + inline(paraLines.join(" "), baseDir) + "</p>");
-      } else {
-        i++;
-      }
-    }
-
-    return out.join("\n");
-  }
-
-  function renderList(items, ordered, baseDir, start) {
-    var tag = ordered ? "ol" : "ul";
-    var html = "<" + tag + (ordered && start > 1 ? ' start="' + start + '"' : "") + ">";
-    items.forEach(function (item) {
-      var checkboxMatch = /^\[( |x|X)\]\s+(.*)$/.exec(item);
-      if (checkboxMatch) {
-        var checked = checkboxMatch[1].toLowerCase() === "x";
-        html += '<li class="checkbox-item"><input type="checkbox" disabled' + (checked ? " checked" : "") + "> " +
-          inline(checkboxMatch[2], baseDir) + "</li>";
-      } else {
-        html += "<li>" + inline(item, baseDir) + "</li>";
-      }
-    });
-    html += "</" + tag + ">";
-    return html;
-  }
-
-  function splitTableRow(row) {
-    var trimmed = row.trim().replace(/^\|/, "").replace(/\|$/, "");
-    return trimmed.split("|").map(function (c) { return c.trim(); });
-  }
-
-  function inline(text, baseDir) {
-    var escaped = escapeHtml(text);
-    // inline code
-    escaped = escaped.replace(/`([^`]+)`/g, "<code>$1</code>");
-    // bold
-    escaped = escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-    // strikethrough
-    escaped = escaped.replace(/~~([^~]+)~~/g, "<del>$1</del>");
-    // links
-    escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (match, label, href) {
-      var resolved = resolveHref(baseDir, href);
-      return '<a href="' + resolved + '">' + label + "</a>";
-    });
-    return escaped;
-  }
-
-  function resolveHref(baseDir, href) {
-    if (/^([a-z][a-z0-9+.-]*:)/i.test(href) || href.charAt(0) === "#") {
-      return href; // absolute URL, mailto:, or in-page anchor
-    }
-    var baseParts = baseDir ? baseDir.split("/") : [];
-    var parts = href.split("/");
-    parts.forEach(function (p) {
-      if (p === "" || p === ".") return;
-      if (p === "..") baseParts.pop();
-      else baseParts.push(p);
-    });
-    var resolved = baseParts.join("/");
-    if (/\.md(#.*)?$/i.test(resolved)) {
-      var hashIndex = resolved.indexOf("#");
-      var pathPart = hashIndex >= 0 ? resolved.slice(0, hashIndex) : resolved;
-      return "doc.html?src=" + pathPart;
-    }
-    return resolved;
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
 })();
 </script>
 </body>
