@@ -37,6 +37,11 @@ body {
   color: var(--color-body);
   font-size: 17px;
   line-height: 1.7;
+  /* Korean breaks anywhere by default, so a line can end mid-word ("방향으 / 로").
+     keep-all wraps at 어절 boundaries instead; break-word is the escape hatch for a
+     single run too long to fit, such as a URL. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 a { color: var(--color-link-teal); }
