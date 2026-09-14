@@ -7,8 +7,8 @@
 }
 
 .app-header h1 {
-  margin: 0 0 6px;
-  font-size: 21px;
+  margin: 0 0 8px;
+  font-size: 25px;
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--color-ink);
@@ -17,7 +17,7 @@
 .app-sub {
   margin: 0;
   color: var(--color-mute);
-  font-size: 14px;
+  font-size: 17px;
 }
 
 /* .tabs / .tab-btn / .tab-panel base styles live in ../assets/tokens.css; this app
@@ -46,15 +46,15 @@ main {
 }
 
 h2 {
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   margin-top: 0;
   color: var(--color-ink);
 }
 h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 10px;
   color: var(--color-ink);
 }
 
@@ -67,9 +67,9 @@ h3 {
 
 input, select {
   font-family: inherit;
-  font-size: 16px;
-  padding: 8px 12px;
-  height: 36px;
+  font-size: 18px;
+  padding: 10px 14px;
+  height: 46px;
   border: 1px solid var(--color-hairline);
   border-radius: var(--radius-md);
   background: var(--color-surface-card);
@@ -83,7 +83,7 @@ input:focus, select:focus {
 }
 
 input[type="number"] {
-  width: 100px;
+  width: 110px;
 }
 
 /* This app's tables are number-dense, so center cells (docs use tokens.css's left-aligned default) */
@@ -94,10 +94,11 @@ input[type="number"] {
   background: transparent;
   border: none;
   color: var(--color-accent-red);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   height: auto;
-  padding: 4px 8px;
+  min-height: 44px;
+  padding: 8px 12px;
   cursor: pointer;
 }
 .remove-btn:hover { background: var(--color-accent-red-soft); }
@@ -112,12 +113,12 @@ input[type="number"] {
 .desk-grid label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 16px;
   color: var(--color-mute);
 }
 
-.desk-grid input { width: 160px; }
+.desk-grid input { width: 170px; }
 
 .data-actions {
   display: flex;
@@ -134,9 +135,9 @@ input[type="number"] {
   color: var(--color-ink);
   border: none;
   border-radius: var(--radius-md);
-  height: 40px;
-  padding: 8px 16px;
-  font-size: 14px;
+  min-height: 46px;
+  padding: 10px 20px;
+  font-size: 16px;
   font-weight: 700;
 }
 .file-btn:hover { background: var(--color-hairline-soft); }
@@ -158,12 +159,12 @@ input[type="number"] {
 
 @media (max-width: 480px) {
   .app-header { padding: 16px 12px 10px; }
-  .app-header h1 { font-size: 18px; }
+  .app-header h1 { font-size: 21px; }
   .tabs { padding: 8px 12px; }
   .tab-panel { padding: 16px; }
   main { padding: 16px 12px 48px; }
-  input[type="number"] { width: 56px; padding: 8px 6px; }
-  .data-table th, .data-table td { padding: 6px; font-size: 13px; }
+  input[type="number"] { width: 64px; padding: 10px 6px; }
+  .data-table th, .data-table td { padding: 9px 6px; font-size: 15px; }
   .desk-grid { gap: 12px; }
   .desk-grid input { width: 100%; }
   .desk-grid label { flex: 1 1 140px; }
