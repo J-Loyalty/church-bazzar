@@ -1,5 +1,4 @@
 import http.server
-import socketserver
 import sys
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
@@ -15,10 +14,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return ctype
 
 
-class ReusableTCPServer(socketserver.TCPServer):
-    allow_reuse_address = True
-
-
-with ReusableTCPServer(("", PORT), Handler) as httpd:
+# ThreadingHTTPServer, not a plain TCPServer: a single-threaded server handles one
+# connection at a time, so a browser's idle keep-alive socket blocks every later
+# request. doc.html then fails its fetch() of the .md file with "Failed to fetch".
+with http.server.ThreadingHTTPServer(("", PORT), Handler) as httpd:
     print(f"Serving {sys.path[0] or '.'} at http://localhost:{PORT}")
     httpd.serve_forever()
