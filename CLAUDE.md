@@ -16,6 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `index.html` (허브) / `doc.html` (마크다운 뷰어) / `print.html` (인쇄용 묶음) — 읽는 순서가 세 곳에 중복 정의되어 있다: 기획안의 "읽는 순서" 절, `index.html`의 단계별 탭, `assets/nav.js`의 `NAV` 배열. 문서를 추가·삭제·재배치하면 **세 곳을 모두** 맞춰야 한다.
 - `assets/nav.js` — 읽는 순서(`NAV`)와 평탄화된 `SEQUENCE`. `doc.html`(사이드바·이전/다음)과 `print.html`(차례·본문 순서)이 함께 쓴다.
 - `assets/markdown.js` — 최소 마크다운 렌더러(`MD.render`, `MD.escapeHtml`). `doc.html`과 `print.html`이 함께 쓴다. 저장소 문서가 실제로 쓰는 문법만 처리한다. **코드 블록(```)은 지원하지 않으므로** 도식은 표로 작성할 것.
+- `answers.html` / `assets/answers.gs` / `assets/config.js` — 봉사자가 "정해진 내용"을 적어 보내면 구글 시트에 쌓이는 수집 창구. `answers.gs`는 시트의 Apps Script에 붙여넣을 코드 사본이고, `config.js`에는 배포 주소만 넣는다. 설정 순서는 [SETUP-SHEETS.md](SETUP-SHEETS.md). **시트에 쌓인 답변은 보고이지 문서가 아니다** — 확정된 것만 `docs/`의 문서에 옮겨 적어 `.md`가 단일 기준으로 남게 한다.
+- **공개 저장소이므로 어떤 비밀값도 코드에 넣지 않는다.** 토큰·암호를 넣으면 소스 보기로 누구나 읽을 수 있다. 답변 수집의 공유 암호도 Apps Script 쪽에만 두고 사이트 코드에는 두지 않는다. 같은 이유로 브라우저에서 저장소로 직접 커밋·푸시하는 기능은 만들지 않는다.
 - `print.html` — 읽는 순서대로 모든 문서를 한 페이지에 이어 붙여 인쇄용으로 내보낸다. A4 기준이며 한 문서가 한 장에서 시작하도록 `break-before: page`를 건다. 최종 산출물은 인쇄해서 보관하는 것이므로, 문서를 고칠 때 인쇄 결과도 함께 확인한다.
 - `doc.html`은 문서를 섹션 탭으로 쪼개지 않고 한 페이지로 이어서 보여준다. 탭이 목차처럼 보이지만 실제로는 필터라 첫 섹션만 읽고 문서를 다 봤다고 오해할 수 있어 제거했다.
 - `voucher-settlement/` — 교환권 정산 대사(검증) 정적 웹앱 (`index.html`, `style.css`, `app.js`). 빌드 도구 없이 파일을 그대로 서빙.
