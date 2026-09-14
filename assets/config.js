@@ -4,4 +4,4 @@
 // 입력을 막습니다. 설정 순서는 저장소 루트의 SETUP-SHEETS.md 참고.
 //
 // 예) window.ANSWERS_URL = "https://script.google.com/macros/s/AKfy.../exec";
-window.ANSWERS_URL = "";
+window.ANSWERS_URL = "https://script.google.com/macros/s/AKfycbwCOI8DCX__IIgv6RO4aUCjVuFRq0NF8hJsws4CM4nbKKbEmUli9-cfw6zusSNsFRTd-w/exec";
