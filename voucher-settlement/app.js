@@ -123,7 +123,7 @@
       var tr = document.createElement("tr");
       tr.innerHTML =
         "<td>" + escapeHtml(b.name) + "</td>" +
-        "<td>" + escapeHtml(b.category) + "</td>" +
+        "<td>" + escapeHtml(b.category || "—") + "</td>" +
         '<td><button class="remove-btn" data-id="' + b.id + '">삭제</button></td>';
       tbody.appendChild(tr);
     });

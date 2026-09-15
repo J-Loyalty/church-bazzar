@@ -1,16 +1,21 @@
-/* App-specific layout. Shared colors/typography/buttons/tables live in ../assets/tokens.css */
+/* App-specific layout. Shared colors/typography/buttons/tables/form controls and
+   the top bar live in ../assets/tokens.css */
 
+/* The bar runs edge to edge but its contents line up with the panel below --
+   a title starting 120px left of the panel it belongs to reads as a separate
+   page. max() keeps the 16px gutter once the screen is narrower than the panel. */
 .app-header {
-  padding: 20px 16px 12px;
-  border-bottom: 1px solid var(--color-hairline);
+  padding: 24px max(16px, calc((100% - 900px) / 2 + 16px)) 16px;
   background: var(--color-canvas);
 }
 
 .app-header h1 {
-  margin: 0 0 8px;
-  font-size: 25px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
   color: var(--color-ink);
 }
 
@@ -19,11 +24,12 @@
   color: var(--color-mute);
   font-size: 17px;
 }
+.app-sub strong { color: var(--color-ink); font-weight: 600; }
 
 /* .tabs / .tab-btn / .tab-panel base styles live in ../assets/tokens.css; this app
    additionally pins its tab bar to the top of the viewport while scrolling. */
 .tabs {
-  padding: 10px 16px;
+  padding: 10px max(16px, calc((100% - 900px) / 2 + 16px));
   background: var(--color-canvas);
   border-bottom: 1px solid var(--color-hairline);
   position: sticky;
@@ -46,14 +52,18 @@ main {
 }
 
 h2 {
-  font-size: 23px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
   margin-top: 0;
   color: var(--color-ink);
 }
 h3 {
+  font-family: var(--font-body);
   font-size: 19px;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0;
   margin-bottom: 10px;
   color: var(--color-ink);
 }
@@ -65,25 +75,18 @@ h3 {
   margin-bottom: 16px;
 }
 
-input, select {
-  font-family: inherit;
-  font-size: 18px;
-  padding: 10px 14px;
-  height: 46px;
-  border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-card);
-  color: var(--color-ink);
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--color-accent-blue);
-  box-shadow: 0 0 0 3px rgba(44, 132, 224, 0.25);
-}
+/* Base size/border/focus live in tokens.css; this app only sets what differs. */
+input, select { font-size: 18px; }
 
 input[type="number"] {
   width: 110px;
+}
+
+/* Inside a table the input is the cell, so it drops the rounded box and rides
+   flush -- a bordered pill inside a bordered cell reads as two nested boxes. */
+.data-table input {
+  min-height: 44px;
+  padding: 8px 10px;
 }
 
 /* This app's tables are number-dense, so center cells (docs use tokens.css's left-aligned default) */
@@ -158,12 +161,13 @@ input[type="number"] {
 }
 
 @media (max-width: 480px) {
-  .app-header { padding: 16px 12px 10px; }
-  .app-header h1 { font-size: 21px; }
+  .app-header { padding: 16px 12px 12px; }
+  .app-header h1 { font-size: 24px; }
   .tabs { padding: 8px 12px; }
   .tab-panel { padding: 16px; }
   main { padding: 16px 12px 48px; }
   input[type="number"] { width: 64px; padding: 10px 6px; }
+  .topbar { padding: 8px 12px; }
   .data-table th, .data-table td { padding: 9px 6px; font-size: 15px; }
   .desk-grid { gap: 12px; }
   .desk-grid input { width: 100%; }

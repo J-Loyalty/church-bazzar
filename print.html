@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>인쇄용 전체 문서 · 바자회 준비</title>
+<title>인쇄용 문서 묶음 · 바자회 준비</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <script src="assets/markdown.js"></script>
 <script src="assets/nav.js"></script>
@@ -24,9 +24,30 @@
     align-items: center;
     gap: 12px;
   }
-  .toolbar .title { font-weight: 700; font-size: 19px; color: var(--color-ink); margin-right: auto; }
+  .toolbar .title { font-weight: 500; font-size: 19px; color: var(--color-ink); margin-right: auto; }
   .toolbar .note { flex: 1 0 100%; margin: 0; font-size: 16px; color: var(--color-mute); }
-  .toolbar a.back { color: var(--color-mute); font-weight: 600; text-decoration: none; font-size: 16px; }
+
+  .picker {
+    max-width: 1000px;
+    margin: 24px auto 0;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px 22px;
+  }
+  .picker h2 { font-family: var(--font-display); font-size: 24px; font-weight: 300; letter-spacing: -0.02em; margin: 0 0 4px; color: var(--color-ink); }
+  .picker .lead { margin: 0 0 16px; font-size: 16px; color: var(--color-mute); }
+  .picker .group { font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--color-mute); margin: 18px 0 2px; }
+  .picker .group:first-of-type { margin-top: 0; }
+  .picker .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0 20px; }
+  .picker label {
+    display: flex; align-items: flex-start; gap: 11px;
+    padding: 11px 0; font-size: 17px; color: var(--color-ink); cursor: pointer;
+  }
+  .picker input[type="checkbox"] { width: 22px; height: 22px; flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--color-primary); }
+  .picker .why { display: block; font-size: 15px; color: var(--color-mute); margin-top: 2px; }
+  .picker .picker-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .picker .picker-actions button { min-height: 44px; font-size: 15px; padding: 8px 18px; }
 
   .sheet {
     max-width: 1000px;
@@ -38,25 +59,26 @@
   }
 
   .cover { text-align: center; padding: 40px 0 32px; border-bottom: 2px solid var(--color-ink); }
-  .cover h1 { font-size: 30px; font-weight: 800; color: var(--color-ink); margin: 0 0 12px; letter-spacing: -0.6px; }
+  .cover h1 { font-family: var(--font-display); font-size: 44px; font-weight: 300; line-height: 1.1; color: var(--color-ink); margin: 0 0 16px; letter-spacing: -0.03em; }
   .cover .when { font-size: 20px; font-weight: 700; color: var(--color-ink); margin: 0 0 6px; }
   .cover .where { font-size: 17px; color: var(--color-body); margin: 0 0 20px; }
   .cover .printed { font-size: 15px; color: var(--color-mute); margin: 0; }
 
   .toc { margin: 28px 0 0; }
-  .toc h2 { font-size: 21px; color: var(--color-ink); margin: 0 0 12px; }
+  .toc h2 { font-family: var(--font-display); font-size: 26px; font-weight: 300; letter-spacing: -0.02em; color: var(--color-ink); margin: 0 0 14px; }
   .toc .group { font-size: 15px; font-weight: 700; color: var(--color-mute); margin: 16px 0 6px; }
   .toc ol { margin: 0; padding-left: 26px; font-size: 17px; }
   .toc li { margin-bottom: 5px; }
 
   .doc { margin-top: 40px; padding-top: 28px; border-top: 2px solid var(--color-hairline); }
   .doc:first-of-type { border-top: none; }
-  .doc h1 { font-size: 26px; font-weight: 800; color: var(--color-ink); margin: 0 0 16px; letter-spacing: -0.5px; }
+  .doc h1 { font-family: var(--font-display); font-size: 32px; font-weight: 300; line-height: 1.15; color: var(--color-ink); margin: 0 0 18px; letter-spacing: -0.02em; }
   .doc h2 {
-    font-size: 21px; font-weight: 700; color: var(--color-ink);
-    margin: 28px 0 12px; padding-top: 14px; border-top: 1px solid var(--color-hairline-soft);
+    font-family: var(--font-display); font-size: 25px; font-weight: 300;
+    letter-spacing: -0.02em; color: var(--color-ink);
+    margin: 30px 0 12px; padding-top: 16px; border-top: 1px solid var(--color-hairline);
   }
-  .doc h3 { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 22px 0 8px; }
+  .doc h3 { font-family: var(--font-body); font-size: 18px; font-weight: 600; letter-spacing: 0; color: var(--color-ink); margin: 24px 0 8px; }
   .doc p { margin: 0 0 14px; font-size: 16px; line-height: 1.7; }
   .doc ul, .doc ol { margin: 0 0 14px; padding-left: 24px; font-size: 16px; line-height: 1.7; }
   .doc li { margin-bottom: 7px; }
@@ -72,7 +94,7 @@
   @page { size: A4; margin: 17mm 15mm 15mm; }
 
   @media print {
-    .toolbar { display: none !important; }
+    .toolbar, .picker { display: none !important; }
 
     body { background: #fff; color: #000; font-size: 11pt; line-height: 1.55; }
     .sheet { max-width: none; margin: 0; padding: 0; border: none; border-radius: 0; background: #fff; }
@@ -118,11 +140,21 @@
 </head>
 <body>
 
-<div class="toolbar">
-  <span class="title">인쇄용 전체 문서</span>
-  <a class="back" href="index.html">← 허브로</a>
+<div class="toolbar topbar">
+  <a class="home" href="index.html">&larr; 준비 허브</a>
+  <span class="title">인쇄용 문서 묶음</span>
   <button type="button" id="btn-print">인쇄하기</button>
   <p class="note" id="status">문서를 불러오는 중…</p>
+</div>
+
+<div class="picker" id="picker">
+  <h2>인쇄할 문서 고르기</h2>
+  <p class="lead">기본값은 <strong>행사를 치르는 데 필요한 문서</strong>입니다. 아래 두 가지는 보관용 인쇄물에 넣지 않는 것을 기본으로 두었습니다 — 필요하면 다시 켜세요.</p>
+  <div id="picker-list"></div>
+  <div class="picker-actions">
+    <button type="button" id="btn-all" class="btn-secondary">전체 선택</button>
+    <button type="button" id="btn-default" class="btn-secondary">기본값으로</button>
+  </div>
 </div>
 
 <div class="sheet">
@@ -144,24 +176,130 @@
   document.getElementById("printed").textContent =
     "인쇄일 " + new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
-  // The table of contents mirrors the reading order, numbered straight through so
-  // a printed copy can be referred to by number.
-  (function renderToc() {
+  // Left out of the printed bundle by default. Neither is wrong to print -- they
+  // are simply not what someone carries around on the day, and together they are
+  // nine of the bundle's fifty-one pages.
+  var OFF_BY_DEFAULT = {
+    "docs/가치_기준.md": "문서를 쓸 때 쓰는 판단 기준입니다. 행사 당일에는 볼 일이 없습니다.",
+    "docs/확인_필요_체크리스트.md": "아직 정해지지 않은 126가지입니다. 회의 때마다 바뀌므로 종이에 남기면 금세 옛 내용이 됩니다."
+  };
+
+  var SELECT_KEY = "cbz_print_v1";
+  var cache = {};          // 경로 → 렌더된 HTML. 한 번만 받아온다
+  var failed = {};         // 경로 → true. 못 받아온 문서
+  var selected = loadSelection();
+
+  function defaultSelection() {
+    var out = {};
+    window.SEQUENCE.forEach(function (item) {
+      out[item.path] = !OFF_BY_DEFAULT[item.path];
+    });
+    return out;
+  }
+
+  function loadSelection() {
+    var base = defaultSelection();
+    try {
+      var raw = localStorage.getItem(SELECT_KEY);
+      if (raw) {
+        var saved = JSON.parse(raw);
+        // 저장된 값 중 지금도 있는 문서만 받아들인다 -- 문서를 지웠거나 새로
+        // 넣었을 때 옛 선택이 목록을 망가뜨리지 않게.
+        Object.keys(base).forEach(function (path) {
+          if (typeof saved[path] === "boolean") base[path] = saved[path];
+        });
+      }
+    } catch (e) { /* 저장 공간이 막혀 있어도 인쇄에는 지장이 없다 */ }
+    return base;
+  }
+
+  function saveSelection() {
+    try { localStorage.setItem(SELECT_KEY, JSON.stringify(selected)); } catch (e) { /* 무시 */ }
+  }
+
+  function chosen() {
+    return window.SEQUENCE.filter(function (item) { return selected[item.path]; });
+  }
+
+  // ---------- 고르는 칸 ----------
+  (function renderPicker() {
+    var html = "";
+    window.NAV.forEach(function (group) {
+      html += '<p class="group">' + MD.escapeHtml(group.group) + '</p><div class="items">';
+      group.items.forEach(function (item) {
+        var why = OFF_BY_DEFAULT[item.path];
+        html += '<label><input type="checkbox" data-path="' + MD.escapeHtml(item.path) + '"' +
+          (selected[item.path] ? " checked" : "") + "><span>" + MD.escapeHtml(item.label) +
+          (why ? '<span class="why">' + MD.escapeHtml(why) + "</span>" : "") + "</span></label>";
+      });
+      html += "</div>";
+    });
+    document.getElementById("picker-list").innerHTML = html;
+  })();
+
+  document.getElementById("picker-list").addEventListener("change", function (e) {
+    var box = e.target.closest("input[type=checkbox]");
+    if (!box) return;
+    selected[box.dataset.path] = box.checked;
+    saveSelection();
+    render();
+  });
+
+  function setAll(all) {
+    selected = defaultSelection();
+    if (all) {
+      window.SEQUENCE.forEach(function (item) { selected[item.path] = true; });
+    }
+    saveSelection();
+    document.querySelectorAll("#picker-list input[type=checkbox]").forEach(function (box) {
+      box.checked = !!selected[box.dataset.path];
+    });
+    render();
+  }
+  document.getElementById("btn-all").addEventListener("click", function () { setAll(true); });
+  document.getElementById("btn-default").addEventListener("click", function () { setAll(false); });
+
+  // ---------- 차례와 본문 ----------
+  // 차례 번호는 고른 문서만 이어서 매긴다 -- 3번 다음이 5번이면 종이에서 빠진
+  // 장을 찾게 된다.
+  function renderToc(list) {
     var html = "<h2>차례</h2>";
     var n = 0;
     window.NAV.forEach(function (group) {
+      var items = group.items.filter(function (item) { return selected[item.path]; });
+      if (!items.length) return;
       html += '<p class="group">' + MD.escapeHtml(group.group) + '</p><ol start="' + (n + 1) + '">';
-      group.items.forEach(function (item) {
+      items.forEach(function (item) {
         n++;
         html += "<li>" + MD.escapeHtml(item.label) + "</li>";
       });
       html += "</ol>";
     });
     document.getElementById("toc").innerHTML = html;
-  })();
+  }
 
-  // Fetch every document at once but write them out in reading order, so the
-  // printed bundle is never shuffled by whichever request happened to finish first.
+  function render() {
+    var list = chosen();
+    renderToc(list);
+    document.getElementById("docs").innerHTML = list.map(function (item) {
+      return '<section class="doc">' + (cache[item.path] || "") + "</section>";
+    }).join("");
+    setStatus(list);
+  }
+
+  function setStatus(list) {
+    var missing = list.filter(function (item) { return failed[item.path]; }).length;
+    var el = document.getElementById("status");
+    if (missing) {
+      el.textContent = "문서 " + list.length + "개 중 " + missing + "개를 불러오지 못했습니다.";
+      return;
+    }
+    var left = window.SEQUENCE.length - list.length;
+    el.textContent = "문서 " + list.length + "개를 한 묶음으로 준비했습니다" +
+      (left ? " (" + left + "개 제외)" : "") + ". 한 문서가 한 장에서 시작하도록 인쇄됩니다.";
+  }
+
+  // 고를 때마다 다시 받아오지 않도록 읽는 순서 전체를 한 번에 받아 담아둔다.
   Promise.all(window.SEQUENCE.map(function (item) {
     return fetch(item.path)
       .then(function (res) {
@@ -170,25 +308,14 @@
       })
       .then(function (text) {
         var dir = item.path.indexOf("/") >= 0 ? item.path.slice(0, item.path.lastIndexOf("/")) : "";
-        return { ok: true, html: MD.render(text, dir) };
+        cache[item.path] = MD.render(text, dir);
       })
       .catch(function (err) {
-        return {
-          ok: false,
-          html: '<p class="load-error">' + MD.escapeHtml(item.label) +
-            " 문서를 불러오지 못했습니다 (" + MD.escapeHtml(err.message) + ")</p>"
-        };
+        failed[item.path] = true;
+        cache[item.path] = '<p class="load-error">' + MD.escapeHtml(item.label) +
+          " 문서를 불러오지 못했습니다 (" + MD.escapeHtml(err.message) + ")</p>";
       });
-  })).then(function (results) {
-    document.getElementById("docs").innerHTML = results.map(function (r) {
-      return '<section class="doc">' + r.html + "</section>";
-    }).join("");
-
-    var failed = results.filter(function (r) { return !r.ok; }).length;
-    document.getElementById("status").textContent = failed
-      ? "문서 " + results.length + "개 중 " + failed + "개를 불러오지 못했습니다."
-      : "문서 " + results.length + "개를 한 묶음으로 준비했습니다. 한 문서가 한 장에서 시작하도록 인쇄됩니다.";
-  });
+  })).then(render);
 
   document.getElementById("btn-print").addEventListener("click", function () { window.print(); });
 })();

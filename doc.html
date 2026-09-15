@@ -6,7 +6,7 @@
 <title>문서 보기 · 바자회 준비 허브</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <script src="assets/markdown.js"></script>
 <script src="assets/nav.js"></script>
@@ -29,22 +29,12 @@
     overflow-y: auto;
   }
 
-  .sidebar .back {
-    display: block;
-    color: var(--color-mute);
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    padding: 6px 0;
-  }
-  .sidebar .back:hover { color: var(--color-ink); }
-
   .sidebar h2 {
-    font-size: 14px;
-    font-weight: 700;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
     color: var(--color-mute);
     margin: 20px 0 8px;
   }
@@ -78,9 +68,10 @@
     border: 1px solid var(--color-hairline);
     color: var(--color-ink);
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 500;
     padding: 14px 16px;
     height: auto;
+    border-radius: var(--radius-md);
     margin-bottom: 12px;
   }
   .sidebar-toggle .chevron { float: right; transition: transform 0.15s; }
@@ -101,29 +92,33 @@
   }
 
   .doc-card h1 {
-    font-size: 29px;
-    font-weight: 800;
-    letter-spacing: -0.6px;
-    line-height: 1.35;
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1.18;
     color: var(--color-ink);
-    margin: 0 0 18px;
+    margin: 0 0 20px;
   }
   .doc-card h2 {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    line-height: 1.4;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
     color: var(--color-ink);
-    margin: 34px 0 14px;
-    padding-top: 16px;
+    margin: 38px 0 14px;
+    padding-top: 18px;
     border-top: 1px solid var(--color-hairline-soft);
   }
   .doc-card h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
   .doc-card h3 {
+    font-family: var(--font-body);
     font-size: 19px;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0;
     color: var(--color-ink);
-    margin: 26px 0 10px;
+    margin: 28px 0 10px;
   }
   .doc-card p { margin: 0 0 16px; font-size: 17px; line-height: 1.75; }
   .doc-card ul, .doc-card ol { margin: 0 0 16px; padding-left: 24px; font-size: 17px; line-height: 1.75; }
@@ -137,7 +132,6 @@
   }
   .doc-card hr { border: none; border-top: 1px solid var(--color-hairline); margin: 24px 0; }
   .doc-card strong { color: var(--color-ink); font-weight: 700; }
-  .doc-card a { color: var(--color-link-teal); }
   .doc-card del { color: var(--color-mute); }
 
   .doc-loading, .doc-error { color: var(--color-mute); font-size: 17px; }
@@ -154,13 +148,13 @@
   .prev-next a {
     flex: 0 1 auto;
     background: var(--color-surface-card);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--radius-md);
-    padding: 14px 18px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
     text-decoration: none;
     color: var(--color-ink);
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 500;
   }
   .prev-next a:hover { background: var(--color-surface-soft); }
   .prev-next .label {
@@ -170,7 +164,14 @@
     color: var(--color-mute);
     margin-bottom: 3px;
   }
-  .prev-next .next { text-align: right; }
+  .prev-next .next {
+    text-align: right;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .prev-next .next:hover { background: var(--color-primary-pressed); }
+  .prev-next .next .label { color: var(--color-on-dark-soft); }
   .prev-next .progress {
     flex: 0 0 auto;
     font-size: 15px;
@@ -178,7 +179,10 @@
   }
 
   @media (max-width: 860px) {
-    .layout { flex-direction: column; }
+    /* Stacked, the sidebar and the article are full-width rows. Left over from
+       the desktop layout, align-items:flex-start sizes them to their content
+       instead, which let the article push the page a hair past the screen. */
+    .layout { flex-direction: column; align-items: stretch; }
     .sidebar {
       width: 100%;
       position: static;
@@ -195,6 +199,11 @@
 </style>
 </head>
 <body>
+
+<nav class="topbar">
+  <a class="home" href="index.html">&larr; 준비 허브</a>
+  <span class="where" id="where"></span>
+</nav>
 
 <div class="layout">
   <nav class="sidebar" id="sidebar"></nav>
@@ -213,7 +222,19 @@
   var src = params.get("src") || "바자회_기획안.md";
 
   renderSidebar(src);
+  renderWhere(src);
   loadDoc(src);
+
+  // 사이드바를 펼치지 않아도 지금 읽는 자리를 알 수 있게 상단 바에 적어둔다.
+  function renderWhere(currentSrc) {
+    var where = "";
+    NAV.forEach(function (group) {
+      group.items.forEach(function (item) {
+        if (item.path === currentSrc) where = group.group + " · " + item.label;
+      });
+    });
+    document.getElementById("where").textContent = where;
+  }
 
   function renderSidebar(currentSrc) {
     var nav = document.getElementById("sidebar");
@@ -224,8 +245,7 @@
       });
     });
 
-    var html = '<a class="back" href="index.html">&larr; 허브로</a>';
-    html += '<button type="button" class="sidebar-toggle" id="sidebar-toggle">' +
+    var html = '<button type="button" class="sidebar-toggle" id="sidebar-toggle">' +
       MD.escapeHtml(currentLabel) + ' <span class="chevron">&#9662;</span></button>';
     html += '<div class="sidebar-groups" id="sidebar-groups">';
     NAV.forEach(function (group) {

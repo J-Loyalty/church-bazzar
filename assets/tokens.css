@@ -1,42 +1,87 @@
+/* Design tokens. Follows design/DESIGN.md (ElevenLabs-inspired): an off-white
+   canvas holding warm near-black ink, a light serif for display, and no
+   saturated action colour -- the ink pill is the only CTA.
+
+   Three deliberate departures, all from CLAUDE.md's rule that readers are mostly
+   in their 50s to 70s:
+   - Body sits at 17px, not the spec's 16px, and tables at 16px.
+   - `muted` is darkened from the spec's #777169 (4.43:1 on canvas, under AA) to
+     #6b655d (5.28:1). `muted-soft` likewise. Every text pair clears 4.5:1.
+   - Form controls take `--color-field-border`, not the spec's hairline-strong,
+     which is 1.49:1 on white -- under WCAG's 3:1 for a control's boundary. */
 :root {
-  --color-canvas: #eeefe9;
+  /* Surface */
+  --color-canvas: #f5f5f5;
+  --color-canvas-soft: #fafafa;
   --color-surface-card: #ffffff;
-  --color-surface-soft: #e5e7e0;
-  --color-surface-doc: #fcfcfa;
-  --color-ink: #23251d;
-  --color-body: #4d4f46;
-  --color-mute: #5b5d53;
-  --color-ash: #75776c;
-  --color-hairline: #bfc1b7;
-  --color-hairline-soft: #dcdfd2;
-  --color-primary: #f7a501;
-  --color-primary-pressed: #dd9001;
-  --color-on-primary: #23251d;
+  --color-surface-soft: #f0efed;
+  --color-surface-doc: #fafafa;
+  --color-surface-dark: #0c0a09;
+
+  /* Text */
+  --color-ink: #0c0a09;
+  --color-body: #4e4e4e;
+  --color-mute: #6b655d;
+  --color-ash: #7d776f;
+  --color-on-primary: #ffffff;
   --color-on-dark: #ffffff;
-  --color-link-teal: #0c6285;
-  --color-accent-blue: #2c84e0;
-  --color-accent-blue-soft: #dceaf6;
-  --color-accent-red: #cd4239;
-  --color-accent-red-soft: #f7d6d3;
-  --color-accent-green: #2c8c66;
-  --color-accent-green-soft: #d9eddf;
-  --color-accent-purple: #7c44a6;
-  --color-accent-purple-soft: #e7d8ee;
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
+  --color-on-dark-soft: #a8a29e;
+
+  /* Hairlines */
+  --color-hairline: #e7e5e4;
+  --color-hairline-soft: #f0efed;
+  --color-hairline-strong: #d6d3d1;
+  /* The edge of something you type into, not a divider. A hairline at #d6d3d1 is
+     1.49:1 on white -- under WCAG's 3:1 for a control's boundary, and on a bright
+     screen the box simply is not there. This clears 3:1 against both the white
+     card and the #fafafa panel that inputs sit on. */
+  --color-field-border: #918b83;
+
+  /* The ink pill is the only CTA colour. No saturated brand action colour. */
+  --color-primary: #292524;
+  --color-primary-pressed: #0c0a09;
+
+  /* Semantic. Used for status only, never as decoration. */
+  --color-accent-red: #b91c1c;
+  --color-accent-red-soft: #fdeceb;
+  --color-accent-green: #15803d;
+  --color-accent-green-soft: #eaf5ee;
+  --color-accent-blue: #1d4ed8;
+  --color-accent-blue-soft: #eef2fb;
+  --color-accent-purple: #6d28d9;
+  --color-accent-purple-soft: #f3eefc;
+
+  /* Atmospheric gradient stops. Decoration only -- never a fill behind text,
+     never a button or a text colour. */
+  --grad-mint: #a7e5d3;
+  --grad-peach: #f4c5a8;
+  --grad-lavender: #c8b8e0;
+  --grad-sky: #a8c8e8;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
+
+  /* Display is a light serif; body a neutral sans. Waldenburg is licensed, so
+     the serif is Noto Serif KR, which unlike EB Garamond carries Korean. */
+  --font-display: "Noto Serif KR", "Times New Roman", serif;
+  --font-body: "Inter", "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: "IBM Plex Sans KR", "IBM Plex Sans", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   background: var(--color-canvas);
   color: var(--color-body);
   font-size: 17px;
   line-height: 1.7;
+  letter-spacing: 0.16px;
   /* Korean breaks anywhere by default, so a line can end mid-word ("방향으 / 로").
      keep-all wraps at 어절 boundaries instead; break-word is the escape hatch for a
      single run too long to fit, such as a URL. */
@@ -44,9 +89,28 @@ body {
   overflow-wrap: break-word;
 }
 
-a { color: var(--color-link-teal); }
+/* Display type: light serif, never bold. Bolding it turns the voice from
+   editorial to consumer-marketing. */
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
 
-/* Buttons: bare <button> and .btn (for anchor tags styled as buttons) share the same default look */
+/* No saturated accent means a link cannot be spotted by colour alone, so the
+   underline carries the whole affordance. */
+a { color: var(--color-ink); text-underline-offset: 3px; }
+
+/* Focus. Nothing in this palette separates a focused control by colour, so the
+   ring has to carry it. focus-visible rather than focus: a mouse click should
+   not leave a ring behind, but tabbing must never leave someone lost. */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Buttons: the ink pill is primary, a hairline outline is secondary. */
 button, .btn {
   display: inline-flex;
   align-items: center;
@@ -54,42 +118,50 @@ button, .btn {
   cursor: pointer;
   font-family: inherit;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
+  letter-spacing: 0;
   min-height: 46px;
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
-  border: none;
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
   text-decoration: none;
   background: var(--color-primary);
   color: var(--color-on-primary);
 }
 button:hover, .btn:hover { background: var(--color-primary-pressed); }
 button.danger, .btn-danger { background: var(--color-accent-red); color: var(--color-on-dark); }
-button.danger:hover, .btn-danger:hover { background: #a83527; }
-.btn-secondary { background: var(--color-surface-soft); color: var(--color-ink); }
-.btn-secondary:hover { background: var(--color-hairline-soft); }
+button.danger:hover, .btn-danger:hover { background: #911616; }
+.btn-secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-hairline-strong);
+}
+.btn-secondary:hover { background: var(--color-surface-soft); }
 
 /* Callout banners */
 .banner {
   padding: 18px 22px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   margin: 20px 0;
   font-size: 17px;
   line-height: 1.7;
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+  border-left: 3px solid var(--color-hairline-strong);
 }
-.banner-blue { background: var(--color-accent-blue-soft); color: var(--color-ink); }
-.banner-green { background: var(--color-accent-green-soft); color: var(--color-accent-green); font-weight: 600; }
-.banner-red { background: var(--color-accent-red-soft); color: var(--color-accent-red); font-weight: 600; }
-.banner-purple { background: var(--color-accent-purple-soft); color: var(--color-ink); }
+.banner-blue { background: var(--color-accent-blue-soft); border-left-color: var(--color-accent-blue); }
+.banner-green { background: var(--color-accent-green-soft); border-left-color: var(--color-accent-green); color: var(--color-ink); }
+.banner-red { background: var(--color-accent-red-soft); border-left-color: var(--color-accent-red); color: var(--color-ink); }
+.banner-purple { background: var(--color-accent-purple-soft); border-left-color: var(--color-accent-purple); }
 
 /* Data / content tables */
 .data-table {
   width: 100%;
   border-collapse: collapse;
   background: var(--color-surface-card);
-  margin: 16px 0;
+  margin: 20px 0;
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   font-size: 16px;
 }
@@ -103,8 +175,9 @@ button.danger:hover, .btn-danger:hover { background: #a83527; }
 .data-table th {
   background: var(--color-surface-soft);
   color: var(--color-ink);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 16px;
+  letter-spacing: 0;
 }
 .data-table tr:last-child td { border-bottom: none; }
 
@@ -113,7 +186,7 @@ button.danger:hover, .btn-danger:hover { background: #a83527; }
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin: 16px 0;
+  margin: 20px 0;
 }
 .table-scroll .data-table { margin: 0; }
 
@@ -129,6 +202,90 @@ code {
 
 .hint { color: var(--color-mute); font-size: 16px; }
 
+/* Form controls. Shared so every screen gets the same target height and the same
+   outline; pages may override sizes after this file. */
+input[type="text"], input[type="number"], input[type="password"],
+input[type="search"], input[type="tel"], input[type="email"],
+select, textarea {
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  min-height: 48px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  border-color: var(--color-ink);
+}
+::placeholder { color: var(--color-mute); opacity: 1; }
+
+/* Page chrome. Every page other than the hub carries the same bar in the same
+   place, so the way back is always where it was on the last screen. */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 16px;
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-hairline);
+}
+.topbar .home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-card);
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.topbar .home:hover { background: var(--color-surface-soft); }
+.topbar .where {
+  color: var(--color-mute);
+  font-size: 16px;
+  min-width: 0;
+}
+.topbar .spacer { margin-left: auto; }
+
+/* Section label: the small uppercase line that names a band. */
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+  margin: 0 0 10px;
+}
+
+/* Cards. A hairline and a white fill lift a card off the canvas; the soft drop
+   is the system's only shadow tier and appears on hover alone. */
+.card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card > h2:first-child { margin-top: 0; }
+.card h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.card .lead { margin: 0 0 18px; font-size: 16px; color: var(--color-mute); }
+
 /* Pill tabs: shared by the voucher-settlement app, the doc viewer, and the hub page */
 .tabs {
   display: flex;
@@ -140,17 +297,21 @@ code {
 .tab-btn {
   background: var(--color-surface-card);
   color: var(--color-ink);
-  border: 1px solid var(--color-hairline);
+  border: 1px solid var(--color-hairline-strong);
   border-radius: var(--radius-full);
   height: auto;
   min-height: 44px;
   padding: 10px 18px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   font-family: inherit;
 }
 .tab-btn:hover { background: var(--color-surface-soft); }
-.tab-btn.active { background: var(--color-ink); color: var(--color-on-dark); border-color: var(--color-ink); }
+.tab-btn.active {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }

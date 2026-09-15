@@ -6,55 +6,32 @@
 <title>정해진 내용 알려주기 · 바자회 준비</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <script src="assets/nav.js"></script>
 <script src="assets/config.js"></script>
 <style>
-  header {
-    padding: 28px 20px 20px;
-    border-bottom: 1px solid var(--color-hairline);
-    text-align: center;
-  }
-  header h1 { margin: 0 0 8px; font-size: 27px; font-weight: 800; color: var(--color-ink); letter-spacing: -0.6px; }
-  header p { margin: 0; color: var(--color-mute); font-size: 17px; }
-  header a.back { display: inline-block; margin-top: 12px; color: var(--color-mute); font-weight: 600; font-size: 16px; text-decoration: none; }
+  /* 제목은 본문과 같은 폭 안에 왼쪽으로 맞춘다 -- 가운데 정렬한 제목은
+     아래 카드들과 시선 시작점이 달라 읽는 자리를 한 번 더 찾게 만든다. */
+  .page-head { max-width: 900px; margin: 0 auto; padding: 36px 16px 4px; }
+  .page-head h1 { margin: 0; font-family: var(--font-display); font-size: 38px; font-weight: 300; line-height: 1.15; color: var(--color-ink); letter-spacing: -0.03em; }
+  .page-head p { margin: 10px 0 0; color: var(--color-mute); font-size: 17px; }
 
   main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 
-  .card {
-    background: var(--color-surface-card);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--radius-md);
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-  .card h2 { margin: 0 0 6px; font-size: 21px; font-weight: 700; color: var(--color-ink); }
-  .card .lead { margin: 0 0 18px; font-size: 16px; color: var(--color-mute); }
 
   .field { margin-bottom: 18px; }
   .field label { display: block; font-size: 17px; font-weight: 600; color: var(--color-ink); margin-bottom: 7px; }
   .field .help { display: block; font-weight: 400; font-size: 15px; color: var(--color-mute); margin-top: 3px; }
-  .field input, .field select, .field textarea {
-    width: 100%;
-    font-family: inherit;
-    font-size: 18px;
-    padding: 11px 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-card);
-    color: var(--color-ink);
-  }
-  .field input, .field select { height: 50px; }
+  .field input, .field select, .field textarea { width: 100%; font-size: 18px; }
+  .field input, .field select { height: 52px; }
   .field textarea { min-height: 130px; line-height: 1.6; resize: vertical; }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(44, 132, 224, 0.25);
-  }
 
+  /* 설명이 붙은 칸과 안 붙은 칸이 나란히 서면 입력칸 높이가 어긋난다.
+     설명 줄이 남는 자리를 먹게 해서 입력칸 바닥을 맞춘다. */
   .row { display: flex; flex-wrap: wrap; gap: 16px; }
-  .row .field { flex: 1 1 240px; margin-bottom: 0; }
+  .row .field { flex: 1 1 240px; margin-bottom: 0; display: flex; flex-direction: column; }
+  .row .field label { flex: 1 0 auto; }
 
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
   .msg { font-size: 16px; font-weight: 600; }
@@ -80,11 +57,15 @@
 </head>
 <body>
 
-<header>
+<nav class="topbar">
+  <a class="home" href="index.html">&larr; 준비 허브</a>
+  <span class="where">정해진 내용 알려주기</span>
+</nav>
+
+<div class="page-head">
   <h1>정해진 내용 알려주기</h1>
   <p>회의에서 정해진 것을 적어 보내주시면 담당자가 문서에 반영합니다.</p>
-  <a class="back" href="index.html">← 허브로</a>
-</header>
+</div>
 
 <main>
   <div class="card" id="setup-warning" hidden>

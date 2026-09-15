@@ -6,29 +6,17 @@
 <title>메뉴판 · 봉투 양식 만들기 · 바자회 준비</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <style>
-  header {
-    padding: 28px 20px 20px;
-    border-bottom: 1px solid var(--color-hairline);
-    text-align: center;
-  }
-  header h1 { margin: 0 0 8px; font-size: 27px; font-weight: 800; color: var(--color-ink); letter-spacing: -0.6px; }
-  header p { margin: 0; color: var(--color-mute); font-size: 17px; }
-  header a.back { display: inline-block; margin-top: 12px; color: var(--color-mute); font-weight: 600; font-size: 16px; text-decoration: none; }
+  /* 제목은 본문과 같은 폭 안에 왼쪽으로 맞춘다 -- 가운데 정렬한 제목은
+     아래 카드들과 시선 시작점이 달라 읽는 자리를 한 번 더 찾게 만든다. */
+  .page-head { max-width: 1120px; margin: 0 auto; padding: 36px 16px 4px; }
+  .page-head h1 { margin: 0; font-family: var(--font-display); font-size: 38px; font-weight: 300; line-height: 1.15; color: var(--color-ink); letter-spacing: -0.03em; }
+  .page-head p { margin: 10px 0 0; color: var(--color-mute); font-size: 17px; }
 
   main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 100px; }
 
-  .card {
-    background: var(--color-surface-card);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--radius-md);
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-  .card h2 { margin: 0 0 6px; font-size: 21px; font-weight: 700; color: var(--color-ink); }
-  .card .lead { margin: 0 0 18px; font-size: 16px; color: var(--color-mute); }
 
   /* ---- Input ---- */
   .booth {
@@ -40,28 +28,12 @@
   }
   .booth-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
   .booth-head label { font-size: 17px; font-weight: 700; color: var(--color-ink); }
-  .booth-head input {
-    flex: 1 1 220px;
-    font-family: inherit; font-size: 19px; font-weight: 700;
-    padding: 10px 14px; height: 50px;
-    border: 1px solid var(--color-hairline); border-radius: var(--radius-md);
-    background: var(--color-surface-card); color: var(--color-ink);
-  }
+  .booth-head input { flex: 1 1 220px; font-size: 19px; font-weight: 700; height: 52px; }
 
   .items { display: grid; grid-template-columns: 1fr 160px 44px; gap: 10px; align-items: center; }
   .items .col-head { font-size: 15px; font-weight: 700; color: var(--color-mute); }
-  .items input {
-    font-family: inherit; font-size: 18px;
-    padding: 10px 12px; height: 46px;
-    border: 1px solid var(--color-hairline); border-radius: var(--radius-md);
-    background: var(--color-surface-card); color: var(--color-ink);
-    width: 100%;
-  }
+  .items input { font-size: 18px; width: 100%; }
   .items input[type="number"] { text-align: right; }
-  input:focus {
-    outline: none; border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(44, 132, 224, 0.25);
-  }
   .row-del {
     background: transparent; border: none; color: var(--color-accent-red);
     font-size: 15px; font-weight: 700; min-height: 44px; padding: 4px; cursor: pointer;
@@ -78,7 +50,7 @@
 
   /* ---- Preview (screen) ---- */
   .preview { margin-top: 8px; }
-  .preview h3 { font-size: 18px; color: var(--color-mute); margin: 0 0 10px; font-weight: 700; }
+  .preview h3 { font-family: var(--font-body); font-size: 15px; color: var(--color-mute); margin: 0 0 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
   .sheets { display: flex; flex-wrap: wrap; gap: 16px; }
 
   /* Black ink only. These go through whatever printer is free on the day, and a
@@ -131,7 +103,7 @@
 
   /* ---- Print ---- */
   @media print {
-    header, main > .card.no-print, .preview h3, .toolbar { display: none !important; }
+    .topbar, .page-head, main > .card.no-print, .preview h3, .toolbar { display: none !important; }
     body { background: #fff; margin: 0; }
     main { max-width: none; margin: 0; padding: 0; }
     /* Every wrapper is flattened. A stray 8px margin on .preview was enough to
@@ -207,11 +179,15 @@
 </head>
 <body>
 
-<header>
+<nav class="topbar">
+  <a class="home" href="index.html">&larr; 준비 허브</a>
+  <span class="where">메뉴판 · 봉투 양식 만들기</span>
+</nav>
+
+<div class="page-head">
   <h1>메뉴판 · 봉투 양식 만들기</h1>
   <p>조 이름과 품목을 적으면 인쇄할 종이가 바로 만들어집니다.</p>
-  <a class="back" href="index.html">← 허브로</a>
-</header>
+</div>
 
 <main>
   <div class="card no-print">
