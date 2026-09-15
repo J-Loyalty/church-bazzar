@@ -33,7 +33,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## voucher-settlement 아키텍처
 - 상태는 `app.js` 최상단의 단일 `state` 객체(`booths`, `floats`, `finals`, `desk`)로 관리하며, `localStorage` 키 `cbz_voucher_v1`에 저장된다.
 - 권종은 `DENOMS = [1000, 5000, 10000]`으로 고정.
-- 핵심 계산: `denomTotal()`로 권종별 수량×금액 합산 → 부스 매출 = `finals` 합계 − `floats` 합계; 교환권 부스 대사 = (발행 총액 − 초기 지급 합계) vs (현금 + 계좌이체).
+- 상태에는 `cash`(부스별 현금 매출), `presale`(사전 구매 매출), `desk.refund`·`desk.refundCash`(재환전)가 함께 들어 있다. 빈 상태는 `emptyState()` 한 곳에만 정의하고, 저장된 데이터는 `normalize()`로 빠진 필드를 채워 읽는다 — 예전 백업도 그대로 불러올 수 있어야 한다.
+- 핵심 계산: `denomTotal()`로 권종별 수량×금액 합산 → 부스 교환권 매출 = `finals` − `floats`, 여기에 `cash`를 더해야 실제 매출. 교환권 부스 대사 = (발행 총액 − 초기 지급 합계 − 재환전 회수액) vs (현금 + 계좌이체 − 재환전 지급액). **재환전은 양쪽에서 동시에 빠진다** — 한쪽만 빼면 대사가 어긋난다.
+- 최종 수익금 = 교환권 부스 순 수령액 + 부스 현금 매출 합계 + 사전 구매 매출.
 - **중요한 제약**: `localStorage`는 브라우저/기기별로 격리되어 있어 여러 기기에서 동시에 입력한 내용이 자동으로 합쳐지지 않는다. 이 앱을 다중 기기 동시 입력 구조로 확장하려면 이 제약을 먼저 사용자와 확인할 것 (`docs/확인_필요_체크리스트.md` 5번 참고).
 
 ## 문서 작성 원칙 (이 저장소에서 문서를 작성/수정할 때 반드시 따를 것)

@@ -67,9 +67,18 @@
     <p class="hint">판매 종료 후 각 부스가 실제로 보유하고 있는(=받은) 교환권 수량을 권종별로 집계해 입력하세요. 초기 지급분도 포함된 수량입니다.</p>
     <div class="table-scroll">
       <table class="data-table" id="final-table">
-        <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
+        <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th></tr></thead>
         <tbody id="final-body"></tbody>
       </table>
+    </div>
+    <p class="hint">「현금 매출」은 그 부스가 <strong>현금으로 받은 금액</strong>입니다. 교환권과 섞지 말고 따로 세어 입력하세요. 교환권 대사에는 잡히지 않고 최종 수익금에만 더해집니다.</p>
+
+    <h3>사전 구매 매출</h3>
+    <p class="hint">행사 전에 미리 판 물품의 매출 합계입니다. 교환권을 거치지 않으므로 대사에는 잡히지 않고 최종 수익금에만 더해집니다.</p>
+    <div class="desk-grid">
+      <label>사전 구매 매출 (원)
+        <input type="number" id="presale" min="0" step="1">
+      </label>
     </div>
   </section>
 
@@ -95,30 +104,52 @@
         </tbody>
       </table>
     </div>
+
+    <h3>재환전 (현금으로 되돌려준 내역)</h3>
+    <p class="hint">고객이 교환권을 현금으로 바꿔간 내역입니다. 돌려받은 교환권 수량과 내어준 현금을 입력하세요. <strong>적지 않으면 교환권은 돌아왔는데 발행액에서 빠지지 않고, 현금은 나갔는데 수령액에서 빠지지 않아 대사가 어긋납니다.</strong></p>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>권종</th><th>돌려받은 수량</th></tr></thead>
+        <tbody>
+          <tr><td>1,000원</td><td><input type="number" id="desk-refund-1000" min="0" step="1"></td></tr>
+          <tr><td>5,000원</td><td><input type="number" id="desk-refund-5000" min="0" step="1"></td></tr>
+          <tr><td>10,000원</td><td><input type="number" id="desk-refund-10000" min="0" step="1"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="desk-grid">
+      <label>내어준 현금 (원)
+        <input type="number" id="desk-refund-cash" min="0" step="1">
+      </label>
+    </div>
+    <p id="refund-status" class="hint"></p>
   </section>
 
   <!-- 대사 리포트 -->
   <section class="tab-panel" id="panel-report">
     <h2>대사(검증) 리포트</h2>
 
-    <h3>1. 부스별 매출 (제출 보유액 − 초기 지급액)</h3>
+    <h3>1. 부스별 매출</h3>
+    <p class="hint">교환권 매출 = 제출 보유액 − 초기 지급액. 여기에 현금 매출을 더해야 그 부스의 실제 매출이 됩니다.</p>
     <div class="table-scroll">
       <table class="data-table" id="report-booth-table">
-        <thead><tr><th>부스</th><th>초기 지급액</th><th>제출 보유액</th><th>매출(추정)</th></tr></thead>
+        <thead><tr><th>부스</th><th>초기 지급액</th><th>제출 보유액</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th></tr></thead>
         <tbody id="report-booth-body"></tbody>
       </table>
     </div>
-    <p><strong>부스 매출 합계: <span id="report-booth-total">0</span>원</strong></p>
+    <p><strong>부스 교환권 매출 합계: <span id="report-booth-total">0</span>원</strong><br>
+    <strong>부스 현금 매출 합계: <span id="report-booth-cash-total">0</span>원</strong></p>
 
     <h3>2. 교환권 부스 대사 (발행액 vs 실제 판매 수령액)</h3>
     <div class="table-scroll">
       <table class="data-table" id="report-desk-table">
         <tbody>
-          <tr><th>총 발행액 (초기 지급 + 추가 판매분 포함)</th><td id="report-desk-issued">0원</td></tr>
+          <tr><th>총 발행액 (초기 지급 + 판매분 포함)</th><td id="report-desk-issued">0원</td></tr>
           <tr><th>부스 초기 지급액 합계</th><td id="report-desk-float">0원</td></tr>
-          <tr><th>발행액 중 실제 판매분 (발행액 − 초기 지급액 합계)</th><td id="report-desk-expected">0원</td></tr>
-          <tr><th>교환권 부스 실수령액 (현금+계좌이체)</th><td id="report-desk-actual">0원</td></tr>
-          <tr><th>차이 (실수령액 − 실제 판매분)</th><td id="report-desk-diff">0원</td></tr>
+          <tr><th>재환전으로 돌려받은 교환권</th><td id="report-desk-refund">0원</td></tr>
+          <tr><th>순 판매 교환권액 (발행액 − 초기 지급 − 재환전 회수)</th><td id="report-desk-expected">0원</td></tr>
+          <tr><th>교환권 부스 순 수령액 (현금+계좌이체 − 재환전 지급)</th><td id="report-desk-actual">0원</td></tr>
+          <tr><th>차이 (순 수령액 − 순 판매 교환권액)</th><td id="report-desk-diff">0원</td></tr>
         </tbody>
       </table>
     </div>
@@ -128,13 +159,26 @@
     <div class="table-scroll">
       <table class="data-table">
         <tbody>
-          <tr><th>부스 매출 합계</th><td id="report-summary-booth">0원</td></tr>
-          <tr><th>교환권 부스 실수령액</th><td id="report-summary-desk">0원</td></tr>
+          <tr><th>부스 교환권 매출 합계</th><td id="report-summary-booth">0원</td></tr>
+          <tr><th>교환권 부스 순 수령액</th><td id="report-summary-desk">0원</td></tr>
           <tr><th>차이 (미사용 교환권 등으로 발생 가능)</th><td id="report-summary-diff">0원</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="hint">※ 부스 매출 합계와 교환권 부스 실수령액은 원칙적으로 비슷해야 합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류 등을 확인하세요.</p>
+    <p class="hint">※ 여기서 비교하는 것은 <strong>교환권으로 오간 몫만</strong>입니다. 현금 매출과 사전 구매는 아래 4번에서 더합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류, 재환전 기록 누락을 확인하세요.</p>
+
+    <h3>4. 최종 수익금</h3>
+    <div class="table-scroll">
+      <table class="data-table">
+        <tbody>
+          <tr><th>교환권 부스 순 수령액</th><td id="report-final-desk">0원</td></tr>
+          <tr><th>부스 현금 매출 합계</th><td id="report-final-cash">0원</td></tr>
+          <tr><th>사전 구매 매출</th><td id="report-final-presale">0원</td></tr>
+          <tr><th><strong>최종 수익금</strong></th><td><strong id="report-final-total">0원</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">※ 교환권으로 오간 돈은 부스가 아니라 <strong>교환권 부스가 받은 금액</strong>으로 셉니다. 고객이 쓰지 않고 가져간 교환권도 이미 값을 치른 것이므로 수익에 포함됩니다.</p>
   </section>
 
   <!-- 데이터 관리 -->
