@@ -21,7 +21,7 @@
       { path: "docs/타임라인.md", label: "타임라인" },
       { path: "docs/운영_역할.md", label: "운영 역할" },
       { path: "docs/교환권_운영.md", label: "교환권 운영" },
-      { path: "docs/사전_구매_신청.md", label: "사전 구매 신청" }
+      { path: "docs/사전_구매_신청.md", label: "사전 구매" }
     ]},
     { group: "3단계 · 마무리", items: [
       { path: "docs/정산_절차.md", label: "정산 절차" }
