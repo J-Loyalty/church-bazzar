@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>메뉴판 · 봉투 양식 만들기 · 바자회 준비</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+  header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--color-hairline);
+    text-align: center;
+  }
+  header h1 { margin: 0 0 8px; font-size: 27px; font-weight: 800; color: var(--color-ink); letter-spacing: -0.6px; }
+  header p { margin: 0; color: var(--color-mute); font-size: 17px; }
+  header a.back { display: inline-block; margin-top: 12px; color: var(--color-mute); font-weight: 600; font-size: 16px; text-decoration: none; }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 100px; }
+
+  .card {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .card h2 { margin: 0 0 6px; font-size: 21px; font-weight: 700; color: var(--color-ink); }
+  .card .lead { margin: 0 0 18px; font-size: 16px; color: var(--color-mute); }
+
+  /* ---- Input ---- */
+  .booth {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    margin-bottom: 16px;
+    background: var(--color-surface-doc);
+  }
+  .booth-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .booth-head label { font-size: 17px; font-weight: 700; color: var(--color-ink); }
+  .booth-head input {
+    flex: 1 1 220px;
+    font-family: inherit; font-size: 19px; font-weight: 700;
+    padding: 10px 14px; height: 50px;
+    border: 1px solid var(--color-hairline); border-radius: var(--radius-md);
+    background: var(--color-surface-card); color: var(--color-ink);
+  }
+
+  .items { display: grid; grid-template-columns: 1fr 160px 44px; gap: 10px; align-items: center; }
+  .items .col-head { font-size: 15px; font-weight: 700; color: var(--color-mute); }
+  .items input {
+    font-family: inherit; font-size: 18px;
+    padding: 10px 12px; height: 46px;
+    border: 1px solid var(--color-hairline); border-radius: var(--radius-md);
+    background: var(--color-surface-card); color: var(--color-ink);
+    width: 100%;
+  }
+  .items input[type="number"] { text-align: right; }
+  input:focus {
+    outline: none; border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(44, 132, 224, 0.25);
+  }
+  .row-del {
+    background: transparent; border: none; color: var(--color-accent-red);
+    font-size: 15px; font-weight: 700; min-height: 44px; padding: 4px; cursor: pointer;
+  }
+  .row-del:hover { background: var(--color-accent-red-soft); border-radius: var(--radius-sm); }
+  .booth-del { margin-top: 14px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .toolbar .hint { flex: 1 0 100%; margin: 0; }
+
+  /* ---- Preview (screen) ---- */
+  .preview { margin-top: 8px; }
+  .preview h3 { font-size: 18px; color: var(--color-mute); margin: 0 0 10px; font-weight: 700; }
+  .sheets { display: flex; flex-wrap: wrap; gap: 16px; }
+
+  .sheet {
+    background: #fff;
+    border: 1px solid var(--color-hairline);
+    color: #000;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+  }
+  /* A4 ratio previews, scaled down on screen. */
+  .sheet-menu { width: 340px; aspect-ratio: 297 / 210; padding: 18px; }
+  .sheet-env  { width: 230px; aspect-ratio: 210 / 297; padding: 18px; justify-content: flex-start; }
+
+  .sheet .booth-name { font-weight: 800; letter-spacing: -0.5px; }
+  .sheet-menu .booth-name { font-size: 26px; margin-bottom: 18px; }
+  .sheet-menu .menu-item { font-size: 17px; font-weight: 600; margin: 5px 0; }
+  .sheet-menu .empty { color: #888; font-size: 15px; }
+
+  .sheet-env .booth-name { font-size: 15px; margin: 22px 0 18px; }
+  .sheet-env .env-line {
+    display: flex; align-items: baseline; justify-content: center; gap: 8px;
+    font-size: 13px; margin: 7px 0; width: 100%;
+  }
+  .sheet-env .env-label { flex: 0 0 auto; text-align: right; }
+  .sheet-env .env-blank { flex: 0 0 52px; border-bottom: 1px solid #000; height: 15px; }
+
+  /* ---- Print ---- */
+  @media print {
+    header, main > .card.no-print, .preview h3, .toolbar { display: none !important; }
+    body { background: #fff; }
+    main { max-width: none; margin: 0; padding: 0; }
+    .card { border: none; border-radius: 0; padding: 0; margin: 0; background: #fff; }
+    .sheets { display: block; gap: 0; }
+
+    .sheet {
+      border: none;
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: auto;
+      break-after: page;
+      break-inside: avoid;
+      padding: 0;
+    }
+    .sheet:last-child { break-after: auto; }
+    /* Pushed down instead of centred with a viewport height: vh means the screen,
+       not the sheet of paper, and browsers slip a blank page in when it overflows. */
+    .sheet-menu { padding-top: 40mm; }
+    .sheet-env { padding-top: 20mm; }
+
+    /* Only the section being printed is shown, so the two page sizes never mix
+       inside one print job. */
+    body.printing-menu #section-env,
+    body.printing-env  #section-menu { display: none !important; }
+
+    .sheet-menu .booth-name { font-size: 64pt; margin-bottom: 40pt; }
+    .sheet-menu .menu-item { font-size: 34pt; font-weight: 600; margin: 14pt 0; }
+    .sheet-menu .empty { display: none; }
+
+    .sheet-env { justify-content: flex-start; }
+    .sheet-env .booth-name { font-size: 22pt; margin: 40pt 0 32pt; }
+    .sheet-env .env-line { font-size: 20pt; margin: 16pt 0; gap: 14pt; }
+    .sheet-env .env-blank { flex-basis: 90pt; height: 24pt; border-bottom: 1.5pt solid #000; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>메뉴판 · 봉투 양식 만들기</h1>
+  <p>조 이름과 품목을 적으면 인쇄할 종이가 바로 만들어집니다.</p>
+  <a class="back" href="index.html">← 허브로</a>
+</header>
+
+<main>
+  <div class="card no-print">
+    <h2>조와 품목 적기</h2>
+    <p class="lead">조 이름은 메뉴판과 봉투 양식에 함께 쓰입니다. 한 번만 적으면 됩니다. 마지막 칸을 채우면 다음 칸이 저절로 생깁니다.</p>
+    <div id="booths"></div>
+    <div class="toolbar">
+      <button type="button" id="btn-add-booth" class="btn-secondary">조 추가</button>
+      <p class="hint">적은 내용은 이 브라우저에 저장되어 다시 열어도 남아 있습니다.</p>
+    </div>
+  </div>
+
+  <div class="card no-print">
+    <h2>인쇄하기</h2>
+    <p class="lead">조마다 한 장씩 나옵니다. 메뉴판은 A4 가로, 봉투 양식은 A4 세로입니다.</p>
+    <div class="toolbar">
+      <button type="button" id="btn-print-menu">메뉴판 인쇄</button>
+      <button type="button" id="btn-print-env">봉투 양식 인쇄</button>
+      <p class="hint">인쇄 창에서 용지 방향이 위와 다르면 「기본값」이나 「시스템 대화상자」로 인쇄해 보세요.</p>
+    </div>
+  </div>
+
+  <div class="card" id="section-menu">
+    <div class="preview">
+      <h3>메뉴판 미리보기 (A4 가로)</h3>
+      <div class="sheets" id="preview-menu"></div>
+    </div>
+  </div>
+
+  <div class="card" id="section-env">
+    <div class="preview">
+      <h3>봉투 양식 미리보기 (A4 세로)</h3>
+      <div class="sheets" id="preview-env"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "cbz_forms_v1";
+
+  // 마감 제출용이므로 권종 세 줄에 더해 초기 지급과 현금 매출을 함께 적는다.
+  // 현금 매출은 올해 일부 현금 결제가 가능해지면서 필요해진 칸이다.
+  var ENV_LINES = ["1,000원 교환권", "5,000원 교환권", "10,000원 교환권", "초기지급", "현금 매출"];
+
+  var booths = load();
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.length) return parsed;
+      }
+    } catch (e) { /* 저장 공간이 막혀 있어도 입력은 된다 */ }
+    return [blankBooth()];
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(booths)); } catch (e) { /* 무시 */ }
+  }
+
+  function blankBooth() { return { name: "", items: [{ name: "", price: "" }] }; }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function won(v) {
+    var n = Number(v);
+    if (!v && v !== 0) return "";
+    if (!isFinite(n)) return "";
+    return n.toLocaleString("ko-KR") + "원";
+  }
+
+  // ---------- Input ----------
+  function renderInputs() {
+    var box = document.getElementById("booths");
+    box.innerHTML = booths.map(function (b, bi) {
+      var rows = b.items.map(function (it, ii) {
+        return '<input type="text" placeholder="품목명" data-b="' + bi + '" data-i="' + ii + '" data-f="name" value="' + esc(it.name) + '">' +
+               '<input type="number" min="0" step="100" placeholder="가격" data-b="' + bi + '" data-i="' + ii + '" data-f="price" value="' + esc(it.price) + '">' +
+               '<button type="button" class="row-del" data-del-item="' + bi + '" data-i="' + ii + '" title="이 품목 지우기">✕</button>';
+      }).join("");
+      return '<div class="booth">' +
+        '<div class="booth-head"><label>조 이름</label>' +
+        '<input type="text" placeholder="예: 1조 국수" data-b="' + bi + '" data-f="boothname" value="' + esc(b.name) + '"></div>' +
+        '<div class="items"><span class="col-head">품목명</span><span class="col-head">가격</span><span></span>' + rows + "</div>" +
+        '<button type="button" class="row-del booth-del" data-del-booth="' + bi + '">이 조 지우기</button>' +
+        "</div>";
+    }).join("");
+  }
+
+  document.getElementById("booths").addEventListener("input", function (e) {
+    var el = e.target;
+    if (el.tagName !== "INPUT") return;
+    var bi = Number(el.dataset.b);
+    if (el.dataset.f === "boothname") {
+      booths[bi].name = el.value;
+      autoGrowBooths();
+    } else {
+      var ii = Number(el.dataset.i);
+      booths[bi].items[ii][el.dataset.f] = el.value;
+      autoGrowItems(bi);
+    }
+    save();
+    renderPreviews();
+  });
+
+  // Typing in the last row is the signal that another one is wanted; making the
+  // volunteer hunt for an "add" button for every single item would be worse.
+  function autoGrowItems(bi) {
+    var items = booths[bi].items;
+    var last = items[items.length - 1];
+    if (last && (last.name || last.price)) {
+      items.push({ name: "", price: "" });
+      redraw(true);
+    }
+  }
+
+  function autoGrowBooths() {
+    var last = booths[booths.length - 1];
+    if (last && last.name) {
+      booths.push(blankBooth());
+      redraw(true);
+    }
+  }
+
+  // Re-rendering steals focus, so put the caret back where it was.
+  function redraw(keepFocus) {
+    var a = document.activeElement;
+    var key = keepFocus && a && a.dataset ? [a.dataset.b, a.dataset.i, a.dataset.f].join("|") : null;
+    var pos = keepFocus && a && a.selectionStart != null ? a.selectionStart : null;
+    renderInputs();
+    if (key) {
+      var next = Array.prototype.find.call(document.querySelectorAll("#booths input"), function (el) {
+        return [el.dataset.b, el.dataset.i, el.dataset.f].join("|") === key;
+      });
+      if (next) {
+        next.focus();
+        if (pos != null && next.setSelectionRange) {
+          try { next.setSelectionRange(pos, pos); } catch (e) { /* number 칸은 지원 안 함 */ }
+        }
+      }
+    }
+  }
+
+  document.getElementById("booths").addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    if (btn.dataset.delBooth != null) {
+      booths.splice(Number(btn.dataset.delBooth), 1);
+      if (!booths.length) booths.push(blankBooth());
+    } else if (btn.dataset.delItem != null) {
+      var bi = Number(btn.dataset.delItem);
+      booths[bi].items.splice(Number(btn.dataset.i), 1);
+      if (!booths[bi].items.length) booths[bi].items.push({ name: "", price: "" });
+    } else { return; }
+    save();
+    redraw(false);
+    renderPreviews();
+  });
+
+  document.getElementById("btn-add-booth").addEventListener("click", function () {
+    booths.push(blankBooth());
+    save();
+    redraw(false);
+    renderPreviews();
+  });
+
+  // ---------- Previews ----------
+  // A booth with no name would print a blank sheet, so it is left out.
+  function named() {
+    return booths.filter(function (b) { return String(b.name).trim(); });
+  }
+
+  function renderPreviews() {
+    var list = named();
+    var menu = document.getElementById("preview-menu");
+    var env = document.getElementById("preview-env");
+
+    if (!list.length) {
+      menu.innerHTML = '<p class="hint">조 이름을 적으면 여기에 나타납니다.</p>';
+      env.innerHTML = '<p class="hint">조 이름을 적으면 여기에 나타납니다.</p>';
+      return;
+    }
+
+    menu.innerHTML = list.map(function (b) {
+      var items = b.items.filter(function (it) { return String(it.name).trim(); });
+      var body = items.length
+        ? items.map(function (it) {
+            return '<p class="menu-item">' + esc(it.name) + (won(it.price) ? " " + won(it.price) : "") + "</p>";
+          }).join("")
+        : '<p class="empty">품목을 적으면 여기에 나옵니다</p>';
+      return '<div class="sheet sheet-menu"><p class="booth-name">' + esc(b.name) + "</p>" + body + "</div>";
+    }).join("");
+
+    env.innerHTML = list.map(function (b) {
+      var lines = ENV_LINES.map(function (label) {
+        return '<div class="env-line"><span class="env-label">' + esc(label) + '</span><span class="env-blank"></span></div>';
+      }).join("");
+      return '<div class="sheet sheet-env"><p class="booth-name">' + esc(b.name) + "</p>" + lines + "</div>";
+    }).join("");
+  }
+
+  // ---------- Print ----------
+  // The two sheets need different paper orientations, so each print run sets its
+  // own @page rule and hides the other section.
+  var pageStyle = document.createElement("style");
+  document.head.appendChild(pageStyle);
+
+  function printAs(mode) {
+    if (!named().length) {
+      alert("먼저 조 이름을 적어주세요.");
+      return;
+    }
+    document.body.className = "printing-" + mode;
+    pageStyle.textContent = mode === "menu"
+      ? "@page { size: A4 landscape; margin: 14mm; }"
+      : "@page { size: A4 portrait; margin: 16mm; }";
+    window.print();
+  }
+
+  window.addEventListener("afterprint", function () {
+    document.body.className = "";
+    pageStyle.textContent = "";
+  });
+
+  document.getElementById("btn-print-menu").addEventListener("click", function () { printAs("menu"); });
+  document.getElementById("btn-print-env").addEventListener("click", function () { printAs("env"); });
+
+  renderInputs();
+  renderPreviews();
+})();
+</script>
+</body>
+</html>
