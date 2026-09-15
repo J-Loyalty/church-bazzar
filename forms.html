@@ -77,29 +77,48 @@
   .preview h3 { font-size: 18px; color: var(--color-mute); margin: 0 0 10px; font-weight: 700; }
   .sheets { display: flex; flex-wrap: wrap; gap: 16px; }
 
+  /* The printed sheet: a frame with an accent band at the head. Wide colour fills
+     are avoided on purpose -- they drink toner and go muddy on a mono printer, so
+     the decoration is carried by rules and a narrow band instead. */
   .sheet {
     background: #fff;
-    border: 1px solid var(--color-hairline);
     color: #000;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    border: 2px solid var(--color-ink);
+    border-top: 7px solid var(--color-primary);
+    display: flex; flex-direction: column; align-items: center;
     text-align: center;
   }
-  /* A4 ratio previews, scaled down on screen. */
-  .sheet-menu { width: 340px; aspect-ratio: 297 / 210; padding: 18px; }
-  .sheet-env  { width: 230px; aspect-ratio: 210 / 297; padding: 18px; justify-content: flex-start; }
+  .sheet-menu { width: 340px; aspect-ratio: 297 / 210; padding: 16px 20px; justify-content: center; }
+  .sheet-env  { width: 230px; aspect-ratio: 210 / 297; padding: 14px 16px; justify-content: flex-start; }
 
-  .sheet .booth-name { font-weight: 800; letter-spacing: -0.5px; }
-  .sheet-menu .booth-name { font-size: 26px; margin-bottom: 18px; }
-  .sheet-menu .menu-item { font-size: 17px; font-weight: 600; margin: 5px 0; }
+  .sheet .booth-name {
+    font-weight: 800; letter-spacing: -0.5px;
+    width: 100%;
+    border-bottom: 2px solid var(--color-ink);
+  }
+  .sheet .sheet-foot {
+    margin: auto 0 0; padding-top: 8px; width: 100%;
+    border-top: 1px solid var(--color-hairline);
+    font-size: 9px; color: #666; letter-spacing: 0.02em;
+  }
+
+  .sheet-menu .booth-name { font-size: 26px; padding-bottom: 10px; margin: 0 0 16px; }
+  .sheet-menu .menu-list { margin: 0 auto; }
+  .sheet-menu .menu-item { font-size: 17px; font-weight: 500; margin: 6px 0; }
+  .sheet-menu .menu-item .price { font-weight: 800; margin-left: 10px; }
   .sheet-menu .empty { color: #888; font-size: 15px; }
 
-  .sheet-env .booth-name { font-size: 15px; margin: 22px 0 18px; }
+  .sheet-env .booth-name { font-size: 15px; padding: 14px 0 8px; margin: 0 0 14px; }
+  .sheet-env .env-group { width: 100%; }
+  .sheet-env .env-group + .env-group {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed #999;
+  }
   .sheet-env .env-line {
-    display: flex; align-items: baseline; justify-content: center; gap: 8px;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
     font-size: 13px; margin: 7px 0; width: 100%;
   }
-  .sheet-env .env-label { flex: 0 0 auto; text-align: right; }
-  .sheet-env .env-blank { flex: 0 0 52px; border-bottom: 1px solid #000; height: 15px; }
+  .sheet-env .env-label { flex: 0 0 auto; }
+  .sheet-env .env-blank { flex: 0 1 68px; border-bottom: 1px solid #000; height: 15px; }
 
   /* ---- Print ---- */
   @media print {
@@ -110,34 +129,47 @@
     .sheets { display: block; gap: 0; }
 
     .sheet {
-      border: none;
       display: block;
       width: 100%;
       height: auto;
       aspect-ratio: auto;
       break-after: page;
       break-inside: avoid;
-      padding: 0;
+      border: 2.5pt solid #000;
+      border-top: 14pt solid var(--color-primary);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      padding: 0 12mm 10mm;
     }
     .sheet:last-child { break-after: auto; }
     /* Pushed down instead of centred with a viewport height: vh means the screen,
        not the sheet of paper, and browsers slip a blank page in when it overflows. */
-    .sheet-menu { padding-top: 40mm; }
-    .sheet-env { padding-top: 20mm; }
+    .sheet-menu { padding-top: 26mm; }
+    .sheet-env { padding-top: 16mm; }
+
+    .sheet .booth-name { border-bottom: 3pt solid #000; }
+    .sheet .sheet-foot {
+      margin-top: 14mm; padding-top: 3mm;
+      border-top: 0.5pt solid #999;
+      font-size: 9pt; color: #555;
+    }
 
     /* Only the section being printed is shown, so the two page sizes never mix
        inside one print job. */
     body.printing-menu #section-env,
     body.printing-env  #section-menu { display: none !important; }
 
-    .sheet-menu .booth-name { font-size: 64pt; margin-bottom: 40pt; }
-    .sheet-menu .menu-item { font-size: 34pt; font-weight: 600; margin: 14pt 0; }
+    .sheet-menu .booth-name { font-size: 58pt; padding-bottom: 8mm; margin: 0 0 12mm; }
+    .sheet-menu .menu-item { font-size: 32pt; font-weight: 500; margin: 8mm 0; }
+    .sheet-menu .menu-item .price { font-weight: 800; margin-left: 10pt; }
     .sheet-menu .empty { display: none; }
 
-    .sheet-env { justify-content: flex-start; }
-    .sheet-env .booth-name { font-size: 22pt; margin: 40pt 0 32pt; }
-    .sheet-env .env-line { font-size: 20pt; margin: 16pt 0; gap: 14pt; }
-    .sheet-env .env-blank { flex-basis: 90pt; height: 24pt; border-bottom: 1.5pt solid #000; }
+    .sheet-env .booth-name { font-size: 24pt; padding-bottom: 6mm; margin: 0 0 10mm; }
+    .sheet-env .env-group + .env-group {
+      margin-top: 8mm; padding-top: 8mm; border-top: 1pt dashed #777;
+    }
+    .sheet-env .env-line { font-size: 19pt; margin: 9mm 0; gap: 14pt; }
+    .sheet-env .env-blank { flex: 0 1 34mm; height: 22pt; border-bottom: 1.5pt solid #000; }
   }
 </style>
 </head>
@@ -191,9 +223,14 @@
 
   var STORAGE_KEY = "cbz_forms_v1";
 
-  // 마감 제출용이므로 권종 세 줄에 더해 초기 지급과 현금 매출을 함께 적는다.
-  // 현금 매출은 올해 일부 현금 결제가 가능해지면서 필요해진 칸이다.
-  var ENV_LINES = ["1,000원 교환권", "5,000원 교환권", "10,000원 교환권", "초기지급", "현금 매출"];
+  // 마감 제출용. 권종 세 줄과, 성격이 다른 두 줄(초기 지급·현금 매출)을 선으로
+  // 갈라 적는다. 현금 매출은 올해 일부 현금 결제가 가능해지면서 필요해진 칸이다.
+  var ENV_GROUPS = [
+    ["1,000원 교환권", "5,000원 교환권", "10,000원 교환권"],
+    ["초기지급", "현금 매출"]
+  ];
+
+  var SHEET_FOOT = "2026년 이웃돕기 사랑의 바자회 · 2026. 10. 9. (금)";
 
   var booths = load();
 
@@ -342,18 +379,25 @@
     menu.innerHTML = list.map(function (b) {
       var items = b.items.filter(function (it) { return String(it.name).trim(); });
       var body = items.length
-        ? items.map(function (it) {
-            return '<p class="menu-item">' + esc(it.name) + (won(it.price) ? " " + won(it.price) : "") + "</p>";
-          }).join("")
+        ? '<div class="menu-list">' + items.map(function (it) {
+            var price = won(it.price);
+            return '<p class="menu-item">' + esc(it.name) +
+              (price ? '<span class="price">' + price + "</span>" : "") + "</p>";
+          }).join("") + "</div>"
         : '<p class="empty">품목을 적으면 여기에 나옵니다</p>';
-      return '<div class="sheet sheet-menu"><p class="booth-name">' + esc(b.name) + "</p>" + body + "</div>";
+      return '<div class="sheet sheet-menu"><p class="booth-name">' + esc(b.name) + "</p>" + body +
+        '<p class="sheet-foot">' + esc(SHEET_FOOT) + "</p></div>";
     }).join("");
 
     env.innerHTML = list.map(function (b) {
-      var lines = ENV_LINES.map(function (label) {
-        return '<div class="env-line"><span class="env-label">' + esc(label) + '</span><span class="env-blank"></span></div>';
+      var groups = ENV_GROUPS.map(function (labels) {
+        return '<div class="env-group">' + labels.map(function (label) {
+          return '<div class="env-line"><span class="env-label">' + esc(label) +
+            '</span><span class="env-blank"></span></div>';
+        }).join("") + "</div>";
       }).join("");
-      return '<div class="sheet sheet-env"><p class="booth-name">' + esc(b.name) + "</p>" + lines + "</div>";
+      return '<div class="sheet sheet-env"><p class="booth-name">' + esc(b.name) + "</p>" + groups +
+        '<p class="sheet-foot">마감 제출용 · ' + esc(SHEET_FOOT) + "</p></div>";
     }).join("");
   }
 
