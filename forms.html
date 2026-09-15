@@ -71,6 +71,10 @@
 
   .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
   .toolbar .hint { flex: 1 0 100%; margin: 0; }
+  .toolbar .warn {
+    flex: 1 0 100%; margin: 0;
+    font-size: 16px; font-weight: 600; color: var(--color-accent-red);
+  }
 
   /* ---- Preview (screen) ---- */
   .preview { margin-top: 8px; }
@@ -108,6 +112,8 @@
   .sheet-menu .menu-item { font-size: 17px; font-weight: 500; margin: 6px 0; }
   .sheet-menu[data-many="1"] .booth-name { font-size: 20px; padding-bottom: 7px; margin-bottom: 10px; }
   .sheet-menu[data-many="1"] .menu-item { font-size: 13px; margin: 3px 0; }
+  .sheet-menu[data-many="2"] .booth-name { font-size: 16px; padding-bottom: 5px; margin-bottom: 7px; }
+  .sheet-menu[data-many="2"] .menu-item { font-size: 10px; margin: 2px 0; }
   .sheet-menu .menu-item .price { font-weight: 800; margin-left: 10px; }
   .sheet-menu .empty { color: #888; font-size: 15px; }
 
@@ -126,16 +132,20 @@
   /* ---- Print ---- */
   @media print {
     header, main > .card.no-print, .preview h3, .toolbar { display: none !important; }
-    body { background: #fff; }
+    body { background: #fff; margin: 0; }
     main { max-width: none; margin: 0; padding: 0; }
-    .card { border: none; border-radius: 0; padding: 0; margin: 0; background: #fff; }
+    /* Every wrapper is flattened. A stray 8px margin on .preview was enough to
+       tip each sheet onto a second page when the box left only 1mm of slack. */
+    .card, .preview, .sheets { border: none; border-radius: 0; padding: 0; margin: 0; background: #fff; }
     .sheets { display: block; gap: 0; }
 
     /* The frame is a fixed rectangle, not a box that hugs its contents: with an
        auto height the bottom edge landed somewhere different on every sheet
        depending on how many items a booth had. Heights are the printable area of
-       the page minus the @page margin, less 1mm so rounding cannot tip it onto a
-       second sheet. vh is no use here -- it means the screen, not the paper. */
+       the page minus the @page margin, with several millimetres to spare: a
+       printer's own unprintable edge can be wider than the margin asked for, and
+       the browser shrinks the usable area to suit. vh is no use here -- it means
+       the screen, not the paper. */
     .sheet {
       display: flex;
       flex-direction: column;
@@ -149,10 +159,10 @@
     }
     .sheet:last-child { break-after: auto; }
 
-    /* A4 가로 210mm − 여백 14mm×2 = 182mm */
-    .sheet-menu { height: 181mm; padding-top: 10mm; }
-    /* A4 세로 297mm − 여백 16mm×2 = 265mm */
-    .sheet-env { height: 264mm; padding-top: 10mm; }
+    /* A4 가로 210mm − 여백 15mm×2 = 180mm 중 172mm (여유 8mm) */
+    .sheet-menu { height: 172mm; padding-top: 9mm; }
+    /* A4 세로 297mm − 여백 15mm×2 = 267mm 중 258mm (여유 9mm) */
+    .sheet-env { height: 258mm; padding-top: 9mm; }
 
     .sheet .booth-name { border-bottom: 3pt solid #000; }
     .sheet .sheet-foot {
@@ -181,8 +191,10 @@
 
     /* Past seven items the fixed frame runs out, so the type steps down rather
        than spilling over the border. */
-    .sheet-menu[data-many="1"] .booth-name { font-size: 40pt; padding-bottom: 4mm; margin: 0 0 5mm; }
-    .sheet-menu[data-many="1"] .menu-item { font-size: 22pt; margin: 3mm 0; }
+    .sheet-menu[data-many="1"] .booth-name { font-size: 38pt; padding-bottom: 4mm; margin: 0 0 4mm; }
+    .sheet-menu[data-many="1"] .menu-item { font-size: 21pt; margin: 2.4mm 0; }
+    .sheet-menu[data-many="2"] .booth-name { font-size: 30pt; padding-bottom: 3mm; margin: 0 0 3mm; }
+    .sheet-menu[data-many="2"] .menu-item { font-size: 16pt; margin: 1.8mm 0; }
 
     .sheet-env .booth-name { font-size: 24pt; line-height: 1.2; padding-bottom: 6mm; margin: 0 0 12mm; }
     .sheet-env .env-group + .env-group {
@@ -218,7 +230,8 @@
     <div class="toolbar">
       <button type="button" id="btn-print-menu">메뉴판 인쇄</button>
       <button type="button" id="btn-print-env">봉투 양식 인쇄</button>
-      <p class="hint">인쇄 창에서 용지 방향이 위와 다르면 「기본값」이나 「시스템 대화상자」로 인쇄해 보세요.</p>
+      <p class="hint">인쇄 창에서 용지 방향이 위와 다르면 「기본값」이나 「시스템 대화상자」로 인쇄해 보세요. 여백은 「기본값」으로 두세요.</p>
+      <p class="hint" id="crowd-warning"></p>
     </div>
   </div>
 
@@ -396,6 +409,8 @@
       return;
     }
 
+    warnCrowded(list);
+
     menu.innerHTML = list.map(function (b) {
       var items = b.items.filter(function (it) { return String(it.name).trim(); });
       var body = items.length
@@ -405,7 +420,11 @@
               (price ? '<span class="price">' + price + "</span>" : "") + "</p>";
           }).join("") + "</div>"
         : '<p class="empty">품목을 적으면 여기에 나옵니다</p>';
-      var many = items.length > 6 ? ' data-many="1"' : "";
+      // The frame is a fixed size, so a long list steps the type down rather than
+      // spilling past the border. Past ten it gets too small to read across a
+      // stall, which is what the warning below the print buttons is for.
+      var step = items.length > 10 ? "2" : (items.length > 6 ? "1" : "");
+      var many = step ? ' data-many="' + step + '"' : "";
       return '<div class="sheet sheet-menu"' + many + '><p class="booth-name">' + esc(b.name) + "</p>" + body +
         '<p class="sheet-foot">' + esc(SHEET_FOOT) + "</p></div>";
     }).join("");
@@ -422,6 +441,23 @@
     }).join("");
   }
 
+  // ---------- Crowded menus ----------
+  function warnCrowded(list) {
+    var crowded = list.filter(function (b) {
+      return b.items.filter(function (it) { return String(it.name).trim(); }).length > 10;
+    }).map(function (b) { return b.name; });
+
+    var el = document.getElementById("crowd-warning");
+    if (!crowded.length) {
+      el.textContent = "";
+      el.className = "hint";
+      return;
+    }
+    el.textContent = "품목이 많아 글자가 작아지는 조: " + crowded.join(", ") +
+      ". 멀리서 읽기 어려울 수 있으니 메뉴판을 두 장으로 나누는 것을 권합니다.";
+    el.className = "warn";
+  }
+
   // ---------- Print ----------
   // The two sheets need different paper orientations, so each print run sets its
   // own @page rule and hides the other section.
@@ -435,8 +471,8 @@
     }
     document.body.className = "printing-" + mode;
     pageStyle.textContent = mode === "menu"
-      ? "@page { size: A4 landscape; margin: 14mm; }"
-      : "@page { size: A4 portrait; margin: 16mm; }";
+      ? "@page { size: A4 landscape; margin: 15mm; }"
+      : "@page { size: A4 portrait; margin: 15mm; }";
     window.print();
   }
 
