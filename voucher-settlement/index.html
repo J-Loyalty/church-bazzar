@@ -74,6 +74,14 @@
     </label>
   </div>
 
+  <h2>1-4. 행사 전에 판 교환권</h2>
+  <p class="hint">전도용(펀치) 교환권처럼 <strong>행사 전에 값을 받고 내어준 교환권</strong>의 금액입니다. 그 교환권은 위 「아침 통」을 셀 때 <strong>이미 빠져나간 뒤</strong>이고 대금도 이미 받았으므로, 여기 적지 않으면 <strong>그만큼 매출이 적게 잡힙니다</strong>. 없으면 0으로 두세요.</p>
+  <label class="field-inline">금액 (원)
+    <input type="number" id="presale-voucher" min="0" step="1" inputmode="numeric">
+    <span class="field-help">장수가 아니라 금액입니다</span>
+  </label>
+  <div class="banner banner-blue">받은 대금은 <strong>저녁 금고에 합치지 마세요.</strong> 합치면 금고 차액에도 잡혀 같은 돈을 두 번 세게 됩니다. 아침 금고에 넣어두거나 따로 보관하시면 됩니다.</div>
+
   <div class="panel-foot">
     <button type="button" class="btn-secondary" data-goto="close">마감 입력으로 &rarr;</button>
   </div>
@@ -86,9 +94,10 @@
   <h2>2-1. 조별로 걷은 것</h2>
   <p class="hint">각 조가 마감에 제출한 <strong>교환권 장수</strong>와, 따로 세어 낸 <strong>현금 매출</strong>, 그리고 그 조가 쓴 <strong>재료비</strong>입니다. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
   <p class="hint"><strong>재료비</strong>는 그 조가 물건을 마련하는 데 쓴 돈입니다 (장 본 값, 재료 구입비 등). 영수증이 늦게 들어오면 나중에 채워도 됩니다.</p>
+  <p class="hint"><strong>「재정 지급」에 표시</strong>하면 교회 재정에서 이미 낸 돈이라는 뜻입니다. <strong>표시하지 않은 것은 조원이 사비로 낸 것</strong>으로 보고, 마감 후 돌려드릴 금액으로 따로 합산합니다. 수익 계산에는 둘 다 똑같이 원가로 들어갑니다.</p>
   <div class="table-scroll">
     <table class="data-table" id="final-table">
-      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th><th>재료비</th></tr></thead>
+      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th><th>재료비</th><th>재정 지급</th></tr></thead>
       <tbody id="final-body"></tbody>
     </table>
   </div>
@@ -121,6 +130,7 @@
 
   <h2>2-4. 공통 비용</h2>
   <p class="hint">특정 조에 붙지 않는 지출입니다 — <strong>교환권 인쇄비</strong>, 천막·비품 대여료, 공통 자재비 같은 것. 항목 이름과 금액을 적으면 다음 칸이 저절로 생깁니다.</p>
+  <p class="hint">여기도 <strong>「재정 지급」</strong> 표시가 있습니다. 표시하지 않은 것은 누군가 먼저 내주신 돈으로 보고 돌려드릴 금액에 넣습니다.</p>
   <div id="common-costs"></div>
   <p class="row-total-line">공통 비용 합계 <strong id="common-sum">0원</strong></p>
 
@@ -146,9 +156,11 @@
         <tr><th>아침 통</th><td id="r-open-tin">0원</td></tr>
         <tr><th>− 저녁 통</th><td id="r-close-tin">0원</td></tr>
         <tr><th>− 조별 지급 합계</th><td id="r-float">0원</td></tr>
+        <tr><th>+ 행사 전에 판 교환권</th><td id="r-pv1">0원</td></tr>
         <tr class="row-sum"><th>= 손님에게 팔려 나간 교환권</th><td id="r-sold">0원</td></tr>
         <tr><th>저녁 금고 − 아침 금고</th><td id="r-cash-delta">0원</td></tr>
         <tr><th>+ 계좌이체</th><td id="r-transfer">0원</td></tr>
+        <tr><th>+ 행사 전에 판 교환권 대금</th><td id="r-pv2">0원</td></tr>
         <tr class="row-sum"><th>= 그 값으로 받은 돈</th><td id="r-received">0원</td></tr>
         <tr class="row-diff"><th>차이</th><td id="r-diff">0원</td></tr>
       </tbody>
@@ -159,9 +171,9 @@
   <p class="hint">교환권 매출 = 제출한 교환권 − 아침에 받은 잔돈. 여기에 현금 매출을 더한 것이 그 조가 실제로 판 금액입니다.</p>
   <div class="table-scroll">
     <table class="data-table">
-      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th><th>재료비</th></tr></thead>
+      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th><th>재료비</th><th>재정 지급</th></tr></thead>
       <tbody id="report-booth-body"></tbody>
-      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-total">0원</th><th id="rb-cost">0원</th></tr></tfoot>
+      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-total">0원</th><th id="rb-cost">0원</th><th></th></tr></tfoot>
     </table>
   </div>
 
@@ -193,6 +205,25 @@
       </tbody>
     </table>
   </div>
+  <h2>마감 후 돌려드릴 돈</h2>
+  <p class="hint">원가 중 <strong>교회 재정에서 아직 내지 않은 몫</strong>입니다. 조원이 사비로 장을 본 경우가 여기 해당하며, 마감 후 그분들께 돌려드려야 합니다. <strong>수익금은 이미 위에서 원가를 뺀 값</strong>이므로 여기서 또 빼지 않습니다.</p>
+  <div class="table-scroll">
+    <table class="data-table balance">
+      <tbody>
+        <tr><th>원가 합계</th><td id="r-refund-all">0원</td></tr>
+        <tr><th>− 재정에서 이미 지급한 몫</th><td id="r-refund-paid">0원</td></tr>
+        <tr class="row-total"><th>= 돌려드릴 금액</th><td id="r-refund">0원</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-scroll" id="refund-list-box">
+    <table class="data-table">
+      <thead><tr><th>받으실 곳</th><th>금액</th></tr></thead>
+      <tbody id="refund-list"></tbody>
+    </table>
+  </div>
+  <div class="banner banner-red">이 돈을 <strong>교환소 금고에서 꺼내지 마세요.</strong> 금고에서 나가면 저녁 금고가 그만큼 줄어 대사가 틀어집니다. 따로 마련한 돈으로 지급하세요.</div>
+
   <div class="banner banner-blue">조들이 모아 온 교환권 총액은 <strong>매출에 더하지 않습니다.</strong> 그 돈은 이미 교환소에서 받아 맨 윗줄에 들어 있습니다 — 더하면 같은 돈을 두 번 세는 것입니다.</div>
 </section>
 

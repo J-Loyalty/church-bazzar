@@ -121,25 +121,30 @@ function saveSettlement(body) {
   rows.push(['2026 바자회 정산', '', '', '', '', '']);
   rows.push(['올린 시각', at, '', '', '', '']);
   rows.push([]);
-  rows.push(['조', '받은 잔돈', '제출 교환권', '교환권 매출', '현금 매출', '매출 합계', '재료비']);
+  rows.push(['조', '받은 잔돈', '제출 교환권', '교환권 매출', '현금 매출', '매출 합계', '재료비', '재정 지급']);
   (s.rows || []).forEach(function (r) {
-    rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total, r.cost]);
+    rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total, r.cost,
+      r.cost > 0 ? (r.costPaid ? '재정 지급' : '돌려드릴 것') : '']);
   });
-  rows.push(['합계', s.floatSum, s.finalSum, s.voucherSum, s.cashSum, s.totalSum, s.costSum]);
+  rows.push(['합계', s.floatSum, s.finalSum, s.voucherSum, s.cashSum, s.totalSum, s.costSum, '']);
   rows.push([]);
   rows.push(['교환소 대사', '', '', '', '', '']);
   rows.push(['아침 통', s.openTin]);
   rows.push(['저녁 통', s.closeTin]);
   rows.push(['조별 지급 합계', s.floatSum]);
+  rows.push(['행사 전에 판 교환권', s.presaleVoucher]);
   rows.push(['팔려 나간 교환권', s.sold]);
   rows.push(['저녁 금고 − 아침 금고', s.cashDelta]);
   rows.push(['계좌이체', s.transfer]);
+  rows.push(['행사 전에 판 교환권 대금', s.presaleVoucher]);
   rows.push(['받은 돈', s.received]);
   rows.push(['차이 (0이어야 함)', s.diff]);
   rows.push(['미사용 교환권', s.unused]);
   rows.push([]);
   rows.push(['공통 비용', '', '', '', '', '']);
-  (s.commonCosts || []).forEach(function (x) { rows.push([x.name, x.amount]); });
+  (s.commonCosts || []).forEach(function (x) {
+    rows.push([x.name, x.amount, x.paid ? '재정 지급' : '돌려드릴 것']);
+  });
   rows.push(['공통 비용 합계', s.commonSum]);
   rows.push([]);
   rows.push(['최종 수익금', '', '', '', '', '']);
@@ -151,8 +156,13 @@ function saveSettlement(body) {
   rows.push(['공통 비용 합계', s.commonSum]);
   rows.push(['원가 합계', s.cost]);
   rows.push(['최종 수익금 (매출 − 원가)', s.final]);
+  rows.push([]);
+  rows.push(['마감 후 돌려드릴 돈', '', '', '', '', '']);
+  rows.push(['재정에서 이미 지급한 원가', s.paidCost]);
+  rows.push(['돌려드릴 금액', s.refund]);
+  (s.refundRows || []).forEach(function (r) { rows.push([r.name, r.amount]); });
 
-  var width = 7;
+  var width = 8;
   var padded = rows.map(function (r) {
     var out = r.slice();
     while (out.length < width) out.push('');

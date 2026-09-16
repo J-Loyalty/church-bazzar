@@ -141,10 +141,33 @@ h3 {
 .box-total { margin: 14px 0 0; font-size: 17px; color: var(--color-body); }
 .box-total strong { color: var(--color-ink); font-size: 19px; }
 
+/* 재정에서 이미 냈는지 표시하는 칸. 손가락으로 누를 자리를 넉넉히 준다. */
+.check-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--color-ink);
+}
+.check-cell input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--color-ink);
+  cursor: pointer;
+}
+.check-text { display: none; }
+/* 표 안에서는 칸 전체가 누를 자리가 되게 한다 */
+.data-table td .check-cell { width: 100%; }
+
 /* 공통 비용 — 항목 이름과 금액 한 쌍씩. 마지막 줄을 채우면 다음 줄이 생긴다. */
 .cost-head, .cost-row {
   display: grid;
-  grid-template-columns: 1fr 200px 96px;
+  grid-template-columns: 1fr 190px 104px 96px;
   gap: 10px;
   align-items: center;
 }
@@ -264,6 +287,7 @@ h3 {
   .denom-cell input { max-width: none; }
   .field-inline input { max-width: none; }
   .cost-head { display: none; }
+  .check-text { display: inline; }
   .cost-row {
     grid-template-columns: 1fr;
     gap: 6px;
@@ -272,4 +296,5 @@ h3 {
     border-bottom: 1px solid var(--color-hairline);
   }
   .cost-row .remove-btn { justify-self: start; }
+  .cost-row .check-cell { justify-self: start; padding-left: 0; }
 }
