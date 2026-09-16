@@ -293,22 +293,52 @@
         '<td><input type="number" min="0" step="100" inputmode="numeric" aria-label="' + (i + 1) +
           '번째 줄 단가" data-ii="' + i + '" data-fld="price" value="' + num(it.price) + '"></td>';
 
-      if (first) {
-        cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
-          esc(t) + ' 재료원가" data-team="' + esc(t) + '" data-cost="1" value="' +
-          num(state.costs[t]) + '"></td>';
-        cells += '<td><label class="check-cell"><input type="checkbox" aria-label="' +
-          esc(t) + ' 재료원가를 재정에서 지급함" data-team="' + esc(t) + '" data-costpaid="1"' +
-          (state.costPaid[t] ? " checked" : "") + '></label></td>';
-      } else {
-        cells += '<td class="span-note">' + (t ? "위 " + esc(t) + " 줄에" : "—") + "</td>";
-        cells += '<td class="span-note">—</td>';
-      }
+      cells += costCells(t, first);
 
       cells += '<td class="col-btn">' + (real
         ? '<button class="remove-btn" data-idel="' + i + '">지우기</button>'
         : "") + "</td>";
       return "<tr>" + cells + "</tr>";
+  }
+
+  function costCells(t, first) {
+    if (first) {
+      return '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
+        esc(t) + ' 재료원가" data-team="' + esc(t) + '" data-cost="1" value="' +
+        num(state.costs[t]) + '"></td>' +
+        '<td><label class="check-cell"><input type="checkbox" aria-label="' +
+        esc(t) + ' 재료원가를 재정에서 지급함" data-team="' + esc(t) + '" data-costpaid="1"' +
+        (state.costPaid[t] ? " checked" : "") + '></label></td>';
+    }
+    return '<td class="span-note">' + (t ? "위 " + esc(t) + " 줄에" : "—") + "</td>" +
+      '<td class="span-note">—</td>';
+  }
+
+  // 조 이름을 치면 재료원가 칸이 그 줄로 옮겨가야 한다. 표를 통째로 다시 그리면
+  // 방금 치던 칸이 지워지므로, **그 두 칸만** 바꿔 끼운다. Tab 이 곧바로
+  // 조 > 항목 > 단가 > 재료원가 로 이어지려면 칸이 미리 있어야 한다.
+  function syncCostCells() {
+    var rows = document.getElementById("item-body").querySelectorAll("tr");
+    var seen = {};
+    for (var i = 0; i < rows.length; i++) {
+      var it = state.items[i] || { team: "" };
+      var t = String(it.team || "").trim();
+      var first = !!t && !seen[t];
+      if (t) seen[t] = true;
+
+      var cells = rows[i].cells;
+      if (cells.length < 5) continue;
+      if (cells[3].contains(document.activeElement) ||
+          cells[4].contains(document.activeElement)) continue;
+
+      var cur = cells[3].querySelector("[data-cost]");
+      if (!!cur === first && (!first || cur.dataset.team === t)) continue;
+
+      // 옛 다섯째 칸을 **먼저** 지운다. 나중에 지우면 방금 넣은 칸이 그 자리라
+      // 재정 지급 칸이 사라진다.
+      cells[4].remove();
+      cells[3].outerHTML = costCells(t, first);
+    }
   }
 
   // 마지막 줄이 채워지면 빈 줄 하나를 **덧붙인다**. 표 전체를 다시 그리지 않으므로
@@ -317,6 +347,11 @@
     var box = document.getElementById("item-body");
     var rows = box.querySelectorAll("tr");
     if (rows.length !== state.items.length) return;   // 이미 빈 줄이 있다
+    // 빈 줄이던 마지막 줄이 방금 진짜 줄이 되었으니 지우기 단추를 붙여 준다.
+    var cell = rows[rows.length - 1].querySelector(".col-btn");
+    if (cell && !cell.querySelector("button")) {
+      cell.innerHTML = '<button class="remove-btn" data-idel="' + (rows.length - 1) + '">지우기</button>';
+    }
     box.insertAdjacentHTML("beforeend",
       itemRow({ team: "", name: "", price: 0 }, state.items.length, false, false));
   }
@@ -341,12 +376,10 @@
     else it[el.dataset.fld] = el.value;
     saveState();
     growItems();
+    if (el.dataset.fld === "team") syncCostCells();
   });
 
-  document.getElementById("item-body").addEventListener("change", function (e) {
-    if (e.target.dataset.ii === undefined) return;
-    CBZ.afterTyping(redrawTeams);
-  });
+
 
   document.getElementById("item-body").addEventListener("click", function (e) {
     var btn = e.target.closest("[data-idel]");
@@ -361,11 +394,16 @@
     redrawTeams();
   });
 
-  // 표를 떠나면(다른 칸으로 가면) 조 목록이 확정되므로 그때 한 번 정리한다.
+  // 표 **안에서** 칸을 옮기는 동안에는 다시 그리지 않는다. Tab 은 다음 칸으로
+  // 포커스를 옮기면서 change 를 내는데, 그때 표를 다시 그리면 방금 포커스가 들어간
+  // 칸이 지워져 포커스가 엉뚱한 곳으로 튄다. 표를 아주 떠날 때 한 번만 정리한다.
   document.getElementById("item-body").addEventListener("focusout", function (e) {
-    if (!document.getElementById("item-body").contains(e.relatedTarget)) {
-      CBZ.afterTyping(redrawTeams);
-    }
+    var box = document.getElementById("item-body");
+    if (box.contains(e.relatedTarget)) return;
+    CBZ.afterTyping(function () {
+      if (box.contains(document.activeElement)) return;   // 그새 다시 들어왔다
+      redrawTeams();
+    });
   });
 
   // 어느 줄에도 없는 조 이름이 남아 있으면 합계에 유령이 낀다.
@@ -504,23 +542,9 @@
       ? { i: focus.dataset.ci, f: focus.dataset.cf, start: focus.selectionStart } : null;
 
     box.innerHTML = '<div class="cost-head"><span>항목</span><span>금액 (원)</span><span>재정 지급</span><span></span></div>' +
-      list.map(function (c, i) {
-        return '<div class="cost-row">' +
-          '<input type="text" placeholder="예: 교환권 인쇄비" aria-label="공통 비용 항목 ' + (i + 1) +
-            '" data-ci="' + i + '" data-cf="name" value="' + esc(c.name) + '">' +
-          '<input type="number" min="0" step="1" inputmode="numeric" aria-label="공통 비용 금액 ' + (i + 1) +
-            '" data-ci="' + i + '" data-cf="amount" value="' + num(c.amount) + '">' +
-          '<label class="check-cell"><input type="checkbox" aria-label="공통 비용 ' + (i + 1) +
-            ' 재정에서 지급함" data-ci="' + i + '" data-cf="paid"' + (c.paid ? " checked" : "") +
-            '><span class="check-text">재정 지급</span></label>' +
-          (i < state.commonCosts.length
-            ? '<button class="remove-btn" data-cdel="' + i + '">지우기</button>'
-            : "<span></span>") +
-          "</div>";
-      }).join("");
+      list.map(function (c, i) { return commonRow(c, i, i < state.commonCosts.length); }).join("");
 
-    document.getElementById("common-sum").textContent =
-      money(state.commonCosts.reduce(function (a, c) { return a + num(c.amount); }, 0));
+    renderCommonSum();
 
     if (keep) {
       var back = box.querySelector('[data-ci="' + keep.i + '"][data-cf="' + keep.f + '"]');
@@ -529,6 +553,19 @@
         if (back.type === "text" && keep.start != null) back.setSelectionRange(keep.start, keep.start);
       }
     }
+  }
+
+  function commonRow(c, i, real) {
+    return '<div class="cost-row">' +
+      '<input type="text" placeholder="예: 교환권 인쇄비" aria-label="공통 비용 항목 ' + (i + 1) +
+        '" data-ci="' + i + '" data-cf="name" value="' + esc(c.name) + '">' +
+      '<input type="number" min="0" step="1" inputmode="numeric" aria-label="공통 비용 금액 ' + (i + 1) +
+        '" data-ci="' + i + '" data-cf="amount" value="' + num(c.amount) + '">' +
+      '<label class="check-cell"><input type="checkbox" aria-label="공통 비용 ' + (i + 1) +
+        ' 재정에서 지급함" data-ci="' + i + '" data-cf="paid"' + (c.paid ? " checked" : "") +
+        '><span class="check-text">재정 지급</span></label>' +
+      (real ? '<button class="remove-btn" data-cdel="' + i + '">지우기</button>' : "<span></span>") +
+      "</div>";
   }
 
   document.getElementById("common-costs").addEventListener("input", function (e) {
@@ -540,20 +577,31 @@
     else if (el.dataset.cf === "paid") state.commonCosts[i].paid = el.checked;
     else state.commonCosts[i].amount = num(el.value);
     saveState();
-    // 항목 이름은 한글이라 치는 중에 다시 그리면 조합이 깨진다 (위 품목 표와 같은 이유).
-    if (el.dataset.cf === "name") growCommon();
-    else renderCommon();
+    // 치는 중에 다시 그리면 한글 조합이 깨지고, Tab 으로 옮겨간 칸도 지워진다.
+    // 합계만 고치고, 줄이 더 필요하면 덧붙이기만 한다 (위 품목 표와 같은 이유).
+    growCommon();
   });
 
-  document.getElementById("common-costs").addEventListener("change", function (e) {
-    if (e.target.dataset.cf === "name") CBZ.afterTyping(renderCommon);
+  document.getElementById("common-costs").addEventListener("focusout", function (e) {
+    var box = document.getElementById("common-costs");
+    if (box.contains(e.relatedTarget)) return;
+    CBZ.afterTyping(function () {
+      if (box.contains(document.activeElement)) return;
+      renderCommon();
+    });
   });
 
   function growCommon() {
     var box = document.getElementById("common-costs");
-    if (box.querySelectorAll(".cost-row").length !== state.commonCosts.length) return;
     renderCommonSum();
-    CBZ.afterTyping(renderCommon);
+    var rows = box.querySelectorAll(".cost-row");
+    if (rows.length !== state.commonCosts.length) return;
+    var last = rows[rows.length - 1].lastElementChild;
+    if (last && last.tagName !== "BUTTON") {
+      last.outerHTML = '<button class="remove-btn" data-cdel="' + (rows.length - 1) + '">지우기</button>';
+    }
+    box.insertAdjacentHTML("beforeend", commonRow(
+      { name: "", amount: 0, paid: false }, state.commonCosts.length, false));
   }
 
   function renderCommonSum() {
