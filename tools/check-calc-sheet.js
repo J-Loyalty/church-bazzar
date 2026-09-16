@@ -104,11 +104,16 @@ function evalFormula(f) {
 
 // ---------- 시나리오: 웹 도구와 같은 값 ----------
 const st = {
-  booths: [{ id: 'a', name: '1조 국수' }, { id: 'b', name: '2조 김밥' }],
-  floats: { a: { 1000: 50, 5000: 0, 10000: 0 }, b: { 1000: 30, 5000: 0, 10000: 0 } },
-  finals: { a: { 1000: 200, 5000: 0, 10000: 0 }, b: { 1000: 150, 5000: 0, 10000: 0 } },
-  cash: { a: 30000, b: 20000 }, presales: { a: 200000, b: 100000 },
-  costs: { a: 100000, b: 60000 }, costPaid: { a: true },
+  items: [
+    { id: 'i1', team: '1조', name: '국수', price: 4000 },
+    { id: 'i2', team: '2조', name: '닭꼬치', price: 3000 },
+    { id: 'i3', team: '2조', name: '소떡소떡', price: 2000 },
+    { id: 'i4', team: '2조', name: '만두', price: 3000 }
+  ],
+  floats: { '1조': { 1000: 50, 5000: 0, 10000: 0 }, '2조': { 1000: 30, 5000: 0, 10000: 0 } },
+  finals: { '1조': { 1000: 200, 5000: 0, 10000: 0 }, '2조': { 1000: 150, 5000: 0, 10000: 0 } },
+  cash: { '1조': 30000, '2조': 20000 }, presales: { '1조': 200000, '2조': 100000 },
+  costs: { '1조': 100000, '2조': 60000 }, costPaid: { '1조': true },
   commonCosts: [{ name: '교환권 인쇄비', amount: 350000, paid: true }, { name: '천막 대여료', amount: 50000, paid: false }],
   presale: 0, presaleVoucher: 100000,
   desk: { openTin: { 1000: 500, 5000: 0, 10000: 0 }, closeTin: { 1000: 100, 5000: 0, 10000: 0 }, openCash: 50000, closeCash: 250000, transfer: 120000 }
@@ -118,10 +123,12 @@ global.__build(st, '2026-10-09 17:00');
 const m = global.__map();
 
 const got = {
-  '조1 교환권 매출': V('J8'), '조2 교환권 매출': V('J9'),
-  '조1 매출 합계': V('M8'), '조2 매출 합계': V('M9'), '지급 합계': V('E' + m.boothSum),
+  '조1 교환권 매출': V('J' + m.boothTop), '조2 교환권 매출': V('J' + (m.boothTop + 1)),
+  '조1 매출 합계': V('M' + m.boothTop), '조2 매출 합계': V('M' + (m.boothTop + 1)),
+  '조1 재료원가(자동)': V('N' + m.boothTop), '조2 재료원가(자동)': V('N' + (m.boothTop + 1)),
+  '지급 합계': V('E' + m.boothSum),
   '현금 합계': V('K' + m.boothSum), '교환권매출 합계': V('J' + m.boothSum),
-  '행사전 구매 합계': V('L' + m.boothSum), '재료비 합계': V('N' + m.boothSum),
+  '행사전 구매 합계': V('L' + m.boothSum), '재료비 합계': V('D' + m.itemSum),
   '팔려 나간 교환권': V('B' + m.bSold), '받은 돈': V('B' + m.bReceived),
   '차이': V('B' + m.bDiff), '판정': V('A' + m.bVerdict),
   '미사용': V('B' + m.bUnused), '미사용 비율': V('B' + m.bUnusedPct),
@@ -131,7 +138,9 @@ const got = {
 };
 const want = {
   '조1 교환권 매출': 150000, '조2 교환권 매출': 120000,
-  '조1 매출 합계': 380000, '조2 매출 합계': 240000, '지급 합계': 80000,
+  '조1 매출 합계': 380000, '조2 매출 합계': 240000,
+  '조1 재료원가(자동)': 100000, '조2 재료원가(자동)': 60000,
+  '지급 합계': 80000,
   '현금 합계': 50000, '교환권매출 합계': 270000,
   '행사전 구매 합계': 300000, '재료비 합계': 160000,
   '팔려 나간 교환권': 420000, '받은 돈': 420000, '차이': 0,
@@ -154,11 +163,21 @@ console.log('빈 양식: 차이', V('B' + m.bDiff), '/ 판정', V('A' + m.bVerdi
 
 // 빈 양식에 손으로 값만 넣어도 되는지 (사이트 없이 쓰는 경우)
 cache.clear();
-grid.set('A8', { v: '1조 국수' }); grid.set('B8', { v: 50 }); grid.set('F8', { v: 200 });
-grid.set('K8', { v: 30000 }); grid.set('L8', { v: 200000 });
-grid.set('N8', { v: 100000 }); grid.set('O8', { v: true });
-grid.set('A9', { v: '2조 김밥' }); grid.set('B9', { v: 30 }); grid.set('F9', { v: 150 });
-grid.set('K9', { v: 20000 }); grid.set('L9', { v: 100000 }); grid.set('N9', { v: 60000 });
+// 품목 블록
+grid.set('A' + m.itemTop, { v: '1조' }); grid.set('B' + m.itemTop, { v: '국수' });
+grid.set('C' + m.itemTop, { v: 4000 }); grid.set('D' + m.itemTop, { v: 100000 });
+grid.set('E' + m.itemTop, { v: true });
+grid.set('A' + (m.itemTop + 1), { v: '2조' }); grid.set('B' + (m.itemTop + 1), { v: '닭꼬치' });
+grid.set('C' + (m.itemTop + 1), { v: 3000 }); grid.set('D' + (m.itemTop + 1), { v: 60000 });
+grid.set('A' + (m.itemTop + 2), { v: '2조' }); grid.set('B' + (m.itemTop + 2), { v: '만두' });
+grid.set('C' + (m.itemTop + 2), { v: 3000 });
+// 조별 블록
+grid.set('A' + m.boothTop, { v: '1조' }); grid.set('B' + m.boothTop, { v: 50 });
+grid.set('F' + m.boothTop, { v: 200 });
+grid.set('K' + m.boothTop, { v: 30000 }); grid.set('L' + m.boothTop, { v: 200000 });
+grid.set('A' + (m.boothTop + 1), { v: '2조' }); grid.set('B' + (m.boothTop + 1), { v: 30 });
+grid.set('F' + (m.boothTop + 1), { v: 150 });
+grid.set('K' + (m.boothTop + 1), { v: 20000 }); grid.set('L' + (m.boothTop + 1), { v: 100000 });
 grid.set('B' + m.openTin, { v: 500 }); grid.set('B' + m.closeTin, { v: 100 });
 grid.set('B' + m.openCash, { v: 50000 }); grid.set('B' + m.closeCash, { v: 250000 });
 grid.set('B' + m.transfer, { v: 120000 }); grid.set('B' + m.preVoucher, { v: 100000 });

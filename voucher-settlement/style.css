@@ -104,6 +104,21 @@ h3 {
   border-top: 2px solid var(--color-hairline-strong);
 }
 
+/* 조 칸 아래에 그 조가 파는 것을 작게 붙인다. 숫자만 보고 어느 조인지 헷갈리지 않게. */
+.row-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-mute);
+}
+
+/* 조 단위 값은 그 조 첫 줄에만 받는다. 나머지 줄은 빈칸이 아니라 이유를 적는다. */
+.span-note {
+  font-size: 14px;
+  color: var(--color-mute);
+}
+
 .remove-btn {
   background: transparent;
   border: none;
@@ -297,4 +312,5 @@ h3 {
   }
   .cost-row .remove-btn { justify-self: start; }
   .cost-row .check-cell { justify-self: start; padding-left: 0; }
+  .row-sub, .span-note { font-size: 13px; }
 }

@@ -39,7 +39,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## voucher-settlement 아키텍처
 - 화면은 실제 순서를 따라 네 단계다 — **① 개장 전 / ② 마감 / ③ 결과 / ④ 저장·백업.** 탭이지만 내용을 숨기는 필터가 아니라 시간 순서라, "문서 작성 원칙" 8번의 예외에 해당한다.
-- 상태는 `app.js` 최상단의 단일 `state` 객체(`booths`, `floats`, `finals`, `cash`, `costs`, `costPaid`, `commonCosts`, `presale`, `presaleVoucher`, `desk`)로 관리하며, `localStorage` 키 `cbz_voucher_v1`에 저장된다. 권종은 `DENOMS = [1000, 5000, 10000]`으로 고정.
+- 상태는 `app.js` 최상단의 단일 `state` 객체(`items`, `floats`, `finals`, `cash`, `costs`, `costPaid`, `presales`, `commonCosts`, `presale`, `presaleVoucher`, `desk`)로 관리하며, `localStorage` 키 `cbz_voucher_v1`에 저장된다. 권종은 `DENOMS = [1000, 5000, 10000]`으로 고정.
+- **줄은 품목 단위이고 돈은 조 단위다.** `items`는 `{id, team, name, price}`의 배열로 **한 줄이 한 품목**이며, 4조처럼 한 조가 세 품목을 맡으면 같은 `team`이 세 줄에 되풀이된다. 나머지 맵은 모두 **조 이름을 열쇠로** 쓴다 — 교환권함이 조마다 하나라 정산 단위가 조이기 때문이다.
+  - 조 목록은 `teams()`가 `items`에서 뽑는다. 별도 목록을 두지 않는다 — 두 곳이 어긋날 자리를 만들지 않기 위함이다.
+  - **재료원가(`costs`)와 `costPaid`는 조 단위**라 등록 표에서 **그 조가 처음 나오는 줄에만** 입력칸을 낸다. 줄마다 받으면 세 배로 잡힌다. 시트에서도 같은 규칙이며, 조별 블록의 「재료원가 (자동)」 열은 `SUMIF`로 품목 블록에서 끌어온다
+  - 조 이름을 바꾸면 그 줄만 다른 조로 갈라진다. 이름이 열쇠라 피할 수 없으므로 화면에 경고를 띄운다. 어느 줄에도 없는 이름이 맵에 남으면 `dropOrphans()`가 지운다
+  - **예전 백업(`booths: [{id, name}]`에 id를 열쇠로 쓰던 구조)도 그대로 열려야 한다** — `normalize()`가 조 이름을 열쇠로 옮긴다
 - **교환소는 아침·저녁에 통과 금고를 한 번씩 센다** — `desk.openTin`/`closeTin`(권종별 장수), `desk.openCash`/`closeCash`, `desk.transfer`. 재환전은 **입력받지 않는다**: 교환권이 통으로 돌아오고 현금이 금고에서 나가므로 두 차액에서 저절로 상쇄된다. 따로 빼면 이중 차감이다.
 - 빈 상태는 `emptyState()` 한 곳에만 정의하고, 저장된 데이터는 `normalize()`로 읽는다. **예전 백업(`desk.issued`/`cash`/`refund` 구조)도 그대로 열려야 한다** — 옛 값은 아침을 0으로 두고 저녁 쪽으로 옮겨 계산 결과가 같아지게 맞춘다.
 - 계산은 `compute()` 한 곳에 모아 두고 화면·CSV·시트 전송이 모두 그 결과를 쓴다. 화면 그리기와 섞지 말 것.

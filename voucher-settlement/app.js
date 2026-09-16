@@ -9,14 +9,16 @@
   // 교환소는 아침과 저녁에 통과 금고를 한 번씩 센다. 그 차이가 하루치이므로
   // 재환전은 따로 적지 않는다 -- 교환권이 통으로 돌아오고 현금이 금고에서
   // 나가므로 양쪽에서 저절로 상쇄된다.
+  // 줄은 품목 단위(조 + 항목 + 단가)이고, 돈은 조 단위다. 4조처럼 한 조가 세 품목을
+  // 맡아도 교환권함은 조마다 하나이므로, 조별 값은 그 조의 첫 줄에서만 받는다.
   function emptyState() {
     return {
-      booths: [],
-      floats: {},   // 조별 아침 지급 (권종별 장수)
+      items: [],    // [{id, team, name, price}] -- 한 줄이 한 품목
+      floats: {},   // 조별 아침 지급 (권종별 장수). 열쇠는 조 이름
       finals: {},   // 조별 마감 제출 (권종별 장수)
       cash: {},     // 조별 현금 매출
-      costs: {},    // 조별 재료비
-      costPaid: {}, // 그 재료비를 교회 재정에서 이미 냈는가
+      costs: {},    // 조별 재료원가 (그 조가 쓴 재료비 총액)
+      costPaid: {}, // 그 재료원가를 교회 재정에서 이미 냈는가
       commonCosts: [],  // 조에 붙지 않는 지출 [{name, amount, paid}]
       presales: {},      // 조별 행사전 구매 매출
       presale: 0,        // 어느 조에도 붙지 않는 행사전 구매
@@ -37,18 +39,48 @@
   function normalize(parsed) {
     var out = emptyState();
     var p = parsed || {};
-    out.booths = Array.isArray(p.booths) ? p.booths : [];
-    out.floats = p.floats || {};
-    out.finals = p.finals || {};
-    out.cash = p.cash || {};
-    out.costs = p.costs || {};
-    out.costPaid = p.costPaid || {};
+
+    if (Array.isArray(p.items)) {
+      out.items = p.items.map(function (it) {
+        return {
+          id: it && it.id || uid(),
+          team: String(it && it.team || ""),
+          name: String(it && it.name || ""),
+          price: num(it && it.price)
+        };
+      });
+      out.floats = p.floats || {};
+      out.finals = p.finals || {};
+      out.cash = p.cash || {};
+      out.costs = p.costs || {};
+      out.costPaid = p.costPaid || {};
+      out.presales = p.presales || {};
+    } else {
+      // 예전 백업: 줄이 조 하나였고 모든 값이 조의 id 를 열쇠로 쓰였다.
+      // 조 이름을 그대로 열쇠로 옮기면 숫자가 그대로 따라온다.
+      var booths = Array.isArray(p.booths) ? p.booths : [];
+      var move = function (src) {
+        var o = {};
+        booths.forEach(function (b) {
+          if (src && src[b.id] !== undefined) o[String(b.name)] = src[b.id];
+        });
+        return o;
+      };
+      out.items = booths.map(function (b) {
+        return { id: b.id || uid(), team: String(b.name || ""), name: "", price: 0 };
+      });
+      out.floats = move(p.floats);
+      out.finals = move(p.finals);
+      out.cash = move(p.cash);
+      out.costs = move(p.costs);
+      out.costPaid = move(p.costPaid);
+      out.presales = move(p.presales);
+    }
     out.commonCosts = Array.isArray(p.commonCosts)
       ? p.commonCosts.map(function (c) {
           return { name: String(c && c.name || ""), amount: num(c && c.amount), paid: !!(c && c.paid) };
         })
       : [];
-    out.presales = p.presales || {};
     out.presale = num(p.presale);
     out.presaleVoucher = num(p.presaleVoucher);
 
@@ -101,6 +133,24 @@
     return DENOMS.reduce(function (sum, d) { return sum + num(entry && entry[d]) * d; }, 0);
   }
 
+  // 줄에 적힌 조 이름에서 조 목록을 뽑는다. 같은 조가 여러 줄이면 한 번만.
+  function teams() {
+    var seen = {}, out = [];
+    state.items.forEach(function (it) {
+      var t = String(it.team || "").trim();
+      if (!t || seen[t]) return;
+      seen[t] = true;
+      out.push(t);
+    });
+    return out;
+  }
+
+  function itemsOf(team) {
+    return state.items.filter(function (it) {
+      return String(it.team || "").trim() === team && String(it.name || "").trim();
+    });
+  }
+
   function ensure(map, id) {
     if (!map[id]) map[id] = { 1000: 0, 5000: 0, 10000: 0 };
     return map[id];
@@ -110,21 +160,24 @@
   // 화면 그리기와 떼어 두면 값이 어디서 나온 것인지 한눈에 보이고,
   // 시트로 보낼 때도 같은 함수를 쓸 수 있다.
   function compute() {
-    var rows = state.booths.map(function (b) {
-      var floatVal = denomTotal(state.floats[b.id]);
-      var finalVal = denomTotal(state.finals[b.id]);
-      var cashVal = num(state.cash[b.id]);
-      var costVal = num(state.costs[b.id]);
-      var preVal = num(state.presales[b.id]);
+    var rows = teams().map(function (t) {
+      var floatVal = denomTotal(state.floats[t]);
+      var finalVal = denomTotal(state.finals[t]);
+      var cashVal = num(state.cash[t]);
+      var costVal = num(state.costs[t]);
+      var preVal = num(state.presales[t]);
       return {
-        id: b.id, name: b.name,
+        id: t, name: t,
+        items: itemsOf(t).map(function (it) {
+          return { name: String(it.name).trim(), price: num(it.price) };
+        }),
         float: floatVal, final: finalVal,
         voucher: finalVal - floatVal,
         cash: cashVal,
         presale: preVal,
         total: finalVal - floatVal + cashVal + preVal,
         cost: costVal,
-        costPaid: !!state.costPaid[b.id]
+        costPaid: !!state.costPaid[t]
       };
     });
 
@@ -196,78 +249,143 @@
     });
   }
 
-  // ---------- 조 ----------
-  document.getElementById("booth-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var input = document.getElementById("booth-name");
-    var name = input.value.trim();
-    if (!name) return;
-    state.booths.push({ id: uid(), name: name });
-    input.value = "";
-    saveState();
-    renderAll();
-    input.focus();
-  });
+  // ---------- 품목 등록 ----------
+  // 한 줄이 한 품목이다. 조 이름은 여러 줄에 되풀이해 적고, 조 단위인 재료원가는
+  // 그 조가 처음 나오는 줄에서만 받는다 -- 세 번 적게 하면 세 배로 잡힌다.
+  // 마지막 줄을 채우면 다음 줄이 저절로 생긴다 (메뉴판 만들기와 같은 방식).
+  function renderItems() {
+    var box = document.getElementById("item-body");
+    var list = state.items.slice();
+    var last = list[list.length - 1];
+    if (!list.length || String(last.team || "").trim() || String(last.name || "").trim() ||
+        num(last.price)) {
+      list.push({ id: "", team: "", name: "", price: 0 });
+    }
 
-  function removeBooth(id) {
-    var b = state.booths.filter(function (x) { return x.id === id; })[0];
-    if (!confirm("「" + (b ? b.name : "") + "」을 지울까요? 그 조에 적은 숫자도 함께 지워집니다.")) return;
-    state.booths = state.booths.filter(function (x) { return x.id !== id; });
-    delete state.cash[id];
-    delete state.costs[id];
-    delete state.presales[id];
-    delete state.costPaid[id];
-    delete state.floats[id];
-    delete state.finals[id];
-    saveState();
-    renderAll();
+    var focus = document.activeElement;
+    var keep = focus && focus.dataset && focus.dataset.ii !== undefined
+      ? { i: focus.dataset.ii, f: focus.dataset.fld, start: focus.selectionStart } : null;
+
+    var seen = {};
+    box.innerHTML = list.map(function (it, i) {
+      var t = String(it.team || "").trim();
+      var first = t && !seen[t];
+      if (t) seen[t] = true;
+      var real = i < state.items.length;
+
+      var cells =
+        '<td><input type="text" placeholder="예: 4조" aria-label="' + (i + 1) +
+          '번째 줄 조" data-ii="' + i + '" data-fld="team" value="' + esc(it.team) + '"></td>' +
+        '<td><input type="text" placeholder="예: 닭꼬치" aria-label="' + (i + 1) +
+          '번째 줄 항목" data-ii="' + i + '" data-fld="name" value="' + esc(it.name) + '"></td>' +
+        '<td><input type="number" min="0" step="100" inputmode="numeric" aria-label="' + (i + 1) +
+          '번째 줄 단가" data-ii="' + i + '" data-fld="price" value="' + num(it.price) + '"></td>';
+
+      if (first) {
+        cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
+          esc(t) + ' 재료원가" data-team="' + esc(t) + '" data-cost="1" value="' +
+          num(state.costs[t]) + '"></td>';
+        cells += '<td><label class="check-cell"><input type="checkbox" aria-label="' +
+          esc(t) + ' 재료원가를 재정에서 지급함" data-team="' + esc(t) + '" data-costpaid="1"' +
+          (state.costPaid[t] ? " checked" : "") + '></label></td>';
+      } else {
+        cells += '<td class="span-note">' + (t ? "위 " + esc(t) + " 줄에" : "—") + "</td>";
+        cells += '<td class="span-note">—</td>';
+      }
+
+      cells += '<td class="col-btn">' + (real
+        ? '<button class="remove-btn" data-idel="' + i + '">지우기</button>'
+        : "") + "</td>";
+      return "<tr>" + cells + "</tr>";
+    }).join("");
+
+    if (keep) {
+      var back = box.querySelector('[data-ii="' + keep.i + '"][data-fld="' + keep.f + '"]');
+      if (back) {
+        back.focus();
+        if (back.type === "text" && keep.start != null) back.setSelectionRange(keep.start, keep.start);
+      }
+    }
   }
 
-  function renderBooths() {
-    var tbody = document.getElementById("booth-list");
-    if (!state.booths.length) {
-      tbody.innerHTML = '<tr><td colspan="2" class="hint">아직 등록된 조가 없습니다. 위에 조 이름을 적고 「조 추가」를 누르세요.</td></tr>';
+  document.getElementById("item-body").addEventListener("input", function (e) {
+    var el = e.target;
+    if (el.dataset.team !== undefined) {
+      var t = el.dataset.team;
+      if (el.dataset.costpaid) state.costPaid[t] = el.checked;
+      else state.costs[t] = num(el.value);
+      saveState();
       return;
     }
-    tbody.innerHTML = state.booths.map(function (b) {
-      return "<tr><td>" + esc(b.name) + '</td><td class="col-btn">' +
-        '<button class="remove-btn" data-id="' + b.id + '">지우기</button></td></tr>';
-    }).join("");
-    tbody.querySelectorAll(".remove-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () { removeBooth(btn.dataset.id); });
-    });
+    if (el.dataset.ii === undefined) return;
+    var i = Number(el.dataset.ii);
+    while (state.items.length <= i) state.items.push({ id: uid(), team: "", name: "", price: 0 });
+    var it = state.items[i];
+    if (el.dataset.fld === "price") it.price = num(el.value);
+    else it[el.dataset.fld] = el.value;
+    saveState();
+    redrawTeams();
+  });
+
+  document.getElementById("item-body").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-idel]");
+    if (!btn) return;
+    var i = Number(btn.dataset.idel);
+    var it = state.items[i];
+    var label = (String(it.team || "").trim() + " " + String(it.name || "").trim()).trim();
+    if (!confirm("「" + (label || "빈 줄") + "」 줄을 지울까요?")) return;
+    state.items.splice(i, 1);
+    dropOrphans();
+    saveState();
+    redrawTeams();
+  });
+
+  // 어느 줄에도 없는 조 이름이 남아 있으면 합계에 유령이 낀다.
+  function dropOrphans() {
+    var live = {};
+    teams().forEach(function (t) { live[t] = true; });
+    [state.floats, state.finals, state.cash, state.costs, state.costPaid, state.presales]
+      .forEach(function (map) {
+        Object.keys(map).forEach(function (k) { if (!live[k]) delete map[k]; });
+      });
+  }
+
+  // 조 목록이 바뀌면 조를 쓰는 표가 모두 따라 바뀌어야 한다.
+  function redrawTeams() {
+    renderItems();
+    renderDenomTable("float-body", state.floats);
+    renderDenomTable("final-body", state.finals, true);
+    renderFloatSum();
+    renderReport();
   }
 
   // ---------- 조별 권종 표 ----------
   function renderDenomTable(bodyId, map, withCash) {
     var tbody = document.getElementById(bodyId);
-    if (!state.booths.length) {
-      tbody.innerHTML = '<tr><td colspan="' + (withCash ? 9 : 5) +
-        '" class="hint">먼저 [1 개장 전]에서 조를 등록하세요.</td></tr>';
+    var list = teams();
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="' + (withCash ? 7 : 5) +
+        '" class="hint">먼저 [1 개장 전]에서 조와 항목을 등록하세요.</td></tr>';
       return;
     }
-    tbody.innerHTML = state.booths.map(function (b) {
-      var entry = ensure(map, b.id);
-      var cells = "<td>" + esc(b.name) + "</td>";
+    tbody.innerHTML = list.map(function (t) {
+      var entry = ensure(map, t);
+      var names = itemsOf(t).map(function (it) { return it.name; }).join(" · ");
+      var cells = '<td>' + esc(t) +
+        (names ? '<span class="row-sub">' + esc(names) + '</span>' : "") + "</td>";
       DENOMS.forEach(function (d) {
         cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
-          esc(b.name) + " " + d.toLocaleString("ko-KR") + '원 장수" data-booth="' + b.id +
+          esc(t) + " " + d.toLocaleString("ko-KR") + '원 장수" data-booth="' + esc(t) +
           '" data-denom="' + d + '" value="' + (entry[d] || 0) + '"></td>';
       });
       cells += '<td class="row-total">' + money(denomTotal(entry)) + "</td>";
       if (withCash) {
         cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
-          esc(b.name) + ' 현금 매출" data-booth="' + b.id + '" data-cash="1" value="' +
-          num(state.cash[b.id]) + '"></td>';
+          esc(t) + ' 현금 매출" data-booth="' + esc(t) + '" data-cash="1" value="' +
+          num(state.cash[t]) + '"></td>';
         cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
-          esc(b.name) + ' 행사전 구매 매출" data-booth="' + b.id + '" data-presale="1" value="' +
-          num(state.presales[b.id]) + '"></td>';
-        cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
-          esc(b.name) + ' 재료비" data-booth="' + b.id + '" data-cost="1" value="' +
-          num(state.costs[b.id]) + '"></td>';
-        cells += '<td><label class="check-cell"><input type="checkbox" aria-label="' +
-          esc(b.name) + ' 재료비를 재정에서 지급함" data-booth="' + b.id + '" data-costpaid="1"' +
-          (state.costPaid[b.id] ? " checked" : "") + '></label></td>';
+          esc(t) + ' 행사전 구매 매출" data-booth="' + esc(t) + '" data-presale="1" value="' +
+          num(state.presales[t]) + '"></td>';
       }
       return "<tr>" + cells + "</tr>";
     }).join("");
@@ -282,10 +400,6 @@
         state.cash[id] = num(input.value);
       } else if (input.dataset.presale) {
         state.presales[id] = num(input.value);
-      } else if (input.dataset.cost) {
-        state.costs[id] = num(input.value);
-      } else if (input.dataset.costpaid) {
-        state.costPaid[id] = input.checked;
       } else {
         ensure(map, id)[input.dataset.denom] = num(input.value);
         var row = input.closest("tr");
@@ -300,7 +414,7 @@
   wireDenomTable("final-body", state.finals);
 
   function renderFloatSum() {
-    var sum = state.booths.reduce(function (a, b) { return a + denomTotal(state.floats[b.id]); }, 0);
+    var sum = teams().reduce(function (a, t) { return a + denomTotal(state.floats[t]); }, 0);
     document.getElementById("float-sum").textContent = money(sum);
   }
 
@@ -417,7 +531,12 @@
     var body = document.getElementById("report-booth-body");
     body.innerHTML = c.rows.length
       ? c.rows.map(function (r) {
-          return "<tr><td>" + esc(r.name) + "</td><td>" + money(r.float) + "</td><td>" +
+          var names = r.items.map(function (x) {
+            return x.name + (x.price ? " " + money(x.price) : "");
+          }).join(" · ");
+          return "<tr><td>" + esc(r.name) +
+            (names ? '<span class="row-sub">' + esc(names) + "</span>" : "") +
+            "</td><td>" + money(r.float) + "</td><td>" +
             money(r.final) + "</td><td>" + money(r.voucher) + "</td><td>" +
             money(r.cash) + "</td><td>" + money(r.presale) + "</td><td>" +
             money(r.total) + "</td><td>" + money(r.cost) + "</td><td>" +
@@ -698,7 +817,7 @@
 
   // ---------- 그리기 ----------
   function renderAll() {
-    renderBooths();
+    renderItems();
     renderDenomTable("float-body", state.floats);
     renderDenomTable("final-body", state.finals, true);
     renderFloatSum();
