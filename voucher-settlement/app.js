@@ -352,7 +352,7 @@
     var deskNet = (Number(state.desk.cash) || 0) + (Number(state.desk.transfer) || 0) - (Number(state.desk.refundCash) || 0);
     var presaleVal = Number(state.presale) || 0;
     rows.push([]);
-    rows.push(["교환권 부스 순 수령액", deskNet]);
+    rows.push(["교환소 순 수령액", deskNet]);
     rows.push(["부스 현금 매출 합계", cashSum]);
     rows.push(["사전 구매 매출", presaleVal]);
     rows.push(["최종 수익금", deskNet + cashSum + presaleVal]);
