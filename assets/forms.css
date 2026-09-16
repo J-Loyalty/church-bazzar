@@ -64,13 +64,24 @@ main { max-width: var(--page-width); margin: 0 auto; padding: 24px 16px 100px; }
 }
 
 .sheet-menu .booth-name { font-size: 26px; padding-bottom: 10px; margin: 0 0 16px; }
-.sheet-menu .menu-list { margin: auto; }
-.sheet-menu .menu-item { font-size: 17px; font-weight: 500; margin: 6px 0; }
+/* 메뉴 줄은 이름(왼쪽) · 점선 · 값(오른쪽). 점선 칸이 남는 폭을 다 먹어
+   두 끝으로 밀어낸다. align-items: baseline 이라 빈 점선 칸의 아래 테두리가
+   글자 밑줄과 같은 높이에 놓인다. */
+.sheet-menu .menu-list { margin: auto; width: 100%; }
+.sheet-menu .menu-item {
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: 20px; font-weight: 500; margin: 4px 0; text-align: left;
+}
+.sheet-menu .menu-item .name { flex: 0 1 auto; }
+.sheet-menu .menu-item .dots {
+  flex: 1 1 auto; min-width: 12px;
+  border-bottom: 2px dotted #000;
+}
 .sheet-menu[data-many="1"] .booth-name { font-size: 20px; padding-bottom: 7px; margin-bottom: 10px; }
-.sheet-menu[data-many="1"] .menu-item { font-size: 13px; margin: 3px 0; }
+.sheet-menu[data-many="1"] .menu-item { font-size: 15px; margin: 2px 0; }
 .sheet-menu[data-many="2"] .booth-name { font-size: 16px; padding-bottom: 5px; margin-bottom: 7px; }
-.sheet-menu[data-many="2"] .menu-item { font-size: 10px; margin: 2px 0; }
-.sheet-menu .menu-item .price { font-weight: 800; margin-left: 10px; }
+.sheet-menu[data-many="2"] .menu-item { font-size: 11px; margin: 1px 0; }
+.sheet-menu .menu-item .price { flex: 0 0 auto; font-weight: 800; }
 .sheet-menu .empty { color: #888; font-size: 15px; }
 
 .sheet-env .booth-name { font-size: 15px; padding: 14px 0 8px; margin: 0 0 14px; }
@@ -78,6 +89,11 @@ main { max-width: var(--page-width); margin: 0 auto; padding: 24px 16px 100px; }
 .sheet-env .env-group + .env-group {
   margin-top: 10px; padding-top: 10px; border-top: 1px dashed #999;
 }
+.sheet-env .env-title {
+  font-size: 12px; font-weight: 800; margin: 0 0 2px;
+  padding-bottom: 3px; border-bottom: 1px solid #000; text-align: left;
+}
+.sheet-env .env-note { font-size: 9px; color: #444; margin: 0 0 4px; text-align: left; }
 .sheet-env .env-line {
   display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
   font-size: 13px; margin: 7px 0; width: 100%;
@@ -141,21 +157,27 @@ main { max-width: var(--page-width); margin: 0 auto; padding: 24px 16px 100px; }
      frame as soon as a booth had four items. */
   .sheet { line-height: 1.2; }
   .sheet-menu .booth-name { font-size: 52pt; line-height: 1.15; padding-bottom: 6mm; margin: 0 0 7mm; }
-  .sheet-menu .menu-item { font-size: 30pt; font-weight: 500; margin: 4.5mm 0; }
-  .sheet-menu .menu-item .price { font-weight: 800; margin-left: 10pt; }
+  .sheet-menu .menu-item { font-size: 36pt; font-weight: 500; margin: 3mm 0; gap: 4mm; }
+  .sheet-menu .menu-item .dots { border-bottom-width: 3pt; }
+  .sheet-menu .menu-item .price { font-weight: 800; }
   .sheet-menu .empty { display: none; }
 
   /* Past seven items the fixed frame runs out, so the type steps down rather
      than spilling over the border. */
   .sheet-menu[data-many="1"] .booth-name { font-size: 38pt; padding-bottom: 4mm; margin: 0 0 4mm; }
-  .sheet-menu[data-many="1"] .menu-item { font-size: 21pt; margin: 2.4mm 0; }
+  .sheet-menu[data-many="1"] .menu-item { font-size: 24pt; margin: 1.8mm 0; }
   .sheet-menu[data-many="2"] .booth-name { font-size: 30pt; padding-bottom: 3mm; margin: 0 0 3mm; }
-  .sheet-menu[data-many="2"] .menu-item { font-size: 16pt; margin: 1.8mm 0; }
+  .sheet-menu[data-many="2"] .menu-item { font-size: 18pt; margin: 1.2mm 0; }
 
   .sheet-env .booth-name { font-size: 24pt; line-height: 1.2; padding-bottom: 6mm; margin: 0 0 12mm; }
   .sheet-env .env-group + .env-group {
     margin-top: 8mm; padding-top: 8mm; border-top: 1pt dashed #777;
   }
-  .sheet-env .env-line { font-size: 19pt; margin: 9mm 0; gap: 14pt; }
+  .sheet-env .env-title {
+    font-size: 15pt; font-weight: 800; margin: 0 0 1.5mm;
+    padding-bottom: 2mm; border-bottom: 1.5pt solid #000; text-align: left;
+  }
+  .sheet-env .env-note { font-size: 11pt; color: #333; margin: 0 0 3mm; text-align: left; }
+  .sheet-env .env-line { font-size: 18pt; margin: 6.5mm 0; gap: 14pt; }
   .sheet-env .env-blank { flex: 0 1 34mm; height: 22pt; border-bottom: 1.5pt solid #000; }
 }

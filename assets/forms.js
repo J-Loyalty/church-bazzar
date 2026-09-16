@@ -5,9 +5,18 @@
 
   // 마감 제출용. 권종 세 줄과, 성격이 다른 두 줄(초기 지급·현금 매출)을 선으로
   // 갈라 적는다. 현금 매출은 올해 일부 현금 결제가 가능해지면서 필요해진 칸이다.
+  // 봉투 양식은 두 덩어리다. 위는 마감에 세어 적는 것, 아래는 아침에 받은 것.
+  // 둘을 섞으면 매출에서 초기 지급분을 뺄 수 없어 정산이 깨진다.
   var ENV_GROUPS = [
-    ["1,000원 교환권", "5,000원 교환권", "10,000원 교환권"],
-    ["초기지급", "현금 매출"]
+    {
+      title: "정산 자료",
+      note: "판매가 종료된 후 개수하여 기록해주세요",
+      lines: ["1,000원 교환권", "5,000원 교환권", "10,000원 교환권", "현금 매출"]
+    },
+    {
+      title: "초기지급 자료",
+      lines: ["1,000원권", "5,000원권"]
+    }
   ];
 
   var SHEET_FOOT = "2026년 이웃돕기 사랑의 바자회 · 2026. 10. 9. (금)";
@@ -150,9 +159,12 @@
       var items = b.items.filter(function (it) { return String(it.name).trim(); });
       var body = items.length
         ? '<div class="menu-list">' + items.map(function (it) {
+            // 이름은 왼쪽, 값은 오른쪽, 그 사이를 점선이 채운다. 멀리서 볼 때
+            // 이름과 값이 헷갈리지 않으려면 둘을 양끝으로 밀어야 한다.
             var price = won(it.price);
-            return '<p class="menu-item">' + esc(it.name) +
-              (price ? '<span class="price">' + price + "</span>" : "") + "</p>";
+            return '<p class="menu-item"><span class="name">' + esc(it.name) + "</span>" +
+              '<span class="dots"></span>' +
+              '<span class="price">' + (price || "") + "</span></p>";
           }).join("") + "</div>"
         : '<p class="empty">품목을 적으면 여기에 나옵니다</p>';
       // The frame is a fixed size, so a long list steps the type down rather than
@@ -165,11 +177,13 @@
     }).join("");
 
     env.innerHTML = list.map(function (b) {
-      var groups = ENV_GROUPS.map(function (labels) {
-        return '<div class="env-group">' + labels.map(function (label) {
-          return '<div class="env-line"><span class="env-label">' + esc(label) +
-            '</span><span class="env-blank"></span></div>';
-        }).join("") + "</div>";
+      var groups = ENV_GROUPS.map(function (g) {
+        return '<div class="env-group"><p class="env-title">' + esc(g.title) + "</p>" +
+          (g.note ? '<p class="env-note">' + esc(g.note) + "</p>" : "") +
+          g.lines.map(function (label) {
+            return '<div class="env-line"><span class="env-label">' + esc(label) +
+              '</span><span class="env-blank"></span></div>';
+          }).join("") + "</div>";
       }).join("");
       return '<div class="sheet sheet-env"><p class="booth-name">' + esc(b.name) + "</p>" + groups +
         '<p class="sheet-foot">마감 제출용 · ' + esc(SHEET_FOOT) + "</p></div>";
