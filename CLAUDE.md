@@ -15,7 +15,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `가치_기준.md` — 문서 작성/정책 결정 시 점검 기준 (아래 "문서 작성 원칙" 4번 참고)
 - `index.html` (허브) / `doc.html` (마크다운 뷰어) / `print.html` (인쇄용 묶음) — 읽는 순서가 세 곳에 중복 정의되어 있다: 기획안의 "읽는 순서" 절, `index.html`의 "문서 읽는 순서" 목록, `assets/nav.js`의 `NAV` 배열. 문서를 추가·삭제·재배치하면 **세 곳을 모두** 맞춰야 한다.
 - `design/` — 화면 디자인의 근거가 되는 명세. [design/DESIGN.md](design/DESIGN.md)가 본문(ElevenLabs 분석: 색·타이포·간격·컴포넌트 규칙)이고 [design/README.md](design/README.md)는 출처 링크다. **이 명세는 참고 자료이지 이 저장소의 규칙이 아니다** — 아래 "문서 작성 원칙" 5·6번(글자 크기, 색 대비, 워드랩)과 부딪히면 5·6번이 이긴다. 실제로 어긋난 곳(본문 16px→17px, `muted` 색 대비 미달, 입력칸 테두리 대비 미달)은 `assets/tokens.css` 첫머리 주석에 이유와 함께 적어두었다.
-- `assets/tokens.css` — 모든 화면이 함께 쓰는 디자인 토큰(색·글꼴·모서리)과 **공용 컴포넌트**. 상단 바(`.topbar`), 카드(`.card`), 입력칸(`input`·`select`·`textarea`), 포커스 테두리, 버튼, 표(`.data-table`), 배너(`.banner`)가 여기 있다. 새 화면을 만들 때 이것들을 페이지 안에 다시 정의하지 말고 그대로 쓴다 — 페이지마다 조금씩 다르게 베껴 쓰면 같은 버튼이 화면마다 달라진다.
+- `assets/` — **모든 CSS와 JS는 여기 있다.** HTML 파일 안에 `<style>`이나 `<script>`를 직접 쓰지 않는다.
+  - `tokens.css` — 모든 화면이 함께 쓰는 디자인 토큰(색·글꼴·모서리)과 **공용 컴포넌트**. 상단 바(`.topbar`), 카드(`.card`), 제목(`.page-head`), 입력칸(`input`·`select`·`textarea`), 포커스 테두리, 버튼, 표(`.data-table`), 배너(`.banner`)가 여기 있다. 새 화면을 만들 때 이것들을 페이지 안에 다시 정의하지 말고 그대로 쓴다 — 페이지마다 조금씩 다르게 베껴 쓰면 같은 버튼이 화면마다 달라진다. 본문 폭은 `--page-width`로 페이지마다 정한다.
+  - `shared.js` — 여러 화면이 함께 쓰는 잔 도구 (`CBZ.esc`, `CBZ.load`/`save`, `CBZ.loadText`/`saveText`). `localStorage`는 사생활 보호 모드에서 막힐 수 있어 읽기·쓰기를 모두 이 함수로 감싼다. **다른 모든 스크립트보다 먼저 읽어야 한다** — `markdown.js`가 `CBZ.esc`를 쓴다.
+  - `index.css` / `doc.css`·`doc.js` / `print.css`·`print.js` / `answers.css`·`answers.js` / `forms.css`·`forms.js` — 각 화면에만 해당하는 것. 두 화면 이상이 같은 것을 쓰게 되면 `tokens.css`나 `shared.js`로 옮긴다.
 - `assets/nav.js` — 읽는 순서(`NAV`)와 평탄화된 `SEQUENCE`. `doc.html`(사이드바·이전/다음)과 `print.html`(차례·본문 순서)이 함께 쓴다.
 - `assets/markdown.js` — 최소 마크다운 렌더러(`MD.render`, `MD.escapeHtml`). `doc.html`과 `print.html`이 함께 쓴다. 저장소 문서가 실제로 쓰는 문법만 처리한다. **코드 블록(```)은 지원하지 않으므로** 도식은 표로 작성할 것.
 - `answers.html` / `assets/answers.gs` / `assets/config.js` — 봉사자가 "정해진 내용"을 적어 보내면 구글 시트에 쌓이는 수집 창구. `answers.gs`는 시트의 Apps Script에 붙여넣을 코드 사본이고, `config.js`에는 배포 주소만 넣는다. 설정 순서는 [SETUP-SHEETS.md](SETUP-SHEETS.md). **시트에 쌓인 답변은 보고이지 문서가 아니다** — 확정된 것만 `docs/`의 문서에 옮겨 적어 `.md`가 단일 기준으로 남게 한다.
@@ -24,12 +27,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `print.html` — 읽는 순서대로 문서를 한 페이지에 이어 붙여 인쇄용으로 내보낸다. A4 기준이며 한 문서가 한 장에서 시작하도록 `break-before: page`를 건다. 최종 산출물은 인쇄해서 보관하는 것이므로, 문서를 고칠 때 인쇄 결과도 함께 확인한다. **어느 문서를 넣을지 화면에서 고를 수 있고**, `가치_기준.md`(문서 작성용 기준)와 `확인_필요_체크리스트.md`(아직 정해지지 않은 것들이라 인쇄하면 바로 옛 내용이 된다)는 기본으로 꺼져 있다 — 스크립트 안 `OFF_BY_DEFAULT`에 이유와 함께 적혀 있다. 선택은 `localStorage` 키 `cbz_print_v1`에 남는다. 차례 번호는 **고른 문서만 이어서** 매긴다.
 - `doc.html`은 문서를 섹션 탭으로 쪼개지 않고 한 페이지로 이어서 보여준다. 탭이 목차처럼 보이지만 실제로는 필터라 첫 섹션만 읽고 문서를 다 봤다고 오해할 수 있어 제거했다.
 - `voucher-settlement/` — 교환권 정산 대사(검증) 정적 웹앱 (`index.html`, `style.css`, `app.js`). 빌드 도구 없이 파일을 그대로 서빙.
-- `.claude/launch.json` — Claude Code 브라우저 프리뷰용 로컬 서버 설정 (`voucher-settlement`, Python 내장 서버 사용)
+- `.claude/launch.json` — Claude Code 브라우저 프리뷰용 로컬 서버 설정. **저장소 뿌리를 서비스하는 `site` 하나뿐이다** (아래 "실행 / 미리보기" 참고)
 
 ## 실행 / 미리보기
-- `voucher-settlement` 앱은 `file://`로 직접 열 수도 있지만, 프리뷰 시에는 `.claude/launch.json`에 등록된 `voucher-settlement` 설정(Claude Code의 preview_start)을 사용해 로컬 서버로 여는 것을 기본으로 한다.
-- 수동 실행 시: `python -m http.server 8123 --directory voucher-settlement`
-- 문서 사이트 전체를 보려면 `python serve.py 8124`. `file://`로 열면 브라우저가 `fetch()`를 CORS로 막아 문서가 로드되지 않는다.
+- **서버는 항상 저장소 뿌리에서 띄운다**: `python serve.py 8124`. 정산 도구는 `http://localhost:8124/voucher-settlement/`.
+- **하위 폴더를 뿌리로 삼지 말 것.** `--directory voucher-settlement`로 띄우면 정산 도구가 참조하는 `../assets/tokens.css`가 서버 뿌리 밖이라 **404**가 나고 화면이 스타일 없이 뜬다. 같은 이유로 `.claude/launch.json`에는 뿌리를 서비스하는 `site` 설정 하나만 둔다.
+- `file://`로 열면 브라우저가 `fetch()`를 CORS로 막아 문서가 로드되지 않는다. 정산 도구는 `fetch()`를 쓰지 않아 `file://`로도 열리지만, 확인은 로컬 서버로 하는 것을 기본으로 한다.
 - 별도의 빌드/린트/테스트 명령은 없다 (정적 파일뿐). 코드 변경 후에는 브라우저에서 직접 동작을 확인한다.
 - 공개 사이트는 GitHub Pages(`main` 브랜치)에서 자동 배포된다 — https://j-loyalty.github.io/church-bazzar/ . 푸시 후 약 1분이면 반영된다.
 

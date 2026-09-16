@@ -1,0 +1,38 @@
+:root { --page-width: 900px; }  /* .page-head 와 main 이 함께 쓴다 */
+
+main { max-width: var(--page-width); margin: 0 auto; padding: 24px 16px 80px; }
+
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 17px; font-weight: 600; color: var(--color-ink); margin-bottom: 7px; }
+.field .help { display: block; font-weight: 400; font-size: 15px; color: var(--color-mute); margin-top: 3px; }
+.field input, .field select, .field textarea { width: 100%; font-size: 18px; }
+.field input, .field select { height: 52px; }
+.field textarea { min-height: 130px; line-height: 1.6; resize: vertical; }
+
+/* 설명이 붙은 칸과 안 붙은 칸이 나란히 서면 입력칸 높이가 어긋난다.
+   설명 줄이 남는 자리를 먹게 해서 입력칸 바닥을 맞춘다. */
+.row { display: flex; flex-wrap: wrap; gap: 16px; }
+.row .field { flex: 1 1 240px; margin-bottom: 0; display: flex; flex-direction: column; }
+.row .field label { flex: 1 0 auto; }
+
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+.msg { font-size: 16px; font-weight: 600; }
+.msg.ok { color: var(--color-accent-green); }
+.msg.err { color: var(--color-accent-red); }
+
+.answers { margin-top: 8px; }
+.answer {
+  border: 1px solid var(--color-hairline);
+  border-left: 4px solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: var(--color-surface-doc);
+}
+.answer .meta { font-size: 15px; color: var(--color-mute); margin-bottom: 6px; }
+.answer .meta strong { color: var(--color-ink); font-weight: 700; }
+.answer .item { font-size: 17px; font-weight: 700; color: var(--color-ink); margin-bottom: 5px; }
+.answer .body { font-size: 17px; line-height: 1.65; margin: 0; }
+
+.empty { color: var(--color-mute); font-size: 17px; }

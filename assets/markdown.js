@@ -176,10 +176,10 @@
       return resolved;
     }
 
+    // 본체는 assets/shared.js에 있다. MD.escapeHtml은 이미 여러 곳에서 쓰고
+    // 있으므로 이름은 그대로 두고 그쪽을 부른다.
     function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, function (c) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-      });
+      return global.CBZ.esc(s);
     }
 
   global.MD = { render: renderMarkdown, escapeHtml: escapeHtml };

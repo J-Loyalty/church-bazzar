@@ -40,20 +40,16 @@
   }
 
   function loadState() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return normalize(JSON.parse(raw));
-    } catch (e) {
-      console.warn("저장된 데이터를 불러오지 못했습니다.", e);
-    }
-    return emptyState();
+    // normalize는 null도 받아 빈 상태를 돌려준다.
+    return normalize(CBZ.load(STORAGE_KEY, null));
   }
 
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      alert("데이터 저장에 실패했습니다: " + e.message);
+    // 다른 화면과 달리 여기서는 저장 실패를 반드시 알린다. 정산 중에 조용히
+    // 저장되지 않으면 하루치 집계가 그대로 날아간다.
+    if (!CBZ.save(STORAGE_KEY, state)) {
+      alert("데이터를 저장하지 못했습니다. 브라우저 저장 공간이 가득 찼거나 막혀 있습니다. " +
+        "[데이터 관리] 탭에서 JSON으로 내보내 백업해 두세요.");
     }
     renderReport();
   }
@@ -132,11 +128,7 @@
     });
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
+  var escapeHtml = CBZ.esc;
 
   // ---------- Floats & Finals (shared rendering logic) ----------
   // withCash adds the "현금 매출" column; only the closing table takes one, since

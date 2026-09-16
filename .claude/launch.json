@@ -6,12 +6,6 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["serve.py", "8124"],
       "port": 8124
-    },
-    {
-      "name": "voucher-settlement",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "voucher-settlement"],
-      "port": 8123
     }
   ]
 }

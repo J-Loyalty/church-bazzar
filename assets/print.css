@@ -1,0 +1,125 @@
+/* ---- Screen: a preview of what will come out of the printer ---- */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-hairline);
+  padding: 16px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.toolbar .title { font-weight: 500; font-size: 19px; color: var(--color-ink); margin-right: auto; }
+.toolbar .note { flex: 1 0 100%; margin: 0; font-size: 16px; color: var(--color-mute); }
+
+.picker {
+  max-width: 1000px;
+  margin: 24px auto 0;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px 22px;
+}
+.picker h2 { font-family: var(--font-display); font-size: 24px; font-weight: 300; letter-spacing: -0.02em; margin: 0 0 4px; color: var(--color-ink); }
+.picker .lead { margin: 0 0 16px; font-size: 16px; color: var(--color-mute); }
+.picker .group { font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--color-mute); margin: 18px 0 2px; }
+.picker .group:first-of-type { margin-top: 0; }
+.picker .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0 20px; }
+.picker label {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 11px 0; font-size: 17px; color: var(--color-ink); cursor: pointer;
+}
+.picker input[type="checkbox"] { width: 22px; height: 22px; flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--color-primary); }
+.picker .why { display: block; font-size: 15px; color: var(--color-mute); margin-top: 2px; }
+.picker .picker-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.picker .picker-actions button { min-height: 44px; font-size: 15px; padding: 8px 18px; }
+
+.sheet {
+  max-width: 1000px;
+  margin: 24px auto 80px;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  padding: 40px 44px;
+}
+
+.cover { text-align: center; padding: 40px 0 32px; border-bottom: 2px solid var(--color-ink); }
+.cover h1 { font-family: var(--font-display); font-size: 44px; font-weight: 300; line-height: 1.1; color: var(--color-ink); margin: 0 0 16px; letter-spacing: -0.03em; }
+.cover .when { font-size: 20px; font-weight: 700; color: var(--color-ink); margin: 0 0 6px; }
+.cover .where { font-size: 17px; color: var(--color-body); margin: 0 0 20px; }
+.cover .printed { font-size: 15px; color: var(--color-mute); margin: 0; }
+
+.toc { margin: 28px 0 0; }
+.toc h2 { font-family: var(--font-display); font-size: 26px; font-weight: 300; letter-spacing: -0.02em; color: var(--color-ink); margin: 0 0 14px; }
+.toc .group { font-size: 15px; font-weight: 700; color: var(--color-mute); margin: 16px 0 6px; }
+.toc ol { margin: 0; padding-left: 26px; font-size: 17px; }
+.toc li { margin-bottom: 5px; }
+
+.doc { margin-top: 40px; padding-top: 28px; border-top: 2px solid var(--color-hairline); }
+.doc:first-of-type { border-top: none; }
+.doc h1 { font-family: var(--font-display); font-size: 32px; font-weight: 300; line-height: 1.15; color: var(--color-ink); margin: 0 0 18px; letter-spacing: -0.02em; }
+.doc h2 {
+  font-family: var(--font-display); font-size: 25px; font-weight: 300;
+  letter-spacing: -0.02em; color: var(--color-ink);
+  margin: 30px 0 12px; padding-top: 16px; border-top: 1px solid var(--color-hairline);
+}
+.doc h3 { font-family: var(--font-body); font-size: 18px; font-weight: 600; letter-spacing: 0; color: var(--color-ink); margin: 24px 0 8px; }
+.doc p { margin: 0 0 14px; font-size: 16px; line-height: 1.7; }
+.doc ul, .doc ol { margin: 0 0 14px; padding-left: 24px; font-size: 16px; line-height: 1.7; }
+.doc li { margin-bottom: 7px; }
+.doc li.checkbox-item { list-style: none; margin-left: -24px; }
+.doc li.checkbox-item input { margin-right: 8px; width: 15px; height: 15px; vertical-align: -2px; }
+.doc strong { color: var(--color-ink); font-weight: 700; }
+.doc hr { border: none; border-top: 1px solid var(--color-hairline); margin: 22px 0; }
+.doc del { color: var(--color-mute); }
+
+.load-error { color: var(--color-accent-red); font-weight: 600; }
+
+/* ---- Print: A4, ink-friendly, one document per sheet ---- */
+@page { size: A4; margin: 17mm 15mm 15mm; }
+
+@media print {
+  .toolbar, .picker { display: none !important; }
+
+  body { background: #fff; color: #000; font-size: 11pt; line-height: 1.55; }
+  .sheet { max-width: none; margin: 0; padding: 0; border: none; border-radius: 0; background: #fff; }
+
+  .cover { padding: 0 0 20pt; border-bottom: 1.5pt solid #000; break-after: page; }
+  .cover h1 { font-size: 22pt; color: #000; }
+  .cover .when { font-size: 14pt; color: #000; }
+  .cover .where, .cover .printed { color: #000; }
+
+  .toc { break-after: page; }
+  .toc h2 { font-size: 15pt; color: #000; }
+  .toc .group { color: #000; font-size: 10.5pt; }
+  .toc ol { font-size: 11pt; }
+
+  /* Every document starts its own sheet, so pages can be pulled out and handed
+     to one team without carrying a neighbouring document's tail. */
+  .doc { break-before: page; margin-top: 0; padding-top: 0; border-top: none; }
+  .doc h1 { font-size: 17pt; color: #000; margin: 0 0 10pt; }
+  .doc h2 { font-size: 13.5pt; color: #000; margin: 16pt 0 7pt; padding-top: 7pt; border-top: 0.5pt solid #999; }
+  .doc h3 { font-size: 11.5pt; color: #000; margin: 12pt 0 5pt; }
+  .doc p, .doc ul, .doc ol { font-size: 11pt; margin-bottom: 8pt; line-height: 1.55; }
+  .doc li { margin-bottom: 3pt; }
+  .doc strong { color: #000; }
+  .doc del { color: #555; }
+
+  h1, h2, h3 { break-after: avoid; }
+  tr, li, .banner { break-inside: avoid; }
+  thead { display: table-header-group; }
+  p { orphans: 2; widows: 2; }
+
+  /* Links point inside this bundle, so a printed URL would be noise. */
+  a { color: #000; text-decoration: none; }
+
+  /* Background fills often do not print; carry the meaning on borders instead. */
+  .data-table { font-size: 10pt; border: 0.5pt solid #000; }
+  .data-table th, .data-table td { border: 0.5pt solid #999; padding: 4pt 6pt; color: #000; }
+  .data-table th { background: #eee; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 700; }
+  .table-scroll { overflow: visible; margin: 8pt 0; }
+  .banner { border: 0.5pt solid #666; border-left: 2.5pt solid #000; background: none; color: #000; padding: 7pt 10pt; font-size: 10.5pt; }
+  code { background: none; border: 0.5pt solid #999; color: #000; font-size: 10pt; }
+}

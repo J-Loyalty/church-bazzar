@@ -58,6 +58,9 @@
   --grad-lavender: #c8b8e0;
   --grad-sky: #a8c8e8;
 
+  /* 화면 본문 폭. 페이지마다 다르므로 각 페이지 CSS에서 다시 정한다. */
+  --page-width: 1120px;
+
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -255,6 +258,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   min-width: 0;
 }
 .topbar .spacer { margin-left: auto; }
+
+/* Page heading. Left-aligned inside the same column as the content below it --
+   a centred title starts the eye somewhere the cards do not, so the reader has
+   to find the line twice. --page-width is set per page. */
+.page-head { max-width: var(--page-width); margin: 0 auto; padding: 36px 16px 4px; }
+.page-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+}
+.page-head p { margin: 10px 0 0; color: var(--color-mute); font-size: 17px; }
 
 /* Section label: the small uppercase line that names a band. */
 .eyebrow {
