@@ -121,11 +121,11 @@ function saveSettlement(body) {
   rows.push(['2026 바자회 정산', '', '', '', '', '']);
   rows.push(['올린 시각', at, '', '', '', '']);
   rows.push([]);
-  rows.push(['조', '받은 잔돈', '제출 교환권', '교환권 매출', '현금 매출', '매출 합계']);
+  rows.push(['조', '받은 잔돈', '제출 교환권', '교환권 매출', '현금 매출', '매출 합계', '재료비']);
   (s.rows || []).forEach(function (r) {
-    rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total]);
+    rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total, r.cost]);
   });
-  rows.push(['합계', s.floatSum, s.finalSum, s.voucherSum, s.cashSum, s.totalSum]);
+  rows.push(['합계', s.floatSum, s.finalSum, s.voucherSum, s.cashSum, s.totalSum, s.costSum]);
   rows.push([]);
   rows.push(['교환소 대사', '', '', '', '', '']);
   rows.push(['아침 통', s.openTin]);
@@ -138,13 +138,21 @@ function saveSettlement(body) {
   rows.push(['차이 (0이어야 함)', s.diff]);
   rows.push(['미사용 교환권', s.unused]);
   rows.push([]);
+  rows.push(['공통 비용', '', '', '', '', '']);
+  (s.commonCosts || []).forEach(function (x) { rows.push([x.name, x.amount]); });
+  rows.push(['공통 비용 합계', s.commonSum]);
+  rows.push([]);
   rows.push(['최종 수익금', '', '', '', '', '']);
   rows.push(['교환소가 받은 돈', s.received]);
   rows.push(['조별 현금 매출 합계', s.cashSum]);
   rows.push(['행사전 구매 매출', s.presale]);
-  rows.push(['최종 수익금', s.final]);
+  rows.push(['매출 합계', s.revenue]);
+  rows.push(['조별 재료비 합계', s.costSum]);
+  rows.push(['공통 비용 합계', s.commonSum]);
+  rows.push(['원가 합계', s.cost]);
+  rows.push(['최종 수익금 (매출 − 원가)', s.final]);
 
-  var width = 6;
+  var width = 7;
   var padded = rows.map(function (r) {
     var out = r.slice();
     while (out.length < width) out.push('');

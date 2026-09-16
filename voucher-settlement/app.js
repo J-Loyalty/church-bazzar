@@ -15,6 +15,8 @@
       floats: {},   // 조별 아침 지급 (권종별 장수)
       finals: {},   // 조별 마감 제출 (권종별 장수)
       cash: {},     // 조별 현금 매출
+      costs: {},    // 조별 재료비
+      commonCosts: [],  // 조에 붙지 않는 지출 [{name, amount}]
       presale: 0,
       desk: {
         openTin: { 1000: 0, 5000: 0, 10000: 0 },
@@ -36,6 +38,10 @@
     out.floats = p.floats || {};
     out.finals = p.finals || {};
     out.cash = p.cash || {};
+    out.costs = p.costs || {};
+    out.commonCosts = Array.isArray(p.commonCosts)
+      ? p.commonCosts.map(function (c) { return { name: String(c && c.name || ""), amount: num(c && c.amount) }; })
+      : [];
     out.presale = num(p.presale);
 
     var d = p.desk || {};
@@ -100,12 +106,14 @@
       var floatVal = denomTotal(state.floats[b.id]);
       var finalVal = denomTotal(state.finals[b.id]);
       var cashVal = num(state.cash[b.id]);
+      var costVal = num(state.costs[b.id]);
       return {
         id: b.id, name: b.name,
         float: floatVal, final: finalVal,
         voucher: finalVal - floatVal,
         cash: cashVal,
-        total: finalVal - floatVal + cashVal
+        total: finalVal - floatVal + cashVal,
+        cost: costVal
       };
     });
 
@@ -117,17 +125,22 @@
     var cashDelta = num(state.desk.closeCash) - num(state.desk.openCash);
     var received = cashDelta + num(state.desk.transfer);
     var presale = num(state.presale);
+    var commonSum = state.commonCosts.reduce(function (a, c) { return a + num(c.amount); }, 0);
+    var revenue = received + sum("cash") + presale;
+    var cost = sum("cost") + commonSum;
 
     return {
       rows: rows,
       floatSum: floatSum, finalSum: sum("final"),
       voucherSum: sum("voucher"), cashSum: sum("cash"), totalSum: sum("total"),
+      costSum: sum("cost"), commonCosts: state.commonCosts.slice(), commonSum: commonSum,
       openTin: openTin, closeTin: closeTin, sold: sold,
       cashDelta: cashDelta, transfer: num(state.desk.transfer), received: received,
       diff: received - sold,
       unused: sold - sum("voucher"),
       presale: presale,
-      final: received + sum("cash") + presale
+      revenue: revenue, cost: cost,
+      final: revenue - cost
     };
   }
 
@@ -171,6 +184,7 @@
     if (!confirm("「" + (b ? b.name : "") + "」을 지울까요? 그 조에 적은 숫자도 함께 지워집니다.")) return;
     state.booths = state.booths.filter(function (x) { return x.id !== id; });
     delete state.cash[id];
+    delete state.costs[id];
     delete state.floats[id];
     delete state.finals[id];
     saveState();
@@ -196,7 +210,7 @@
   function renderDenomTable(bodyId, map, withCash) {
     var tbody = document.getElementById(bodyId);
     if (!state.booths.length) {
-      tbody.innerHTML = '<tr><td colspan="' + (withCash ? 6 : 5) +
+      tbody.innerHTML = '<tr><td colspan="' + (withCash ? 7 : 5) +
         '" class="hint">먼저 [1 개장 전]에서 조를 등록하세요.</td></tr>';
       return;
     }
@@ -213,6 +227,9 @@
         cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
           esc(b.name) + ' 현금 매출" data-booth="' + b.id + '" data-cash="1" value="' +
           num(state.cash[b.id]) + '"></td>';
+        cells += '<td><input type="number" min="0" step="1" inputmode="numeric" aria-label="' +
+          esc(b.name) + ' 재료비" data-booth="' + b.id + '" data-cost="1" value="' +
+          num(state.costs[b.id]) + '"></td>';
       }
       return "<tr>" + cells + "</tr>";
     }).join("");
@@ -225,6 +242,8 @@
       var id = input.dataset.booth;
       if (input.dataset.cash) {
         state.cash[id] = num(input.value);
+      } else if (input.dataset.cost) {
+        state.costs[id] = num(input.value);
       } else {
         ensure(map, id)[input.dataset.denom] = num(input.value);
         var row = input.closest("tr");
@@ -285,6 +304,63 @@
     document.getElementById("presale").value = state.presale;
   }
 
+  // ---------- 공통 비용 ----------
+  // 마지막 줄을 채우면 다음 줄이 저절로 생긴다. 몇 건이 될지 미리 알 수 없고,
+  // 「줄 추가」를 누르게 하면 그 버튼을 못 찾는 사람이 생긴다.
+  function renderCommon() {
+    var box = document.getElementById("common-costs");
+    var list = state.commonCosts.slice();
+    if (!list.length || String(list[list.length - 1].name).trim() || num(list[list.length - 1].amount)) {
+      list.push({ name: "", amount: 0 });
+    }
+    var focus = document.activeElement;
+    var keep = focus && focus.dataset && focus.dataset.ci !== undefined
+      ? { i: focus.dataset.ci, f: focus.dataset.cf, start: focus.selectionStart } : null;
+
+    box.innerHTML = '<div class="cost-head"><span>항목</span><span>금액 (원)</span><span></span></div>' +
+      list.map(function (c, i) {
+        return '<div class="cost-row">' +
+          '<input type="text" placeholder="예: 교환권 인쇄비" aria-label="공통 비용 항목 ' + (i + 1) +
+            '" data-ci="' + i + '" data-cf="name" value="' + esc(c.name) + '">' +
+          '<input type="number" min="0" step="1" inputmode="numeric" aria-label="공통 비용 금액 ' + (i + 1) +
+            '" data-ci="' + i + '" data-cf="amount" value="' + num(c.amount) + '">' +
+          (i < state.commonCosts.length
+            ? '<button class="remove-btn" data-cdel="' + i + '">지우기</button>'
+            : "<span></span>") +
+          "</div>";
+      }).join("");
+
+    document.getElementById("common-sum").textContent =
+      money(state.commonCosts.reduce(function (a, c) { return a + num(c.amount); }, 0));
+
+    if (keep) {
+      var back = box.querySelector('[data-ci="' + keep.i + '"][data-cf="' + keep.f + '"]');
+      if (back) {
+        back.focus();
+        if (back.type === "text" && keep.start != null) back.setSelectionRange(keep.start, keep.start);
+      }
+    }
+  }
+
+  document.getElementById("common-costs").addEventListener("input", function (e) {
+    var el = e.target;
+    if (el.dataset.ci === undefined) return;
+    var i = Number(el.dataset.ci);
+    while (state.commonCosts.length <= i) state.commonCosts.push({ name: "", amount: 0 });
+    if (el.dataset.cf === "name") state.commonCosts[i].name = el.value;
+    else state.commonCosts[i].amount = num(el.value);
+    saveState();
+    renderCommon();
+  });
+
+  document.getElementById("common-costs").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-cdel]");
+    if (!btn) return;
+    state.commonCosts.splice(Number(btn.dataset.cdel), 1);
+    saveState();
+    renderCommon();
+  });
+
   // ---------- 결과 ----------
   function renderReport() {
     var c = compute();
@@ -295,15 +371,17 @@
       ? c.rows.map(function (r) {
           return "<tr><td>" + esc(r.name) + "</td><td>" + money(r.float) + "</td><td>" +
             money(r.final) + "</td><td>" + money(r.voucher) + "</td><td>" +
-            money(r.cash) + "</td><td>" + money(r.total) + "</td></tr>";
+            money(r.cash) + "</td><td>" + money(r.total) + "</td><td>" +
+            money(r.cost) + "</td></tr>";
         }).join("")
-      : '<tr><td colspan="6" class="hint">등록된 조가 없습니다.</td></tr>';
+      : '<tr><td colspan="7" class="hint">등록된 조가 없습니다.</td></tr>';
 
     set("rb-float", money(c.floatSum));
     set("rb-final", money(c.finalSum));
     set("rb-voucher", money(c.voucherSum));
     set("rb-cash", money(c.cashSum));
     set("rb-total", money(c.totalSum));
+    set("rb-cost", money(c.costSum));
 
     set("r-open-tin", money(c.openTin));
     set("r-close-tin", money(c.closeTin));
@@ -321,6 +399,10 @@
     set("r-final-desk", money(c.received));
     set("r-final-cash", money(c.cashSum));
     set("r-final-presale", money(c.presale));
+    set("r-revenue", money(c.revenue));
+    set("r-cost-booth", money(c.costSum));
+    set("r-cost-common", money(c.commonSum));
+    set("r-cost", money(c.cost));
     set("r-final-total", money(c.final));
 
     renderVerdict(c);
@@ -485,8 +567,8 @@
 
   document.getElementById("btn-export-csv").addEventListener("click", function () {
     var c = compute();
-    var rows = [["조", "받은 잔돈", "제출 교환권", "교환권 매출", "현금 매출", "매출 합계"]];
-    c.rows.forEach(function (r) { rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total]); });
+    var rows = [["조", "받은 잔돈", "제출 교환권", "교환권 매출", "현금 매출", "매출 합계", "재료비"]];
+    c.rows.forEach(function (r) { rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total, r.cost]); });
     rows.push([]);
     rows.push(["아침 통", c.openTin]);
     rows.push(["저녁 통", c.closeTin]);
@@ -496,9 +578,15 @@
     rows.push(["차이", c.diff]);
     rows.push(["미사용 교환권", c.unused]);
     rows.push([]);
+    c.commonCosts.forEach(function (x) { rows.push(["공통 비용 — " + x.name, x.amount]); });
+    rows.push([]);
     rows.push(["교환소가 받은 돈", c.received]);
     rows.push(["조별 현금 매출 합계", c.cashSum]);
     rows.push(["행사전 구매 매출", c.presale]);
+    rows.push(["매출 합계", c.revenue]);
+    rows.push(["조별 재료비 합계", c.costSum]);
+    rows.push(["공통 비용 합계", c.commonSum]);
+    rows.push(["원가 합계", c.cost]);
     rows.push(["최종 수익금", c.final]);
     var csv = rows.map(function (r) { return r.join(","); }).join("\n");
     download(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" }),
@@ -539,6 +627,7 @@
     renderTin("open-tin", state.desk.openTin, "open-tin-total");
     renderTin("close-tin", state.desk.closeTin, "close-tin-total");
     renderSingles();
+    renderCommon();
     renderReport();
   }
 

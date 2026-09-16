@@ -141,6 +141,22 @@ h3 {
 .box-total { margin: 14px 0 0; font-size: 17px; color: var(--color-body); }
 .box-total strong { color: var(--color-ink); font-size: 19px; }
 
+/* 공통 비용 — 항목 이름과 금액 한 쌍씩. 마지막 줄을 채우면 다음 줄이 생긴다. */
+.cost-head, .cost-row {
+  display: grid;
+  grid-template-columns: 1fr 200px 96px;
+  gap: 10px;
+  align-items: center;
+}
+.cost-head {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-mute);
+  margin-bottom: 6px;
+}
+.cost-row { margin-bottom: 10px; }
+.cost-row input { width: 100%; }
+
 .field-row { display: flex; flex-wrap: wrap; gap: 20px; }
 .field-inline {
   display: flex;
@@ -247,4 +263,13 @@ h3 {
   .denom-cell { flex: 1 1 100%; }
   .denom-cell input { max-width: none; }
   .field-inline input { max-width: none; }
+  .cost-head { display: none; }
+  .cost-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .cost-row .remove-btn { justify-self: start; }
 }

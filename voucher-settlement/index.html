@@ -84,10 +84,11 @@
   <p class="panel-lead">판매가 끝난 뒤 적는 것입니다.</p>
 
   <h2>2-1. 조별로 걷은 것</h2>
-  <p class="hint">각 조가 마감에 제출한 <strong>교환권 장수</strong>와, 따로 세어 낸 <strong>현금 매출</strong>입니다. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
+  <p class="hint">각 조가 마감에 제출한 <strong>교환권 장수</strong>와, 따로 세어 낸 <strong>현금 매출</strong>, 그리고 그 조가 쓴 <strong>재료비</strong>입니다. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
+  <p class="hint"><strong>재료비</strong>는 그 조가 물건을 마련하는 데 쓴 돈입니다 (장 본 값, 재료 구입비 등). 영수증이 늦게 들어오면 나중에 채워도 됩니다.</p>
   <div class="table-scroll">
     <table class="data-table" id="final-table">
-      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th></tr></thead>
+      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th><th>재료비</th></tr></thead>
       <tbody id="final-body"></tbody>
     </table>
   </div>
@@ -117,6 +118,11 @@
   <label class="field-inline">금액 (원)
     <input type="number" id="presale" min="0" step="1" inputmode="numeric">
   </label>
+
+  <h2>2-4. 공통 비용</h2>
+  <p class="hint">특정 조에 붙지 않는 지출입니다 — <strong>교환권 인쇄비</strong>, 천막·비품 대여료, 공통 자재비 같은 것. 항목 이름과 금액을 적으면 다음 칸이 저절로 생깁니다.</p>
+  <div id="common-costs"></div>
+  <p class="row-total-line">공통 비용 합계 <strong id="common-sum">0원</strong></p>
 
   <div class="panel-foot">
     <button type="button" data-goto="report">결과 보기 &rarr;</button>
@@ -153,9 +159,9 @@
   <p class="hint">교환권 매출 = 제출한 교환권 − 아침에 받은 잔돈. 여기에 현금 매출을 더한 것이 그 조가 실제로 판 금액입니다.</p>
   <div class="table-scroll">
     <table class="data-table">
-      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th></tr></thead>
+      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th><th>재료비</th></tr></thead>
       <tbody id="report-booth-body"></tbody>
-      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-total">0원</th></tr></tfoot>
+      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-total">0원</th><th id="rb-cost">0원</th></tr></tfoot>
     </table>
   </div>
 
@@ -172,17 +178,22 @@
   <p class="hint" id="unused-note"></p>
 
   <h2>최종 수익금</h2>
+  <p class="hint"><strong>들어온 돈(매출)에서 쓴 돈(원가)을 빼면</strong> 교회에 남는 돈이 나옵니다. 2024년 결산서와 같은 방식입니다 (<a href="../doc.html?src=docs/과거_실적.md">과거 실적</a> 참고).</p>
   <div class="table-scroll">
     <table class="data-table balance">
       <tbody>
         <tr><th>교환소가 받은 돈</th><td id="r-final-desk">0원</td></tr>
         <tr><th>+ 조별 현금 매출 합계</th><td id="r-final-cash">0원</td></tr>
         <tr><th>+ 행사전 구매 매출</th><td id="r-final-presale">0원</td></tr>
-        <tr class="row-total"><th>= 최종 수익금</th><td id="r-final-total">0원</td></tr>
+        <tr class="row-sum"><th>= 매출 합계</th><td id="r-revenue">0원</td></tr>
+        <tr><th>조별 재료비 합계</th><td id="r-cost-booth">0원</td></tr>
+        <tr><th>+ 공통 비용 합계</th><td id="r-cost-common">0원</td></tr>
+        <tr class="row-sum"><th>= 원가 합계</th><td id="r-cost">0원</td></tr>
+        <tr class="row-total"><th>= 최종 수익금 (매출 − 원가)</th><td id="r-final-total">0원</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="banner banner-blue">조들이 모아 온 교환권 총액은 <strong>여기에 더하지 않습니다.</strong> 그 돈은 이미 교환소에서 받아 맨 윗줄에 들어 있습니다 — 더하면 같은 돈을 두 번 세는 것입니다.</div>
+  <div class="banner banner-blue">조들이 모아 온 교환권 총액은 <strong>매출에 더하지 않습니다.</strong> 그 돈은 이미 교환소에서 받아 맨 윗줄에 들어 있습니다 — 더하면 같은 돈을 두 번 세는 것입니다.</div>
 </section>
 
 <!-- ================= 4. 저장 ================= -->
