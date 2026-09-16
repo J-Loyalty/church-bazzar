@@ -107,9 +107,10 @@ const st = {
   booths: [{ id: 'a', name: '1조 국수' }, { id: 'b', name: '2조 김밥' }],
   floats: { a: { 1000: 50, 5000: 0, 10000: 0 }, b: { 1000: 30, 5000: 0, 10000: 0 } },
   finals: { a: { 1000: 200, 5000: 0, 10000: 0 }, b: { 1000: 150, 5000: 0, 10000: 0 } },
-  cash: { a: 30000, b: 20000 }, costs: { a: 100000, b: 60000 }, costPaid: { a: true },
+  cash: { a: 30000, b: 20000 }, presales: { a: 200000, b: 100000 },
+  costs: { a: 100000, b: 60000 }, costPaid: { a: true },
   commonCosts: [{ name: '교환권 인쇄비', amount: 350000, paid: true }, { name: '천막 대여료', amount: 50000, paid: false }],
-  presale: 300000, presaleVoucher: 100000,
+  presale: 0, presaleVoucher: 100000,
   desk: { openTin: { 1000: 500, 5000: 0, 10000: 0 }, closeTin: { 1000: 100, 5000: 0, 10000: 0 }, openCash: 50000, closeCash: 250000, transfer: 120000 }
 };
 
@@ -118,9 +119,9 @@ const m = global.__map();
 
 const got = {
   '조1 교환권 매출': V('J8'), '조2 교환권 매출': V('J9'),
-  '조1 매출 합계': V('L8'), '지급 합계': V('E' + m.boothSum),
+  '조1 매출 합계': V('M8'), '조2 매출 합계': V('M9'), '지급 합계': V('E' + m.boothSum),
   '현금 합계': V('K' + m.boothSum), '교환권매출 합계': V('J' + m.boothSum),
-  '재료비 합계': V('M' + m.boothSum),
+  '행사전 구매 합계': V('L' + m.boothSum), '재료비 합계': V('N' + m.boothSum),
   '팔려 나간 교환권': V('B' + m.bSold), '받은 돈': V('B' + m.bReceived),
   '차이': V('B' + m.bDiff), '판정': V('A' + m.bVerdict),
   '미사용': V('B' + m.bUnused), '미사용 비율': V('B' + m.bUnusedPct),
@@ -130,8 +131,9 @@ const got = {
 };
 const want = {
   '조1 교환권 매출': 150000, '조2 교환권 매출': 120000,
-  '조1 매출 합계': 180000, '지급 합계': 80000,
-  '현금 합계': 50000, '교환권매출 합계': 270000, '재료비 합계': 160000,
+  '조1 매출 합계': 380000, '조2 매출 합계': 240000, '지급 합계': 80000,
+  '현금 합계': 50000, '교환권매출 합계': 270000,
+  '행사전 구매 합계': 300000, '재료비 합계': 160000,
   '팔려 나간 교환권': 420000, '받은 돈': 420000, '차이': 0,
   '판정': '맞습니다 — 차이 0원',
   '미사용': 150000, '미사용 비율': 150000 / 420000,
@@ -153,13 +155,13 @@ console.log('빈 양식: 차이', V('B' + m.bDiff), '/ 판정', V('A' + m.bVerdi
 // 빈 양식에 손으로 값만 넣어도 되는지 (사이트 없이 쓰는 경우)
 cache.clear();
 grid.set('A8', { v: '1조 국수' }); grid.set('B8', { v: 50 }); grid.set('F8', { v: 200 });
-grid.set('K8', { v: 30000 }); grid.set('M8', { v: 100000 }); grid.set('N8', { v: true });
+grid.set('K8', { v: 30000 }); grid.set('L8', { v: 200000 });
+grid.set('N8', { v: 100000 }); grid.set('O8', { v: true });
 grid.set('A9', { v: '2조 김밥' }); grid.set('B9', { v: 30 }); grid.set('F9', { v: 150 });
-grid.set('K9', { v: 20000 }); grid.set('M9', { v: 60000 });
+grid.set('K9', { v: 20000 }); grid.set('L9', { v: 100000 }); grid.set('N9', { v: 60000 });
 grid.set('B' + m.openTin, { v: 500 }); grid.set('B' + m.closeTin, { v: 100 });
 grid.set('B' + m.openCash, { v: 50000 }); grid.set('B' + m.closeCash, { v: 250000 });
 grid.set('B' + m.transfer, { v: 120000 }); grid.set('B' + m.preVoucher, { v: 100000 });
-grid.set('B' + m.presale, { v: 300000 });
 grid.set('A' + m.commonTop, { v: '교환권 인쇄비' }); grid.set('B' + m.commonTop, { v: 350000 }); grid.set('C' + m.commonTop, { v: true });
 grid.set('A' + (m.commonTop + 1), { v: '천막 대여료' }); grid.set('B' + (m.commonTop + 1), { v: 50000 });
 console.log('손으로 입력: 차이', V('B' + m.bDiff), '/ 수익', V('B' + m.pFinal), '/ 돌려드릴', V('B' + m.rRefund));

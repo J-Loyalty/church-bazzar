@@ -91,13 +91,14 @@
 <section class="tab-panel" id="panel-close">
   <p class="panel-lead">판매가 끝난 뒤 적는 것입니다.</p>
 
-  <h2>2-1. 조별로 걷은 것</h2>
-  <p class="hint">각 조가 마감에 제출한 <strong>교환권 장수</strong>와, 따로 세어 낸 <strong>현금 매출</strong>, 그리고 그 조가 쓴 <strong>재료비</strong>입니다. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
+  <h2>2-1. 조별 정산</h2>
+  <p class="hint">한 조가 한 줄입니다. 마감에 제출한 <strong>교환권 장수</strong>, 따로 세어 낸 <strong>현금 매출</strong>, 그 조가 <strong>행사 전에 판 금액</strong>, 그 조가 쓴 <strong>재료비</strong>를 가로로 채우세요. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
+  <p class="hint"><strong>행사전 구매</strong>는 행사 전에 미리 판 몫입니다 (<a href="../doc.html?src=docs/행사전_구매.md">행사전 구매</a> 참고). 교환권을 거치지 않아 대사에는 잡히지 않지만, <strong>그 조의 매출</strong>이므로 여기 적습니다 — 2024년 결산서도 조별로 적었습니다.</p>
   <p class="hint"><strong>재료비</strong>는 그 조가 물건을 마련하는 데 쓴 돈입니다 (장 본 값, 재료 구입비 등). 영수증이 늦게 들어오면 나중에 채워도 됩니다.</p>
   <p class="hint"><strong>「재정 지급」에 표시</strong>하면 교회 재정에서 이미 낸 돈이라는 뜻입니다. <strong>표시하지 않은 것은 조원이 사비로 낸 것</strong>으로 보고, 마감 후 돌려드릴 금액으로 따로 합산합니다. 수익 계산에는 둘 다 똑같이 원가로 들어갑니다.</p>
   <div class="table-scroll">
     <table class="data-table" id="final-table">
-      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th><th>재료비</th><th>재정 지급</th></tr></thead>
+      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th><th>행사전 구매</th><th>재료비</th><th>재정 지급</th></tr></thead>
       <tbody id="final-body"></tbody>
     </table>
   </div>
@@ -122,8 +123,8 @@
     </div>
   </div>
 
-  <h2>2-3. 행사전 구매 매출</h2>
-  <p class="hint">행사 전에 미리 판 몫입니다. 교환권을 거치지 않으므로 대사에는 잡히지 않고 <strong>최종 수익금에만 더해집니다</strong>.</p>
+  <h2>2-3. 조 구분 없는 행사전 구매</h2>
+  <p class="hint"><strong>먼저 2-1의 조별 칸을 쓰세요.</strong> 여기는 <strong>어느 조에도 넣을 수 없는</strong> 행사전 구매만 적는 자리입니다. 없으면 0으로 두세요.</p>
   <label class="field-inline">금액 (원)
     <input type="number" id="presale" min="0" step="1" inputmode="numeric">
   </label>
@@ -168,12 +169,12 @@
   </div>
 
   <h2>조별 매출</h2>
-  <p class="hint">교환권 매출 = 제출한 교환권 − 아침에 받은 잔돈. 여기에 현금 매출을 더한 것이 그 조가 실제로 판 금액입니다.</p>
+  <p class="hint">교환권 매출 = 제출한 교환권 − 아침에 받은 잔돈. 여기에 <strong>현금 매출과 행사전 구매</strong>를 더한 것이 그 조가 실제로 판 금액입니다.</p>
   <div class="table-scroll">
     <table class="data-table">
-      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th><th>재료비</th><th>재정 지급</th></tr></thead>
+      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>행사전 구매</th><th>매출 합계</th><th>재료비</th><th>재정 지급</th></tr></thead>
       <tbody id="report-booth-body"></tbody>
-      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-total">0원</th><th id="rb-cost">0원</th><th></th></tr></tfoot>
+      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-presale">0원</th><th id="rb-total">0원</th><th id="rb-cost">0원</th><th></th></tr></tfoot>
     </table>
   </div>
 
@@ -196,7 +197,8 @@
       <tbody>
         <tr><th>교환소가 받은 돈</th><td id="r-final-desk">0원</td></tr>
         <tr><th>+ 조별 현금 매출 합계</th><td id="r-final-cash">0원</td></tr>
-        <tr><th>+ 행사전 구매 매출</th><td id="r-final-presale">0원</td></tr>
+        <tr><th>+ 조별 행사전 구매 합계</th><td id="r-final-presale-booth">0원</td></tr>
+        <tr><th>+ 조 구분 없는 행사전 구매</th><td id="r-final-presale-other">0원</td></tr>
         <tr class="row-sum"><th>= 매출 합계</th><td id="r-revenue">0원</td></tr>
         <tr><th>조별 재료비 합계</th><td id="r-cost-booth">0원</td></tr>
         <tr><th>+ 공통 비용 합계</th><td id="r-cost-common">0원</td></tr>

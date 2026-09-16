@@ -122,12 +122,13 @@ function saveSettlement(body) {
   rows.push(['2026 바자회 정산', '', '', '', '', '']);
   rows.push(['올린 시각', at, '', '', '', '']);
   rows.push([]);
-  rows.push(['조', '받은 잔돈', '제출 교환권', '교환권 매출', '현금 매출', '매출 합계', '재료비', '재정 지급']);
+  rows.push(['조', '받은 잔돈', '제출 교환권', '교환권 매출', '현금 매출', '행사전 구매', '매출 합계', '재료비', '재정 지급']);
   (s.rows || []).forEach(function (r) {
-    rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.total, r.cost,
+    rows.push([r.name, r.float, r.final, r.voucher, r.cash, r.presale, r.total, r.cost,
       r.cost > 0 ? (r.costPaid ? '재정 지급' : '돌려드릴 것') : '']);
   });
-  rows.push(['합계', s.floatSum, s.finalSum, s.voucherSum, s.cashSum, s.totalSum, s.costSum, '']);
+  rows.push(['합계', s.floatSum, s.finalSum, s.voucherSum, s.cashSum, s.presaleBooth,
+    s.totalSum, s.costSum, '']);
   rows.push([]);
   rows.push(['교환소 대사', '', '', '', '', '']);
   rows.push(['아침 통', s.openTin]);
@@ -151,7 +152,8 @@ function saveSettlement(body) {
   rows.push(['최종 수익금', '', '', '', '', '']);
   rows.push(['교환소가 받은 돈', s.received]);
   rows.push(['조별 현금 매출 합계', s.cashSum]);
-  rows.push(['행사전 구매 매출', s.presale]);
+  rows.push(['조별 행사전 구매 합계', s.presaleBooth]);
+  rows.push(['조 구분 없는 행사전 구매', s.presaleOther]);
   rows.push(['매출 합계', s.revenue]);
   rows.push(['조별 재료비 합계', s.costSum]);
   rows.push(['공통 비용 합계', s.commonSum]);
@@ -163,7 +165,7 @@ function saveSettlement(body) {
   rows.push(['돌려드릴 금액', s.refund]);
   (s.refundRows || []).forEach(function (r) { rows.push([r.name, r.amount]); });
 
-  var width = 8;
+  var width = 9;
   var padded = rows.map(function (r) {
     var out = r.slice();
     while (out.length < width) out.push('');
@@ -243,8 +245,8 @@ function calcMap() {
   m.closeCash = m.openCash + 1;
   m.transfer = m.closeCash + 1;
   m.preVoucher = m.transfer + 1;
-  m.presale = m.preVoucher + 3;
-  m.commonHead = m.presale + 2;
+  m.presaleOther = m.preVoucher + 3;
+  m.commonHead = m.presaleOther + 2;
   m.commonTop = m.commonHead + 1;
   m.commonEnd = m.commonTop + CALC_COMMON - 1;
   m.commonSum = m.commonEnd + 1;
@@ -265,8 +267,9 @@ function calcMap() {
   m.profitTop = m.bUnusedPct + 2;
   m.pDesk = m.profitTop + 1;
   m.pCash = m.pDesk + 1;
-  m.pPresale = m.pCash + 1;
-  m.pRevenue = m.pPresale + 1;
+  m.pPresaleBooth = m.pCash + 1;
+  m.pPresaleOther = m.pPresaleBooth + 1;
+  m.pRevenue = m.pPresaleOther + 1;
   m.pCostBooth = m.pRevenue + 1;
   m.pCostCommon = m.pCostBooth + 1;
   m.pCost = m.pCostCommon + 1;
@@ -284,7 +287,7 @@ function calcMap() {
  */
 function buildCalcSheet(st, at) {
   var m = calcMap();
-  var W = 14; // A~N
+  var W = 15; // A~O
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SETTLE_CALC);
   if (!sh) sh = ss.insertSheet(SETTLE_CALC);
@@ -313,21 +316,21 @@ function buildCalcSheet(st, at) {
   put(4, 1, '올린 시각'); put(4, 2, at || '');
 
   // ----- 1. 조별 입력 -----
-  title(6, '1. 조별 입력 — 조 이름, 아침에 나눠준 장수, 마감에 걷은 장수, 현금 매출, 재료비');
+  title(6, '1. 조별 입력 — 한 조가 한 줄입니다. 아침 장수, 마감 장수, 현금 매출, 행사전 구매, 재료비를 가로로 채우세요');
   sh.getRange(m.boothHead, 1, 1, W).setValues([[
     '조', '아침 1,000원', '아침 5,000원', '아침 10,000원', '아침 지급 합계',
     '마감 1,000원', '마감 5,000원', '마감 10,000원', '마감 제출 합계',
-    '교환권 매출', '현금 매출', '매출 합계', '재료비', '재정 지급'
+    '교환권 매출', '현금 매출', '행사전 구매', '매출 합계', '재료비', '재정 지급'
   ]]).setFontWeight('bold').setBackground('#efece7').setWrap(true);
 
   for (var r = m.boothTop; r <= m.boothEnd; r++) {
     fx(r, 5, '=IF($A' + r + '="","",B' + r + '*1000+C' + r + '*5000+D' + r + '*10000)');
     fx(r, 9, '=IF($A' + r + '="","",F' + r + '*1000+G' + r + '*5000+H' + r + '*10000)');
     fx(r, 10, '=IF($A' + r + '="","",I' + r + '-E' + r + ')');
-    fx(r, 12, '=IF($A' + r + '="","",J' + r + '+K' + r + ')');
+    fx(r, 13, '=IF($A' + r + '="","",J' + r + '+K' + r + '+L' + r + ')');
   }
   put(m.boothSum, 1, '합계');
-  [5, 9, 10, 11, 12, 13].forEach(function (c) {
+  [5, 9, 10, 11, 12, 13, 14].forEach(function (c) {
     var L = colLetter(c);
     fx(m.boothSum, c, '=SUM(' + L + m.boothTop + ':' + L + m.boothEnd + ')');
   });
@@ -349,8 +352,8 @@ function buildCalcSheet(st, at) {
   put(m.preVoucher, 1, '행사 전에 판 교환권 (원) — 전도용 등');
 
   // ----- 3. 그 밖의 매출·비용 -----
-  title(m.presale - 1, '3. 그 밖의 매출과 비용');
-  put(m.presale, 1, '행사전 구매 매출 (원)');
+  title(m.presaleOther - 1, '3. 그 밖의 매출과 비용');
+  put(m.presaleOther, 1, '조 구분 없는 행사전 구매 (원) — 조별 몫은 위 1번 표에 적습니다');
   sh.getRange(m.commonHead, 1, 1, 3)
     .setValues([['공통 비용 항목', '금액 (원)', '재정 지급']])
     .setFontWeight('bold').setBackground('#efece7');
@@ -392,9 +395,11 @@ function buildCalcSheet(st, at) {
   [
     [m.pDesk, '교환소가 받은 돈', '=B' + m.bReceived],
     [m.pCash, '＋ 조별 현금 매출 합계', '=K' + m.boothSum],
-    [m.pPresale, '＋ 행사전 구매 매출', '=B' + m.presale],
-    [m.pRevenue, '＝ 매출 합계', '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresale],
-    [m.pCostBooth, '조별 재료비 합계', '=M' + m.boothSum],
+    [m.pPresaleBooth, '＋ 조별 행사전 구매 합계', '=L' + m.boothSum],
+    [m.pPresaleOther, '＋ 조 구분 없는 행사전 구매', '=B' + m.presaleOther],
+    [m.pRevenue, '＝ 매출 합계',
+      '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresaleBooth + '+B' + m.pPresaleOther],
+    [m.pCostBooth, '조별 재료비 합계', '=N' + m.boothSum],
     [m.pCostCommon, '＋ 공통 비용 합계', '=B' + m.commonSum],
     [m.pCost, '＝ 원가 합계', '=B' + m.pCostBooth + '+B' + m.pCostCommon],
     [m.pFinal, '＝ 최종 수익금 (매출 − 원가)', '=B' + m.pRevenue + '-B' + m.pCost]
@@ -409,7 +414,7 @@ function buildCalcSheet(st, at) {
   [
     [m.rAll, '원가 합계', '=B' + m.pCost],
     [m.rPaid, '− 재정에서 이미 지급한 몫',
-      '=SUMIF(N' + m.boothTop + ':N' + m.boothEnd + ',TRUE,M' + m.boothTop + ':M' + m.boothEnd +
+      '=SUMIF(O' + m.boothTop + ':O' + m.boothEnd + ',TRUE,N' + m.boothTop + ':N' + m.boothEnd +
       ')+SUMIF(C' + m.commonTop + ':C' + m.commonEnd + ',TRUE,B' + m.commonTop + ':B' + m.commonEnd + ')'],
     [m.rRefund, '＝ 돌려드릴 금액', '=B' + m.rAll + '-B' + m.rPaid]
   ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
@@ -437,11 +442,11 @@ function decorateCalcSheet(sh, m, W) {
   var inputs = [
     sh.getRange(m.boothTop, 1, CALC_BOOTHS, 4),      // 조 이름 + 아침 장수
     sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3),      // 마감 장수
-    sh.getRange(m.boothTop, 11, CALC_BOOTHS, 1),     // 현금 매출
-    sh.getRange(m.boothTop, 13, CALC_BOOTHS, 2),     // 재료비 + 재정 지급
+    sh.getRange(m.boothTop, 11, CALC_BOOTHS, 2),     // 현금 매출 + 행사전 구매
+    sh.getRange(m.boothTop, 14, CALC_BOOTHS, 2),     // 재료비 + 재정 지급
     sh.getRange(m.openTin, 2, 2, 3),                 // 통 장수
     sh.getRange(m.openCash, 2, 4, 1),                // 금고/이체/사전판매
-    sh.getRange(m.presale, 2, 1, 1),                 // 행사전 구매
+    sh.getRange(m.presaleOther, 2, 1, 1),            // 조 구분 없는 행사전 구매
     sh.getRange(m.commonTop, 1, CALC_COMMON, 3)      // 공통 비용
   ];
   inputs.forEach(function (rg) { rg.setBackground(IN).setBorder(true, true, true, true, true, true); });
@@ -449,11 +454,10 @@ function decorateCalcSheet(sh, m, W) {
   // 금액 칸 서식
   [
     sh.getRange(m.boothTop, 5, CALC_BOOTHS + 1, 1),
-    sh.getRange(m.boothTop, 9, CALC_BOOTHS + 1, 4),
-    sh.getRange(m.boothTop, 13, CALC_BOOTHS + 1, 1),
+    sh.getRange(m.boothTop, 9, CALC_BOOTHS + 1, 6),
     sh.getRange(m.openTin, 5, 2, 1),
     sh.getRange(m.openCash, 2, 4, 1),
-    sh.getRange(m.presale, 2, 1, 1),
+    sh.getRange(m.presaleOther, 2, 1, 1),
     sh.getRange(m.commonTop, 2, CALC_COMMON + 1, 1),
     sh.getRange(m.bOpenTin, 2, m.bUnused - m.bOpenTin + 1, 1),
     sh.getRange(m.pDesk, 2, m.pFinal - m.pDesk + 1, 1),
@@ -467,7 +471,7 @@ function decorateCalcSheet(sh, m, W) {
   sh.getRange(m.bUnusedPct, 2).setNumberFormat('0.0%');
 
   // 재정 지급은 체크 상자로
-  sh.getRange(m.boothTop, 14, CALC_BOOTHS, 1).insertCheckboxes();
+  sh.getRange(m.boothTop, 15, CALC_BOOTHS, 1).insertCheckboxes();
   sh.getRange(m.commonTop, 3, CALC_COMMON, 1).insertCheckboxes();
 
   // 차이 한 줄에만 색을 건다. 이 시트가 내놓는 가장 중요한 답이다.
@@ -491,28 +495,27 @@ function fillCalcSheet(sh, m, st) {
   var rows = [];
   for (var i = 0; i < CALC_BOOTHS; i++) {
     var b = booths[i];
-    if (!b) { rows.push(['', '', '', '', '', '', '', '', '', false]); continue; }
+    if (!b) { rows.push(['', '', '', '', '', '', '', '', '', '', false]); continue; }
     var fl = (st.floats || {})[b.id] || {};
     var fi = (st.finals || {})[b.id] || {};
     rows.push([
       b.name,
       num0(fl[1000]), num0(fl[5000]), num0(fl[10000]),
       num0(fi[1000]), num0(fi[5000]), num0(fi[10000]),
-      num0((st.cash || {})[b.id]), num0((st.costs || {})[b.id]),
-      !!(st.costPaid || {})[b.id]
+      num0((st.cash || {})[b.id]), num0((st.presales || {})[b.id]),
+      num0((st.costs || {})[b.id]), !!(st.costPaid || {})[b.id]
     ]);
   }
   // A~D
   sh.getRange(m.boothTop, 1, CALC_BOOTHS, 4).setValues(rows.map(function (r) { return r.slice(0, 4); }));
   // F~H
   sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3).setValues(rows.map(function (r) { return r.slice(4, 7); }));
-  // K
-  sh.getRange(m.boothTop, 11, CALC_BOOTHS, 1).setValues(rows.map(function (r) { return [r[7]]; }));
-  // M
-  sh.getRange(m.boothTop, 13, CALC_BOOTHS, 1).setValues(rows.map(function (r) { return [r[8]]; }));
-  // N (재정 지급)
-  sh.getRange(m.boothTop, 14, CALC_BOOTHS, 1)
-    .setValues(rows.map(function (r) { return [r[9]]; }));
+  // K~L (현금 매출, 행사전 구매)
+  sh.getRange(m.boothTop, 11, CALC_BOOTHS, 2).setValues(rows.map(function (r) { return r.slice(7, 9); }));
+  // N (재료비)
+  sh.getRange(m.boothTop, 14, CALC_BOOTHS, 1).setValues(rows.map(function (r) { return [r[9]]; }));
+  // O (재정 지급)
+  sh.getRange(m.boothTop, 15, CALC_BOOTHS, 1).setValues(rows.map(function (r) { return [r[10]]; }));
 
   var d = st.desk || {};
   var tin = function (src) {
@@ -525,7 +528,7 @@ function fillCalcSheet(sh, m, st) {
   sh.getRange(m.closeCash, 2).setValue(num0(d.closeCash));
   sh.getRange(m.transfer, 2).setValue(num0(d.transfer));
   sh.getRange(m.preVoucher, 2).setValue(num0(st.presaleVoucher));
-  sh.getRange(m.presale, 2).setValue(num0(st.presale));
+  sh.getRange(m.presaleOther, 2).setValue(num0(st.presale));
 
   var common = st.commonCosts || [];
   var cc = [];
