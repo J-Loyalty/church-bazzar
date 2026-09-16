@@ -79,10 +79,10 @@
     <p class="hint">「현금 매출」은 그 부스가 <strong>현금으로 받은 금액</strong>입니다. 교환권과 섞지 말고 따로 세어 입력하세요. 교환권 대사에는 잡히지 않고 최종 수익금에만 더해집니다.</p>
     <p class="hint">부스가 하루 중 교환소에서 1,000원권을 더 받아왔다면, 그만큼을 <strong>[초기 지급(플로트)] 탭의 수량에 더해야</strong> 그 조 매출이 맞습니다.</p>
 
-    <h3>사전 구매 매출</h3>
+    <h3>행사전 구매 매출</h3>
     <p class="hint">행사 전에 미리 판 물품의 매출 합계입니다. 교환권을 거치지 않으므로 대사에는 잡히지 않고 최종 수익금에만 더해집니다.</p>
     <div class="desk-grid">
-      <label>사전 구매 매출 (원)
+      <label>행사전 구매 매출 (원)
         <input type="number" id="presale" min="0" step="1">
       </label>
     </div>
@@ -177,7 +177,7 @@
         </tbody>
       </table>
     </div>
-    <p class="hint">※ 여기서 비교하는 것은 <strong>교환권으로 오간 몫만</strong>입니다. 현금 매출과 사전 구매는 아래 4번에서 더합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류, 재환전 기록 누락을 확인하세요.</p>
+    <p class="hint">※ 여기서 비교하는 것은 <strong>교환권으로 오간 몫만</strong>입니다. 현금 매출과 행사전 구매는 아래 4번에서 더합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류, 재환전 기록 누락을 확인하세요.</p>
 
     <h3>4. 최종 수익금</h3>
     <div class="table-scroll">
@@ -185,7 +185,7 @@
         <tbody>
           <tr><th>교환소 순 수령액</th><td id="report-final-desk">0원</td></tr>
           <tr><th>부스 현금 매출 합계</th><td id="report-final-cash">0원</td></tr>
-          <tr><th>사전 구매 매출</th><td id="report-final-presale">0원</td></tr>
+          <tr><th>행사전 구매 매출</th><td id="report-final-presale">0원</td></tr>
           <tr><th><strong>최종 수익금</strong></th><td><strong id="report-final-total">0원</strong></td></tr>
         </tbody>
       </table>
