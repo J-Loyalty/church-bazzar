@@ -33,7 +33,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **서버는 항상 저장소 뿌리에서 띄운다**: `python serve.py 8124`. 정산 도구는 `http://localhost:8124/voucher-settlement/`.
 - **하위 폴더를 뿌리로 삼지 말 것.** `--directory voucher-settlement`로 띄우면 정산 도구가 참조하는 `../assets/tokens.css`가 서버 뿌리 밖이라 **404**가 나고 화면이 스타일 없이 뜬다. 같은 이유로 `.claude/launch.json`에는 뿌리를 서비스하는 `site` 설정 하나만 둔다.
 - `file://`로 열면 브라우저가 `fetch()`를 CORS로 막아 문서가 로드되지 않는다. 정산 도구는 `fetch()`를 쓰지 않아 `file://`로도 열리지만, 확인은 로컬 서버로 하는 것을 기본으로 한다.
-- 별도의 빌드/린트/테스트 명령은 없다 (정적 파일뿐). 코드 변경 후에는 브라우저에서 직접 동작을 확인한다.
+- 별도의 빌드/린트 명령은 없다 (정적 파일뿐). 코드 변경 후에는 브라우저에서 직접 동작을 확인한다.
+- **정산 계산 시트만은 확인 스크립트가 있다**: `node tools/check-calc-sheet.js`. 구글 시트 API를 흉내 내어 `assets/answers.gs`를 실행하고, 만들어진 시트 함수를 직접 계산해 `voucher-settlement/app.js`의 `compute()`와 같은 값이 나오는지 대조한다. 라벨이 수식으로 읽힐 모양인지도 함께 잡는다. **두 계산 중 한쪽만 고치면 여기서 걸린다.**
 - 공개 사이트는 GitHub Pages(`main` 브랜치)에서 자동 배포된다 — https://j-loyalty.github.io/church-bazzar/ . 푸시 후 약 1분이면 반영된다.
 
 ## voucher-settlement 아키텍처
@@ -54,6 +55,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **구글 시트 연동**: [저장·백업] 탭에서 `assets/config.js`의 Apps Script 주소로 `saveSettlement`/`loadSettlement`를 보낸다. 암호는 `assets/answers.gs` 쪽에만 있다. 탭 세 개를 쓰며 **보낼 때마다 통째로 덮어쓴다**.
   - 「정산」 — 사람이 읽는 표. 값만 찍혀 있어 고쳐도 아무것도 따라 변하지 않는다
   - 「정산_계산」 — **시트 함수가 들어 있는 계산기.** 이 사이트가 없어져도 값만 넣으면 결과가 나오게 하려는 것이라, `compute()`의 식을 그대로 시트 함수로 옮겨 적었다. **`app.js`의 계산을 고치면 `buildCalcSheet()`의 식도 함께 고쳐야 한다.** 줄 위치는 `calcMap()` 한 곳에만 있으므로 표를 손대면 거기만 고친다. 입력 칸은 노란 배경, 나머지는 함수다
+  - **시트 라벨을 `=`·`+`·`-`·`@`로 시작하지 말 것.** 시트가 수식으로 읽어 `#ERROR!`가 뜬다. 계산 과정을 보여주는 라벨에는 전각 `＝`·`＋`와 `−`(U+2212)를 쓴다 — 보이기는 같고 수식으로 읽히지 않는다. 조 이름처럼 사람이 적는 칸은 `setNumberFormat('@')`으로 글자 서식을 걸어 둔다
   - 「정산_원본」 — 다시 불러오기 위한 JSON 한 칸
   - `onOpen()`이 스프레드시트에 「바자회 정산」 메뉴를 달아, 사이트 없이도 빈 계산 시트를 만들 수 있다
 - **제약**: `localStorage`는 브라우저/기기별로 격리되어 있어 여러 기기의 입력이 자동으로 합쳐지지 않는다. 시트 전송은 백업·공유 수단이지 동시 편집이 아니다 — 나중에 보낸 쪽이 덮어쓴다.

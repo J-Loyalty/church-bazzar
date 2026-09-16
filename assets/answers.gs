@@ -172,6 +172,7 @@ function saveSettlement(body) {
   sh.getRange(1, 1, padded.length, width).setValues(padded);
   sh.getRange(1, 1, 1, width).setFontWeight('bold');
   sh.getRange(4, 1, 1, width).setFontWeight('bold');
+  sh.getRange(1, 1, padded.length, 1).setNumberFormat('@');
   sh.setFrozenRows(1);
 
   // --- 다시 불러올 원본 ---
@@ -363,13 +364,13 @@ function buildCalcSheet(st, at) {
     [m.bOpenTin, '아침 통', '=E' + m.openTin],
     [m.bCloseTin, '− 저녁 통', '=E' + m.closeTin],
     [m.bFloat, '− 조별 지급 합계', '=E' + m.boothSum],
-    [m.bPre, '+ 행사 전에 판 교환권', '=B' + m.preVoucher],
-    [m.bSold, '= 손님에게 팔려 나간 교환권',
+    [m.bPre, '＋ 행사 전에 판 교환권', '=B' + m.preVoucher],
+    [m.bSold, '＝ 손님에게 팔려 나간 교환권',
       '=B' + m.bOpenTin + '-B' + m.bCloseTin + '-B' + m.bFloat + '+B' + m.bPre],
     [m.bCashDelta, '저녁 금고 − 아침 금고', '=B' + m.closeCash + '-B' + m.openCash],
-    [m.bTransfer, '+ 계좌이체', '=B' + m.transfer],
-    [m.bPre2, '+ 행사 전에 판 교환권 대금', '=B' + m.preVoucher],
-    [m.bReceived, '= 그 값으로 받은 돈',
+    [m.bTransfer, '＋ 계좌이체', '=B' + m.transfer],
+    [m.bPre2, '＋ 행사 전에 판 교환권 대금', '=B' + m.preVoucher],
+    [m.bReceived, '＝ 그 값으로 받은 돈',
       '=B' + m.bCashDelta + '+B' + m.bTransfer + '+B' + m.bPre2],
     [m.bDiff, '차이 (0이어야 합니다)', '=B' + m.bReceived + '-B' + m.bSold],
     [m.bUnused, '미사용 교환권 (손님이 쓰지 않고 가져간 몫)',
@@ -390,13 +391,13 @@ function buildCalcSheet(st, at) {
   title(m.profitTop, '5. 최종 수익금 — 매출에서 원가를 뺍니다');
   [
     [m.pDesk, '교환소가 받은 돈', '=B' + m.bReceived],
-    [m.pCash, '+ 조별 현금 매출 합계', '=K' + m.boothSum],
-    [m.pPresale, '+ 행사전 구매 매출', '=B' + m.presale],
-    [m.pRevenue, '= 매출 합계', '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresale],
+    [m.pCash, '＋ 조별 현금 매출 합계', '=K' + m.boothSum],
+    [m.pPresale, '＋ 행사전 구매 매출', '=B' + m.presale],
+    [m.pRevenue, '＝ 매출 합계', '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresale],
     [m.pCostBooth, '조별 재료비 합계', '=M' + m.boothSum],
-    [m.pCostCommon, '+ 공통 비용 합계', '=B' + m.commonSum],
-    [m.pCost, '= 원가 합계', '=B' + m.pCostBooth + '+B' + m.pCostCommon],
-    [m.pFinal, '= 최종 수익금 (매출 − 원가)', '=B' + m.pRevenue + '-B' + m.pCost]
+    [m.pCostCommon, '＋ 공통 비용 합계', '=B' + m.commonSum],
+    [m.pCost, '＝ 원가 합계', '=B' + m.pCostBooth + '+B' + m.pCostCommon],
+    [m.pFinal, '＝ 최종 수익금 (매출 − 원가)', '=B' + m.pRevenue + '-B' + m.pCost]
   ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
   [m.pRevenue, m.pCost, m.pFinal].forEach(function (row) {
     sh.getRange(row, 1, 1, 2).setFontWeight('bold');
@@ -410,7 +411,7 @@ function buildCalcSheet(st, at) {
     [m.rPaid, '− 재정에서 이미 지급한 몫',
       '=SUMIF(N' + m.boothTop + ':N' + m.boothEnd + ',TRUE,M' + m.boothTop + ':M' + m.boothEnd +
       ')+SUMIF(C' + m.commonTop + ':C' + m.commonEnd + ',TRUE,B' + m.commonTop + ':B' + m.commonEnd + ')'],
-    [m.rRefund, '= 돌려드릴 금액', '=B' + m.rAll + '-B' + m.rPaid]
+    [m.rRefund, '＝ 돌려드릴 금액', '=B' + m.rAll + '-B' + m.rPaid]
   ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
   sh.getRange(m.rRefund, 1, 1, 2).setFontWeight('bold');
   sh.getRange(m.rRefund + 1, 1, 1, W).merge()
@@ -458,6 +459,8 @@ function decorateCalcSheet(sh, m, W) {
     sh.getRange(m.pDesk, 2, m.pFinal - m.pDesk + 1, 1),
     sh.getRange(m.rAll, 2, 3, 1)
   ].forEach(function (rg) { rg.setNumberFormat(money); });
+  sh.getRange(m.boothTop, 1, CALC_BOOTHS, 1).setNumberFormat('@');
+  sh.getRange(m.commonTop, 1, CALC_COMMON, 1).setNumberFormat('@');
   sh.getRange(m.boothTop, 2, CALC_BOOTHS, 3).setNumberFormat('0');
   sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3).setNumberFormat('0');
   sh.getRange(m.openTin, 2, 2, 3).setNumberFormat('0');
