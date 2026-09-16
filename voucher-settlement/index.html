@@ -231,7 +231,18 @@
 <section class="tab-panel" id="panel-data">
 
   <h2>구글 시트에 보내기</h2>
-  <p class="hint">입력한 내용을 교회 구글 시트의 <strong>「정산」 탭</strong>에 올립니다. 이 도구는 값을 이 브라우저에만 담아두기 때문에, 시트에 올려두어야 다른 사람도 보고 다음 해에도 남습니다.</p>
+  <p class="hint">입력한 내용을 교회 구글 시트에 올립니다. 이 도구는 값을 이 브라우저에만 담아두기 때문에, 시트에 올려두어야 다른 사람도 보고 다음 해에도 남습니다.</p>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead><tr><th>시트 탭</th><th>무엇이 들어가나</th></tr></thead>
+      <tbody>
+        <tr><td>정산</td><td>결과를 찍어 둔 표. 보고·보관용입니다</td></tr>
+        <tr><td>정산_계산</td><td><strong>시트 함수가 들어 있는 계산기.</strong> 노란 칸에 값을 넣으면 시트 안에서 다시 계산됩니다</td></tr>
+        <tr><td>정산_원본</td><td>이 화면으로 다시 불러오기 위한 기록. 지우지 마세요</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="banner banner-blue"><strong>이 도구를 못 쓰게 되어도 「정산_계산」 탭 하나면 정산할 수 있습니다.</strong> 이 화면의 계산식을 그대로 시트 함수로 옮겨 두었습니다. 다만 거기에 직접 입력하실 거면 <strong>탭을 복사해서</strong> 쓰세요 — 여기서 보내면 그 탭도 새로 만들어집니다.</div>
 
   <div class="card" id="sheet-box">
     <div class="field-row">
@@ -245,7 +256,7 @@
       <button type="button" id="btn-sheet-load" class="btn-secondary">시트에서 불러오기</button>
     </div>
     <p class="status" id="sheet-msg"></p>
-    <p class="hint">보내면 시트의 「정산」 탭이 <strong>지금 내용으로 덮어써집니다.</strong> 불러오면 반대로 이 화면이 시트 내용으로 덮어써집니다.</p>
+    <p class="hint">보내면 위 <strong>세 탭이 모두 지금 내용으로 덮어써집니다.</strong> 불러오면 반대로 이 화면이 시트 내용으로 덮어써집니다.</p>
   </div>
 
   <h2>파일로 백업</h2>
