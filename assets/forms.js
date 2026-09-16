@@ -82,7 +82,7 @@
     var last = items[items.length - 1];
     if (last && (last.name || last.price)) {
       items.push({ name: "", price: "" });
-      redraw(true);
+      CBZ.afterTyping(function () { redraw(true); });
     }
   }
 
@@ -90,7 +90,7 @@
     var last = booths[booths.length - 1];
     if (last && last.name) {
       booths.push(blankBooth());
-      redraw(true);
+      CBZ.afterTyping(function () { redraw(true); });
     }
   }
 

@@ -53,8 +53,33 @@
     }
   }
 
+  // 한글 한 글자는 여러 번의 input 이벤트를 거쳐 만들어진다 (ㅈ -> 조). 그 도중에
+  // 입력칸이 든 화면을 다시 그리면 조합이 끊겨 "1ㅈㅗ" 처럼 깨진 채로 남는다.
+  // 그래서 다시 그리기를 조합이 끝날 때까지 미룬다. 조합 중이 아니면 그대로 실행.
+  var composing = false;
+  var pending = null;
+
+  document.addEventListener("compositionstart", function () { composing = true; });
+  document.addEventListener("compositionend", function () {
+    composing = false;
+    // 브라우저마다 compositionend 와 마지막 input 의 순서가 달라, 한 박자 뒤에
+    // 실행해야 마지막 글자가 상태에 들어간 뒤에 그려진다.
+    setTimeout(function () {
+      if (composing || !pending) return;
+      var fn = pending;
+      pending = null;
+      fn();
+    }, 0);
+  });
+
+  function afterTyping(fn) {
+    if (composing) { pending = fn; return; }
+    fn();
+  }
+
   global.CBZ = {
     esc: esc,
+    afterTyping: afterTyping,
     load: load,
     save: save,
     loadText: loadText,

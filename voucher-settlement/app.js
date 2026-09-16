@@ -271,8 +271,20 @@
       var t = String(it.team || "").trim();
       var first = t && !seen[t];
       if (t) seen[t] = true;
-      var real = i < state.items.length;
+      return itemRow(it, i, first, i < state.items.length);
+    }).join("");
 
+    if (keep) {
+      var back = box.querySelector('[data-ii="' + keep.i + '"][data-fld="' + keep.f + '"]');
+      if (back) {
+        back.focus();
+        if (back.type === "text" && keep.start != null) back.setSelectionRange(keep.start, keep.start);
+      }
+    }
+  }
+
+  function itemRow(it, i, first, real) {
+      var t = String(it.team || "").trim();
       var cells =
         '<td><input type="text" placeholder="예: 4조" aria-label="' + (i + 1) +
           '번째 줄 조" data-ii="' + i + '" data-fld="team" value="' + esc(it.team) + '"></td>' +
@@ -297,17 +309,21 @@
         ? '<button class="remove-btn" data-idel="' + i + '">지우기</button>'
         : "") + "</td>";
       return "<tr>" + cells + "</tr>";
-    }).join("");
-
-    if (keep) {
-      var back = box.querySelector('[data-ii="' + keep.i + '"][data-fld="' + keep.f + '"]');
-      if (back) {
-        back.focus();
-        if (back.type === "text" && keep.start != null) back.setSelectionRange(keep.start, keep.start);
-      }
-    }
   }
 
+  // 마지막 줄이 채워지면 빈 줄 하나를 **덧붙인다**. 표 전체를 다시 그리지 않으므로
+  // 한글을 치는 중에도 입력칸이 살아 있다.
+  function growItems() {
+    var box = document.getElementById("item-body");
+    var rows = box.querySelectorAll("tr");
+    if (rows.length !== state.items.length) return;   // 이미 빈 줄이 있다
+    box.insertAdjacentHTML("beforeend",
+      itemRow({ team: "", name: "", price: 0 }, state.items.length, false, false));
+  }
+
+  // 조·항목은 한글이라 한 글자가 여러 번의 input 을 거친다. 그 도중에 표를 다시
+  // 그리면 조합이 끊겨 "1ㅈㅗ" 처럼 깨지므로, 치는 동안에는 값만 담아 두고 칸을
+  // 떠날 때(change) 한 번 정리한다. 빈 줄 덧붙이기는 기존 줄을 건드리지 않아 안전.
   document.getElementById("item-body").addEventListener("input", function (e) {
     var el = e.target;
     if (el.dataset.team !== undefined) {
@@ -324,7 +340,12 @@
     if (el.dataset.fld === "price") it.price = num(el.value);
     else it[el.dataset.fld] = el.value;
     saveState();
-    redrawTeams();
+    growItems();
+  });
+
+  document.getElementById("item-body").addEventListener("change", function (e) {
+    if (e.target.dataset.ii === undefined) return;
+    CBZ.afterTyping(redrawTeams);
   });
 
   document.getElementById("item-body").addEventListener("click", function (e) {
@@ -338,6 +359,13 @@
     dropOrphans();
     saveState();
     redrawTeams();
+  });
+
+  // 표를 떠나면(다른 칸으로 가면) 조 목록이 확정되므로 그때 한 번 정리한다.
+  document.getElementById("item-body").addEventListener("focusout", function (e) {
+    if (!document.getElementById("item-body").contains(e.relatedTarget)) {
+      CBZ.afterTyping(redrawTeams);
+    }
   });
 
   // 어느 줄에도 없는 조 이름이 남아 있으면 합계에 유령이 낀다.
@@ -512,8 +540,26 @@
     else if (el.dataset.cf === "paid") state.commonCosts[i].paid = el.checked;
     else state.commonCosts[i].amount = num(el.value);
     saveState();
-    renderCommon();
+    // 항목 이름은 한글이라 치는 중에 다시 그리면 조합이 깨진다 (위 품목 표와 같은 이유).
+    if (el.dataset.cf === "name") growCommon();
+    else renderCommon();
   });
+
+  document.getElementById("common-costs").addEventListener("change", function (e) {
+    if (e.target.dataset.cf === "name") CBZ.afterTyping(renderCommon);
+  });
+
+  function growCommon() {
+    var box = document.getElementById("common-costs");
+    if (box.querySelectorAll(".cost-row").length !== state.commonCosts.length) return;
+    renderCommonSum();
+    CBZ.afterTyping(renderCommon);
+  }
+
+  function renderCommonSum() {
+    document.getElementById("common-sum").textContent =
+      money(state.commonCosts.reduce(function (a, c) { return a + num(c.amount); }, 0));
+  }
 
   document.getElementById("common-costs").addEventListener("click", function (e) {
     var btn = e.target.closest("[data-cdel]");

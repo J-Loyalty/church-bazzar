@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `design/` — 화면 디자인의 근거가 되는 명세. [design/DESIGN.md](design/DESIGN.md)가 본문(ElevenLabs 분석: 색·타이포·간격·컴포넌트 규칙)이고 [design/README.md](design/README.md)는 출처 링크다. **이 명세는 참고 자료이지 이 저장소의 규칙이 아니다** — 아래 "문서 작성 원칙" 5·6번(글자 크기, 색 대비, 워드랩)과 부딪히면 5·6번이 이긴다. 실제로 어긋난 곳(본문 16px→17px, `muted` 색 대비 미달, 입력칸 테두리 대비 미달)은 `assets/tokens.css` 첫머리 주석에 이유와 함께 적어두었다.
 - `assets/` — **모든 CSS와 JS는 여기 있다.** HTML 파일 안에 `<style>`이나 `<script>`를 직접 쓰지 않는다.
   - `tokens.css` — 모든 화면이 함께 쓰는 디자인 토큰(색·글꼴·모서리)과 **공용 컴포넌트**. 상단 바(`.topbar`), 카드(`.card`), 제목(`.page-head`), 입력칸(`input`·`select`·`textarea`), 포커스 테두리, 버튼, 표(`.data-table`), 배너(`.banner`)가 여기 있다. 새 화면을 만들 때 이것들을 페이지 안에 다시 정의하지 말고 그대로 쓴다 — 페이지마다 조금씩 다르게 베껴 쓰면 같은 버튼이 화면마다 달라진다. 본문 폭은 `--page-width`로 페이지마다 정한다.
-  - `shared.js` — 여러 화면이 함께 쓰는 잔 도구 (`CBZ.esc`, `CBZ.load`/`save`, `CBZ.loadText`/`saveText`). `localStorage`는 사생활 보호 모드에서 막힐 수 있어 읽기·쓰기를 모두 이 함수로 감싼다. **다른 모든 스크립트보다 먼저 읽어야 한다** — `markdown.js`가 `CBZ.esc`를 쓴다.
+  - `shared.js` — 여러 화면이 함께 쓰는 잔 도구 (`CBZ.esc`, `CBZ.load`/`save`, `CBZ.loadText`/`saveText`, `CBZ.afterTyping`). `localStorage`는 사생활 보호 모드에서 막힐 수 있어 읽기·쓰기를 모두 이 함수로 감싼다. **다른 모든 스크립트보다 먼저 읽어야 한다** — `markdown.js`가 `CBZ.esc`를 쓴다.
   - `index.css` / `doc.css`·`doc.js` / `print.css`·`print.js` / `answers.css`·`answers.js` / `forms.css`·`forms.js` — 각 화면에만 해당하는 것. 두 화면 이상이 같은 것을 쓰게 되면 `tokens.css`나 `shared.js`로 옮긴다.
 - `assets/nav.js` — 읽는 순서(`NAV`)와 평탄화된 `SEQUENCE`. `doc.html`(사이드바·이전/다음)과 `print.html`(차례·본문 순서)이 함께 쓴다.
 - `assets/markdown.js` — 최소 마크다운 렌더러(`MD.render`, `MD.escapeHtml`). `doc.html`과 `print.html`이 함께 쓴다. 저장소 문서가 실제로 쓰는 문법만 처리한다. **코드 블록(```)은 지원하지 않으므로** 도식은 표로 작성할 것. **들여쓴 하위 목록도 지원하지 않는다** — `1.` 아래에 `   - `를 넣으면 줄바꿈 없이 한 문단으로 뭉쳐 나온다. 항목이 여럿이면 표로 만들거나, 소제목을 두고 한 단계 목록으로 편다.
@@ -92,4 +92,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - **내용을 탭 뒤에 숨기지 않는다.** 탭은 목차처럼 보이지만 실제로는 필터라, 첫 칸만 보고 다 봤다고 생각하게 만든다. 허브의 문서 목록과 `doc.html`의 본문에서 탭을 없앤 이유가 이것이다. 한 화면에 여러 작업이 들어가는 도구(`voucher-settlement`)처럼 **단계가 실제로 나뉘는** 경우에만 탭을 쓴다.
    - 허브가 아닌 모든 화면은 맨 위에 같은 상단 바(`.topbar`)를 두어 **돌아가는 길이 늘 같은 자리**에 있게 한다.
    - 한 화면의 **먹색 알약은 하나**다. 그 화면에서 가장 먼저 눌러야 할 것 하나에만 쓰고, 나머지는 테두리만 있는 카드나 버튼으로 둔다.
+   - **한글을 치는 중에 입력칸이 든 영역을 다시 그리지 않는다.** 한 글자가 여러 번의 `input` 이벤트로 만들어지므로(ㅈ → 조), 그 사이에 `innerHTML`로 다시 그리면 입력칸이 새 것으로 바뀌어 조합이 끊기고 **「1ㅈㅗ」처럼 깨진 채로 남는다.** 포커스와 커서를 되돌려 놓아도 소용없다 — 조합 상태는 그 DOM 노드에 붙어 있다.
+     - 글자 칸은 치는 동안 **값만 상태에 담아 두고**, 칸을 떠날 때(`change`)나 `CBZ.afterTyping`으로 조합이 끝난 뒤에 한 번 정리한다.
+     - 「마지막 줄을 채우면 다음 줄이 생긴다」는 **덧붙이기(`insertAdjacentHTML`)로** 한다. 기존 줄을 건드리지 않으므로 조합 중에도 안전하다.
+     - 숫자 칸(`type="number"`)은 조합이 없으므로 그때그때 다시 그려도 된다.
+     - `CBZ.afterTyping(fn)`은 조합 중이면 `compositionend` 뒤로 미루고, 아니면 바로 실행한다. 이 규칙이 걸리는 곳: `voucher-settlement`의 품목 표·공통 비용, `assets/forms.js`의 조 이름·품목명.
    - 누를 수 있는 것은 높이 44px 이상으로 만든다. 입력칸 테두리는 `--color-field-border`를 써서 배경과 3:1 이상 차이나게 하고(옅은 `--color-hairline`은 보이지 않는다), 키보드로 이동했을 때 어디에 있는지 보이도록 포커스 테두리를 지우지 않는다.
