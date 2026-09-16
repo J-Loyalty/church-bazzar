@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>바자회 교환권 정산 도구</title>
+<title>교환권 정산 도구</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="style.css">
+<script src="../assets/shared.js"></script>
+<script src="../assets/config.js"></script>
 </head>
 <body>
+
 <nav class="topbar">
   <a class="home" href="../index.html">&larr; 준비 허브</a>
   <span class="where">교환권 정산 도구</span>
@@ -18,197 +21,210 @@
 
 <header class="app-header">
   <h1>교환권 정산 도구</h1>
-  <p class="app-sub">입력한 내용은 이 브라우저에만 저장됩니다. 다른 기기에서는 보이지 않으니, 정기적으로 <strong>데이터 관리</strong> 탭에서 백업(JSON 내보내기)을 받아두세요.</p>
+  <p class="app-sub">아침에 나눠준 것과 저녁에 걷은 것을 적으면, <strong>얼마를 벌었는지</strong>와 <strong>숫자가 맞는지</strong>를 계산합니다. 회계를 해본 적 없어도 순서대로 따라가면 됩니다. 처음이시면 <a href="../doc.html?src=docs/정산_절차.md">정산 절차</a>를 먼저 보세요.</p>
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="booths">부스 관리</button>
-  <button class="tab-btn" data-tab="floats">초기 지급(플로트)</button>
-  <button class="tab-btn" data-tab="finals">마감 정산 제출</button>
-  <button class="tab-btn" data-tab="desk">교환소</button>
-  <button class="tab-btn" data-tab="report">대사 리포트</button>
-  <button class="tab-btn" data-tab="data">데이터 관리</button>
+  <button class="tab-btn active" data-tab="open"><span class="step-no">1</span>개장 전</button>
+  <button class="tab-btn" data-tab="close"><span class="step-no">2</span>마감</button>
+  <button class="tab-btn" data-tab="report"><span class="step-no">3</span>결과</button>
+  <button class="tab-btn" data-tab="data"><span class="step-no">4</span>저장·백업</button>
 </nav>
 
 <main>
-  <!-- 부스 관리 -->
-  <section class="tab-panel active" id="panel-booths">
-    <h2>판매 부스 목록</h2>
-    <form id="booth-form" class="inline-form">
-      <input type="text" id="booth-name" placeholder="부스 이름 (예: 의류1)" required>
-      <select id="booth-category">
-        <option value="의류">의류</option>
-        <option value="생활용품">생활용품</option>
-        <option value="도서">도서</option>
-        <option value="먹거리">먹거리</option>
-        <option value="수공예품">수공예품</option>
-        <option value="기타">기타</option>
-      </select>
-      <button type="submit">부스 추가</button>
-    </form>
-    <div class="table-scroll">
-      <table class="data-table">
-        <thead><tr><th>부스명</th><th>분류</th><th></th></tr></thead>
-        <tbody id="booth-list"></tbody>
-      </table>
-    </div>
-  </section>
 
-  <!-- 초기 지급 -->
-  <section class="tab-panel" id="panel-floats">
-    <h2>부스별 초기 지급 교환권 (잔돈용 플로트)</h2>
-    <p class="hint">각 부스에 나눠준 잔돈용 교환권 수량을 권종별로 입력하세요. 조마다 수량이 다르고 5,000원권이 섞일 수 있습니다. 개장 전 초기 지급에 더해, <strong>교환소가 순회하며 채워준 몫도 여기에 더합니다.</strong></p>
-    <div class="table-scroll">
-      <table class="data-table" id="float-table">
-        <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
-        <tbody id="float-body"></tbody>
-      </table>
-    </div>
-  </section>
+<!-- ================= 1. 개장 전 ================= -->
+<section class="tab-panel active" id="panel-open">
+  <p class="panel-lead">문 열기 전에 적는 것입니다. <strong>여기를 안 적으면 마감 때 계산이 안 됩니다.</strong></p>
 
-  <!-- 마감 정산 제출 -->
-  <section class="tab-panel" id="panel-finals">
-    <h2>부스별 마감 시 보유 교환권 (제출 내역)</h2>
-    <p class="hint">판매 종료 후 각 부스가 실제로 보유하고 있는(=받은) 교환권 수량을 권종별로 집계해 입력하세요. 초기 지급분도 포함된 수량입니다.</p>
-    <div class="table-scroll">
-      <table class="data-table" id="final-table">
-        <thead><tr><th>부스</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th></tr></thead>
-        <tbody id="final-body"></tbody>
-      </table>
-    </div>
-    <p class="hint">「현금 매출」은 그 부스가 <strong>현금으로 받은 금액</strong>입니다. 교환권과 섞지 말고 따로 세어 입력하세요. 교환권 대사에는 잡히지 않고 최종 수익금에만 더해집니다.</p>
-    <p class="hint">부스가 하루 중 교환소에서 1,000원권을 더 받아왔다면, 그만큼을 <strong>[초기 지급(플로트)] 탭의 수량에 더해야</strong> 그 조 매출이 맞습니다.</p>
+  <h2>1-1. 조 등록</h2>
+  <p class="hint">정산은 부스가 아니라 <strong>조 단위</strong>입니다. 7·8·11조처럼 한 부스를 나눠 쓰는 조도 각각 따로 등록하세요.</p>
+  <form id="booth-form" class="inline-form">
+    <input type="text" id="booth-name" placeholder="조 이름 (예: 1조 국수)" required>
+    <button type="submit">조 추가</button>
+  </form>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead><tr><th>조</th><th class="col-btn"></th></tr></thead>
+      <tbody id="booth-list"></tbody>
+    </table>
+  </div>
 
-    <h3>행사전 구매 매출</h3>
-    <p class="hint">행사 전에 미리 판 물품의 매출 합계입니다. 교환권을 거치지 않으므로 대사에는 잡히지 않고 최종 수익금에만 더해집니다.</p>
-    <div class="desk-grid">
-      <label>행사전 구매 매출 (원)
-        <input type="number" id="presale" min="0" step="1">
+  <h2>1-2. 조별로 나눠준 잔돈 교환권</h2>
+  <p class="hint">아침에 각 조에 나눠준 <strong>잔돈용 교환권</strong>의 장수입니다. 조마다 수량이 다르고 5,000원권이 섞일 수 있습니다. 하루 중에는 채워주지 않으므로 <strong>여기 적은 것이 그 조가 받은 전부</strong>입니다.</p>
+  <div class="table-scroll">
+    <table class="data-table" id="float-table">
+      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>합계</th></tr></thead>
+      <tbody id="float-body"></tbody>
+    </table>
+  </div>
+  <p class="row-total-line">조별 지급 합계 <strong id="float-sum">0원</strong></p>
+
+  <h2>1-3. 교환소 — 아침에 센 것</h2>
+  <p class="hint">교환소가 아침에 가진 <strong>교환권 통</strong>과 <strong>현금 금고</strong>를 세어 적습니다. 저녁에 다시 세서 그 차이로 하루치를 계산하므로, <strong>이 두 숫자가 정산의 출발점</strong>입니다.</p>
+  <div class="count-box">
+    <h3>교환권 통 (장수)</h3>
+    <div class="denom-grid" id="open-tin"></div>
+    <p class="box-total">통에 든 금액 <strong id="open-tin-total">0원</strong></p>
+  </div>
+  <div class="count-box">
+    <h3>현금 금고</h3>
+    <label class="field-inline">금액 (원)
+      <input type="number" id="open-cash" min="0" step="1" inputmode="numeric">
+    </label>
+  </div>
+
+  <div class="panel-foot">
+    <button type="button" class="btn-secondary" data-goto="close">마감 입력으로 &rarr;</button>
+  </div>
+</section>
+
+<!-- ================= 2. 마감 ================= -->
+<section class="tab-panel" id="panel-close">
+  <p class="panel-lead">판매가 끝난 뒤 적는 것입니다.</p>
+
+  <h2>2-1. 조별로 걷은 것</h2>
+  <p class="hint">각 조가 마감에 제출한 <strong>교환권 장수</strong>와, 따로 세어 낸 <strong>현금 매출</strong>입니다. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
+  <div class="table-scroll">
+    <table class="data-table" id="final-table">
+      <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th></tr></thead>
+      <tbody id="final-body"></tbody>
+    </table>
+  </div>
+
+  <h2>2-2. 교환소 — 저녁에 센 것</h2>
+  <p class="hint">아침과 같은 자리를 다시 셉니다. <strong>재환전으로 돌려받은 교환권은 판매용 통에 도로 넣은 상태</strong>여야 합니다 — 그래야 통 차이에 저절로 반영됩니다.</p>
+  <div class="count-box">
+    <h3>교환권 통 (남은 장수)</h3>
+    <div class="denom-grid" id="close-tin"></div>
+    <p class="box-total">남은 금액 <strong id="close-tin-total">0원</strong></p>
+  </div>
+  <div class="count-box">
+    <h3>현금 금고와 계좌이체</h3>
+    <div class="field-row">
+      <label class="field-inline">저녁 금고 (원)
+        <input type="number" id="close-cash" min="0" step="1" inputmode="numeric">
+      </label>
+      <label class="field-inline">계좌이체 합계 (원)
+        <input type="number" id="transfer" min="0" step="1" inputmode="numeric">
+        <span class="field-help">패드·휴대폰에서 확인한 입금 합계</span>
       </label>
     </div>
-  </section>
+  </div>
 
-  <!-- 교환소 -->
-  <section class="tab-panel" id="panel-desk">
-    <h2>교환소 판매 내역</h2>
-    <p class="hint">하루 동안 교환소에서 나간 교환권과 들어온 돈을 입력합니다. 건건이 적지 않고 <strong>아침·저녁에 통과 금고를 센 차이</strong>를 넣습니다.</p>
-    <ul class="hint">
-      <li><strong>현금 판매액</strong> = 저녁 금고 − 아침 금고</li>
-      <li><strong>계좌이체 판매액</strong> = 패드·휴대폰의 입금 합계</li>
-      <li><strong>발행(지급) 수량</strong> = 아침 통 − 저녁 통 (권종별). 부스에 나눠준 몫도 여기 포함됩니다</li>
-    </ul>
-    <div class="desk-grid">
-      <label>현금 판매액 (원)
-        <input type="number" id="desk-cash" min="0" step="1">
+  <h2>2-3. 행사전 구매 매출</h2>
+  <p class="hint">행사 전에 미리 판 몫입니다. 교환권을 거치지 않으므로 대사에는 잡히지 않고 <strong>최종 수익금에만 더해집니다</strong>.</p>
+  <label class="field-inline">금액 (원)
+    <input type="number" id="presale" min="0" step="1" inputmode="numeric">
+  </label>
+
+  <div class="panel-foot">
+    <button type="button" data-goto="report">결과 보기 &rarr;</button>
+  </div>
+</section>
+
+<!-- ================= 3. 결과 ================= -->
+<section class="tab-panel" id="panel-report">
+
+  <div class="verdict" id="verdict">
+    <p class="verdict-label">교환소 대사</p>
+    <p class="verdict-value" id="verdict-value">—</p>
+    <p class="verdict-note" id="verdict-note"></p>
+  </div>
+
+  <h2>나간 교환권과 받은 돈</h2>
+  <p class="hint">교환권은 돈을 받아야만 나갑니다. 그래서 이 두 값은 <strong>같아야</strong> 합니다.</p>
+  <div class="table-scroll">
+    <table class="data-table balance">
+      <tbody>
+        <tr><th>아침 통</th><td id="r-open-tin">0원</td></tr>
+        <tr><th>− 저녁 통</th><td id="r-close-tin">0원</td></tr>
+        <tr><th>− 조별 지급 합계</th><td id="r-float">0원</td></tr>
+        <tr class="row-sum"><th>= 손님에게 팔려 나간 교환권</th><td id="r-sold">0원</td></tr>
+        <tr><th>저녁 금고 − 아침 금고</th><td id="r-cash-delta">0원</td></tr>
+        <tr><th>+ 계좌이체</th><td id="r-transfer">0원</td></tr>
+        <tr class="row-sum"><th>= 그 값으로 받은 돈</th><td id="r-received">0원</td></tr>
+        <tr class="row-diff"><th>차이</th><td id="r-diff">0원</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>조별 매출</h2>
+  <p class="hint">교환권 매출 = 제출한 교환권 − 아침에 받은 잔돈. 여기에 현금 매출을 더한 것이 그 조가 실제로 판 금액입니다.</p>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th></tr></thead>
+      <tbody id="report-booth-body"></tbody>
+      <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-total">0원</th></tr></tfoot>
+    </table>
+  </div>
+
+  <h2>손님이 쓰지 않고 가져간 교환권</h2>
+  <div class="table-scroll">
+    <table class="data-table balance">
+      <tbody>
+        <tr><th>손님에게 팔려 나간 교환권</th><td id="r-sold2">0원</td></tr>
+        <tr><th>− 조별 교환권 매출 합계</th><td id="r-voucher2">0원</td></tr>
+        <tr class="row-sum"><th>= 미사용 교환권</th><td id="r-unused">0원</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" id="unused-note"></p>
+
+  <h2>최종 수익금</h2>
+  <div class="table-scroll">
+    <table class="data-table balance">
+      <tbody>
+        <tr><th>교환소가 받은 돈</th><td id="r-final-desk">0원</td></tr>
+        <tr><th>+ 조별 현금 매출 합계</th><td id="r-final-cash">0원</td></tr>
+        <tr><th>+ 행사전 구매 매출</th><td id="r-final-presale">0원</td></tr>
+        <tr class="row-total"><th>= 최종 수익금</th><td id="r-final-total">0원</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="banner banner-blue">조들이 모아 온 교환권 총액은 <strong>여기에 더하지 않습니다.</strong> 그 돈은 이미 교환소에서 받아 맨 윗줄에 들어 있습니다 — 더하면 같은 돈을 두 번 세는 것입니다.</div>
+</section>
+
+<!-- ================= 4. 저장 ================= -->
+<section class="tab-panel" id="panel-data">
+
+  <h2>구글 시트에 보내기</h2>
+  <p class="hint">입력한 내용을 교회 구글 시트의 <strong>「정산」 탭</strong>에 올립니다. 이 도구는 값을 이 브라우저에만 담아두기 때문에, 시트에 올려두어야 다른 사람도 보고 다음 해에도 남습니다.</p>
+
+  <div class="card" id="sheet-box">
+    <div class="field-row">
+      <label class="field-inline">공유 암호
+        <input type="password" id="sheet-pw" autocomplete="off">
+        <span class="field-help">교회에서 안내받은 암호입니다. 한 번 넣으면 기억합니다</span>
       </label>
-      <label>계좌이체 판매액 (원)
-        <input type="number" id="desk-transfer" min="0" step="1">
-      </label>
     </div>
-    <div class="table-scroll">
-      <table class="data-table">
-        <thead><tr><th>권종</th><th>발행(지급) 수량</th></tr></thead>
-        <tbody>
-          <tr><td>1,000원</td><td><input type="number" id="desk-issued-1000" min="0" step="1"></td></tr>
-          <tr><td>5,000원</td><td><input type="number" id="desk-issued-5000" min="0" step="1"></td></tr>
-          <tr><td>10,000원</td><td><input type="number" id="desk-issued-10000" min="0" step="1"></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>재환전 (현금으로 되돌려준 내역)</h3>
-    <p class="status warn" style="margin-bottom:12px">통과 금고를 앞뒤로 센 값을 위에 넣었다면 <strong>이 표는 비워 두세요.</strong> 재환전은 통을 채우고 금고를 비우므로 위 차액에 이미 반영되어 있습니다. 여기에 또 넣으면 <strong>이중 차감</strong>이 되어 대사가 어긋납니다.</p>
-    <p class="hint">건별로 따로 적어 둔 기록이 있어서 그것으로 대사하려는 경우에만 씁니다. 돌려받은 교환권 수량과 내어준 현금을 입력하세요.</p>
-    <div class="table-scroll">
-      <table class="data-table">
-        <thead><tr><th>권종</th><th>돌려받은 수량</th></tr></thead>
-        <tbody>
-          <tr><td>1,000원</td><td><input type="number" id="desk-refund-1000" min="0" step="1"></td></tr>
-          <tr><td>5,000원</td><td><input type="number" id="desk-refund-5000" min="0" step="1"></td></tr>
-          <tr><td>10,000원</td><td><input type="number" id="desk-refund-10000" min="0" step="1"></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="desk-grid">
-      <label>내어준 현금 (원)
-        <input type="number" id="desk-refund-cash" min="0" step="1">
-      </label>
-    </div>
-    <p id="refund-status" class="hint"></p>
-  </section>
-
-  <!-- 대사 리포트 -->
-  <section class="tab-panel" id="panel-report">
-    <h2>대사(검증) 리포트</h2>
-
-    <h3>1. 부스별 매출</h3>
-    <p class="hint">교환권 매출 = 제출 보유액 − 지급액(초기 + 추가). 여기에 현금 매출을 더해야 그 부스의 실제 매출이 됩니다.</p>
-    <div class="table-scroll">
-      <table class="data-table" id="report-booth-table">
-        <thead><tr><th>부스</th><th>지급액</th><th>제출 보유액</th><th>교환권 매출</th><th>현금 매출</th><th>매출 합계</th></tr></thead>
-        <tbody id="report-booth-body"></tbody>
-      </table>
-    </div>
-    <p><strong>부스 교환권 매출 합계: <span id="report-booth-total">0</span>원</strong><br>
-    <strong>부스 현금 매출 합계: <span id="report-booth-cash-total">0</span>원</strong></p>
-
-    <h3>2. 교환소 대사 (나간 교환권 vs 받은 돈)</h3>
-    <div class="table-scroll">
-      <table class="data-table" id="report-desk-table">
-        <tbody>
-          <tr><th>총 발행액 (아침 통 − 저녁 통)</th><td id="report-desk-issued">0원</td></tr>
-          <tr><th>부스 지급액 합계 (초기 + 추가)</th><td id="report-desk-float">0원</td></tr>
-          <tr><th>재환전으로 돌려받은 교환권</th><td id="report-desk-refund">0원</td></tr>
-          <tr><th>순 판매 교환권액 (발행액 − 초기 지급 − 재환전 회수)</th><td id="report-desk-expected">0원</td></tr>
-          <tr><th>교환소 순 수령액 (금고 차액 + 계좌이체)</th><td id="report-desk-actual">0원</td></tr>
-          <tr><th>차이 (순 수령액 − 순 판매 교환권액)</th><td id="report-desk-diff">0원</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p id="report-desk-status" class="status"></p>
-
-    <h3>3. 전체 요약</h3>
-    <div class="table-scroll">
-      <table class="data-table">
-        <tbody>
-          <tr><th>부스 교환권 매출 합계</th><td id="report-summary-booth">0원</td></tr>
-          <tr><th>교환소 순 수령액</th><td id="report-summary-desk">0원</td></tr>
-          <tr><th>차이 (미사용 교환권 등으로 발생 가능)</th><td id="report-summary-diff">0원</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="hint">※ 여기서 비교하는 것은 <strong>교환권으로 오간 몫만</strong>입니다. 현금 매출과 행사전 구매는 아래 4번에서 더합니다. 차이가 크면 미회수 교환권, 입력 누락, 계수 오류, 재환전 기록 누락을 확인하세요.</p>
-
-    <h3>4. 최종 수익금</h3>
-    <div class="table-scroll">
-      <table class="data-table">
-        <tbody>
-          <tr><th>교환소 순 수령액</th><td id="report-final-desk">0원</td></tr>
-          <tr><th>부스 현금 매출 합계</th><td id="report-final-cash">0원</td></tr>
-          <tr><th>행사전 구매 매출</th><td id="report-final-presale">0원</td></tr>
-          <tr><th><strong>최종 수익금</strong></th><td><strong id="report-final-total">0원</strong></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="hint">※ 교환권으로 오간 돈은 부스가 아니라 <strong>교환소가 받은 금액</strong>으로 셉니다. 고객이 쓰지 않고 가져간 교환권도 이미 값을 치른 것이므로 수익에 포함됩니다.</p>
-  </section>
-
-  <!-- 데이터 관리 -->
-  <section class="tab-panel" id="panel-data">
-    <h2>데이터 관리</h2>
     <div class="data-actions">
-      <button id="btn-export">JSON으로 내보내기 (백업)</button>
-      <label class="file-btn">JSON 불러오기
-        <input type="file" id="import-file" accept="application/json" hidden>
-      </label>
-      <button id="btn-export-csv">리포트 CSV로 내보내기</button>
-      <button id="btn-reset" class="danger">전체 초기화</button>
+      <button type="button" id="btn-sheet-send">시트로 보내기</button>
+      <button type="button" id="btn-sheet-load" class="btn-secondary">시트에서 불러오기</button>
     </div>
-    <p class="hint">불러오기를 실행하면 현재 브라우저에 저장된 데이터를 덮어씁니다. 초기화는 되돌릴 수 없으니 먼저 내보내기로 백업하세요.</p>
-  </section>
+    <p class="status" id="sheet-msg"></p>
+    <p class="hint">보내면 시트의 「정산」 탭이 <strong>지금 내용으로 덮어써집니다.</strong> 불러오면 반대로 이 화면이 시트 내용으로 덮어써집니다.</p>
+  </div>
+
+  <h2>파일로 백업</h2>
+  <p class="hint">시트를 쓰지 못하는 상황을 대비한 수단입니다. 정산 중간중간 받아두세요.</p>
+  <div class="data-actions">
+    <button type="button" id="btn-export" class="btn-secondary">JSON 내보내기</button>
+    <label class="file-btn">JSON 불러오기
+      <input type="file" id="import-file" accept="application/json" hidden>
+    </label>
+    <button type="button" id="btn-export-csv" class="btn-secondary">CSV 내보내기</button>
+  </div>
+
+  <h2>초기화</h2>
+  <p class="hint">모든 입력을 지웁니다. 되돌릴 수 없으니 먼저 백업하세요.</p>
+  <div class="data-actions">
+    <button type="button" id="btn-reset" class="danger">전체 초기화</button>
+  </div>
+</section>
+
 </main>
 
-<script src="../assets/shared.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

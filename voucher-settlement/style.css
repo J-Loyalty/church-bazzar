@@ -1,97 +1,108 @@
-/* App-specific layout. Shared colors/typography/buttons/tables/form controls and
-   the top bar live in ../assets/tokens.css */
+/* 정산 도구 전용. 색·글꼴·버튼·표·입력칸은 ../assets/tokens.css 에 있다.
+   본문 폭은 한 곳에서 정해 머리글·탭·본문이 같은 선에서 시작하게 한다. */
+:root { --page-width: 960px; }
 
-/* The bar runs edge to edge but its contents line up with the panel below --
-   a title starting 120px left of the panel it belongs to reads as a separate
-   page. max() keeps the 16px gutter once the screen is narrower than the panel. */
 .app-header {
-  padding: 24px max(16px, calc((100% - 900px) / 2 + 16px)) 16px;
+  padding: 24px max(16px, calc((100% - var(--page-width)) / 2 + 16px)) 18px;
   background: var(--color-canvas);
 }
-
 .app-header h1 {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 300;
   letter-spacing: -0.03em;
   line-height: 1.2;
   color: var(--color-ink);
 }
-
-.app-sub {
-  margin: 0;
-  color: var(--color-mute);
-  font-size: 17px;
-}
+.app-sub { margin: 0; color: var(--color-body); font-size: 17px; max-width: 70ch; }
 .app-sub strong { color: var(--color-ink); font-weight: 600; }
 
-/* .tabs / .tab-btn / .tab-panel base styles live in ../assets/tokens.css; this app
-   additionally pins its tab bar to the top of the viewport while scrolling. */
+/* 단계 탭. 여기서는 탭이 필터가 아니라 실제로 나뉘는 순서다. */
 .tabs {
-  padding: 10px max(16px, calc((100% - 900px) / 2 + 16px));
+  padding: 10px max(16px, calc((100% - var(--page-width)) / 2 + 16px));
   background: var(--color-canvas);
   border-bottom: 1px solid var(--color-hairline);
   position: sticky;
   top: 0;
   z-index: 10;
 }
+.tab-btn { gap: 9px; }
+.tab-btn .step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-hairline-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+.tab-btn.active .step-no {
+  background: var(--color-on-primary);
+  border-color: var(--color-on-primary);
+  color: var(--color-ink);
+}
 
 main {
-  max-width: 900px;
+  max-width: var(--page-width);
   margin: 0 auto;
-  padding: 24px 16px 60px;
+  padding: 24px 16px 80px;
 }
 
 .tab-panel {
   background: var(--color-surface-doc);
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 24px;
-  max-width: 100%;
+}
+
+.panel-lead {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-size: 17px;
+  color: var(--color-ink);
 }
 
 h2 {
   font-family: var(--font-display);
-  font-size: 27px;
+  font-size: 26px;
   font-weight: 300;
   letter-spacing: -0.02em;
-  margin-top: 0;
   color: var(--color-ink);
+  margin: 36px 0 6px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-hairline);
 }
+h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
 h3 {
   font-family: var(--font-body);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: 0;
-  margin-bottom: 10px;
   color: var(--color-ink);
+  margin: 0 0 10px;
 }
+.tab-panel > .hint { margin: 0 0 16px; max-width: 70ch; }
 
-.inline-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
+.inline-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.inline-form input { flex: 1 1 240px; }
 
-/* Base size/border/focus live in tokens.css; this app only sets what differs. */
-input, select { font-size: 18px; }
-
-input[type="number"] {
-  width: 110px;
-}
-
-/* Inside a table the input is the cell, so it drops the rounded box and rides
-   flush -- a bordered pill inside a bordered cell reads as two nested boxes. */
-.data-table input {
-  min-height: 44px;
-  padding: 8px 10px;
-}
-
-/* This app's tables are number-dense, so center cells (docs use tokens.css's left-aligned default) */
+/* 이 앱의 표는 숫자가 많아 가운데 정렬한다 (문서는 왼쪽 정렬이 기본) */
 .data-table th, .data-table td { text-align: center; }
 .data-table td:first-child, .data-table th:first-child { text-align: left; }
+.data-table input { min-height: 46px; padding: 8px 10px; width: 100%; max-width: 120px; }
+.data-table .col-btn { width: 96px; }
+.data-table tfoot th {
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+  font-weight: 700;
+  border-top: 2px solid var(--color-hairline-strong);
+}
 
 .remove-btn {
   background: transparent;
@@ -99,77 +110,141 @@ input[type="number"] {
   color: var(--color-accent-red);
   font-size: 16px;
   font-weight: 600;
-  height: auto;
   min-height: 44px;
   padding: 8px 12px;
-  cursor: pointer;
+  border-radius: var(--radius-sm);
 }
 .remove-btn:hover { background: var(--color-accent-red-soft); }
 
-.desk-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 16px;
-}
+.row-total-line { margin: 12px 0 0; font-size: 17px; color: var(--color-body); }
+.row-total-line strong { color: var(--color-ink); font-size: 19px; }
 
-.desk-grid label {
+/* 아침·저녁에 세는 칸. 세로로 길게 늘어놓으면 세면서 놓치기 쉬워 한 줄에 묶는다. */
+.count-box {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.denom-grid { display: flex; flex-wrap: wrap; gap: 14px; }
+.denom-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 200px;
+  font-size: 17px;
+  color: var(--color-ink);
+}
+.denom-cell input { width: 100%; max-width: 130px; }
+.denom-unit { color: var(--color-mute); font-size: 16px; }
+.box-total { margin: 14px 0 0; font-size: 17px; color: var(--color-body); }
+.box-total strong { color: var(--color-ink); font-size: 19px; }
+
+.field-row { display: flex; flex-wrap: wrap; gap: 20px; }
+.field-inline {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 16px;
+  flex: 1 1 240px;
+  font-size: 17px;
+  color: var(--color-ink);
+}
+.field-inline input { max-width: 240px; }
+.field-help { font-size: 15px; color: var(--color-mute); font-weight: 400; }
+
+.panel-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+/* 결과 탭 맨 위의 한 줄. 이 도구가 내놓는 가장 중요한 답이다. */
+.verdict {
+  border-radius: var(--radius-xl);
+  padding: 26px 28px;
+  margin-bottom: 8px;
+  background: var(--color-surface-soft);
+  border-left: 5px solid var(--color-hairline-strong);
+}
+.verdict-label {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--color-mute);
 }
-
-.desk-grid input { width: 170px; }
-
-.data-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
+.verdict-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-ink);
 }
+.verdict-note { margin: 10px 0 0; font-size: 17px; color: var(--color-body); }
+.verdict.ok { background: var(--color-accent-green-soft); border-left-color: var(--color-accent-green); }
+.verdict.warn { background: var(--color-accent-red-soft); border-left-color: var(--color-accent-red); }
+
+/* 계산 과정을 보여주는 표 — 값은 오른쪽 끝에 맞춰 자릿수가 눈에 들어오게 한다 */
+.data-table.balance th { text-align: left; background: transparent; font-weight: 500; }
+.data-table.balance td { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table.balance .row-sum th,
+.data-table.balance .row-sum td {
+  font-weight: 700;
+  color: var(--color-ink);
+  border-top: 1px solid var(--color-hairline-strong);
+}
+.data-table.balance .row-diff th,
+.data-table.balance .row-diff td,
+.data-table.balance .row-total th,
+.data-table.balance .row-total td {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: var(--color-surface-soft);
+  border-top: 2px solid var(--color-hairline-strong);
+}
+
+.data-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 12px; }
 
 .file-btn {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  background: var(--color-surface-soft);
+  background: transparent;
   color: var(--color-ink);
-  border: none;
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-full);
   min-height: 46px;
-  padding: 10px 20px;
+  padding: 10px 22px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
 }
-.file-btn:hover { background: var(--color-hairline-soft); }
+.file-btn:hover { background: var(--color-surface-soft); }
 
-.status {
-  font-weight: 600;
-  padding: 16px 20px;
-  border-radius: var(--radius-md);
-}
+.status { font-weight: 600; padding: 14px 18px; border-radius: var(--radius-md); margin: 12px 0; }
+.status:empty { display: none; }
+.status.ok { color: var(--color-accent-green); background: var(--color-accent-green-soft); }
+.status.warn { color: var(--color-accent-red); background: var(--color-accent-red-soft); }
 
-.status.ok {
-  color: var(--color-accent-green);
-  background: var(--color-accent-green-soft);
-}
-.status.warn {
-  color: var(--color-accent-red);
-  background: var(--color-accent-red-soft);
-}
-
-@media (max-width: 480px) {
-  .app-header { padding: 16px 12px 12px; }
-  .app-header h1 { font-size: 24px; }
+@media (max-width: 640px) {
+  .app-header { padding: 16px 12px 14px; }
+  .app-header h1 { font-size: 26px; }
   .tabs { padding: 8px 12px; }
-  .tab-panel { padding: 16px; }
-  main { padding: 16px 12px 48px; }
-  input[type="number"] { width: 64px; padding: 10px 6px; }
   .topbar { padding: 8px 12px; }
+  main { padding: 16px 12px 56px; }
+  .tab-panel { padding: 16px; }
+  h2 { font-size: 22px; }
+  .verdict { padding: 20px; }
+  .verdict-value { font-size: 27px; }
   .data-table th, .data-table td { padding: 9px 6px; font-size: 15px; }
-  .desk-grid { gap: 12px; }
-  .desk-grid input { width: 100%; }
-  .desk-grid label { flex: 1 1 140px; }
+  .data-table input { max-width: none; padding: 8px 6px; }
+  .denom-cell { flex: 1 1 100%; }
+  .denom-cell input { max-width: none; }
+  .field-inline input { max-width: none; }
 }
