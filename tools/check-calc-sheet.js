@@ -19,11 +19,14 @@ function Range(r, c, nr, nc) {
     setValue(v) { grid.set(key(r, c), { v: guard(v, key(r, c)) }); return api; },
     setFormula(f) { grid.set(key(r, c), { f }); return api; },
     setValues(vals) {
-      for (let i = 0; i < vals.length; i++) for (let j = 0; j < vals[i].length; j++) {
-        if (i >= nr || j >= nc) throw new Error(`setValues 범위 초과 @${key(r, c)} ${nr}x${nc} <- ${vals.length}x${vals[i].length}`);
-        grid.set(key(r + i, c + j), { v: guard(vals[i][j], key(r + i, c + j)) });
+      // 시트는 칸 수가 **정확히** 같아야 한다. 넘쳐도 모자라도 예외가 난다.
+      if (vals.length !== nr) throw new Error(`행 수 불일치 @${key(r, c)}: 범위 ${nr}줄, 값 ${vals.length}줄`);
+      for (let i = 0; i < vals.length; i++) {
+        if (vals[i].length !== nc) {
+          throw new Error(`열 수 불일치 @${key(r, c)} ${i + 1}번째 줄: 범위 ${nc}칸, 값 ${vals[i].length}칸`);
+        }
+        for (let j = 0; j < nc; j++) grid.set(key(r + i, c + j), { v: guard(vals[i][j], key(r + i, c + j)) });
       }
-      if (vals.length !== nr) throw new Error(`행 수 불일치 @${key(r, c)}: 범위 ${nr}, 값 ${vals.length}`);
       return api;
     },
     merge: () => api, setFontWeight: () => api, setFontSize: () => api,
@@ -53,7 +56,7 @@ global.ContentService = { createTextOutput: () => ({ setMimeType: () => {} }), M
 
 // ---------- 스크립트 읽어 실행 ----------
 const src = fs.readFileSync('assets/answers.gs', 'utf8');
-(0, eval)(src + '\n;globalThis.__build = buildCalcSheet; globalThis.__map = calcMap;');
+(0, eval)(src + '\n;globalThis.__build = buildCalcSheet; globalThis.__map = calcMap; globalThis.__save = saveSettlement;');
 
 // ---------- 식 계산기 ----------
 const cache = new Map();
@@ -155,6 +158,24 @@ for (const k of Object.keys(want)) {
   if (!ok) { bad++; console.log('X', k, '기대', want[k], '실제', got[k]); }
 }
 console.log(bad ? `\n${bad}개 불일치` : '모든 값이 웹 도구와 일치합니다 (' + Object.keys(want).length + '개)');
+
+// 「정산」 요약 탭도 같은 칸 수 규칙을 지키는지 (여기서 틀리면 시트가 통째로 거부한다)
+cache.clear(); grid.clear();
+const summary = {
+  rows: [
+    { name: '1조', items: [{ name: '국수', price: 4000 }], float: 50000, final: 200000,
+      voucher: 150000, cash: 30000, presale: 200000, total: 380000, cost: 100000, costPaid: true }
+  ],
+  floatSum: 50000, finalSum: 200000, voucherSum: 150000, cashSum: 30000,
+  presaleBooth: 200000, presaleOther: 0, totalSum: 380000, costSum: 100000,
+  commonCosts: [{ name: '인쇄비', amount: 350000, paid: true }], commonSum: 350000,
+  openTin: 500000, closeTin: 100000, sold: 420000, cashDelta: 200000, transfer: 120000,
+  received: 420000, diff: 0, unused: 150000, presale: 200000, presaleVoucher: 100000,
+  revenue: 770000, cost: 450000, paidCost: 450000, refund: 0, refundRows: [], final: 320000
+};
+const saved = global.__save({ state: st, summary: summary });
+if (!saved.ok) { console.log('X 정산 요약 탭:', saved.error); process.exitCode = 1; }
+else console.log('정산 요약 탭: 칸 수 맞음');
 
 // 빈 양식도 깨지지 않는지
 cache.clear(); grid.clear();

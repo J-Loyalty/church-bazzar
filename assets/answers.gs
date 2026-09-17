@@ -300,7 +300,9 @@ function calcMap() {
  */
 function buildCalcSheet(st, at) {
   var m = calcMap();
-  var W = 15; // A~O
+  // 가장 넓은 표가 조별 블록(A~N)이다. 재정 지급 칸이 품목 블록으로 옮겨가면서
+  // 한 칸 줄었다 -- 머리글 개수와 어긋나면 시트가 통째로 거부한다.
+  var W = 14; // A~N
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SETTLE_CALC);
   if (!sh) sh = ss.insertSheet(SETTLE_CALC);

@@ -34,7 +34,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **하위 폴더를 뿌리로 삼지 말 것.** `--directory voucher-settlement`로 띄우면 정산 도구가 참조하는 `../assets/tokens.css`가 서버 뿌리 밖이라 **404**가 나고 화면이 스타일 없이 뜬다. 같은 이유로 `.claude/launch.json`에는 뿌리를 서비스하는 `site` 설정 하나만 둔다.
 - `file://`로 열면 브라우저가 `fetch()`를 CORS로 막아 문서가 로드되지 않는다. 정산 도구는 `fetch()`를 쓰지 않아 `file://`로도 열리지만, 확인은 로컬 서버로 하는 것을 기본으로 한다.
 - 별도의 빌드/린트 명령은 없다 (정적 파일뿐). 코드 변경 후에는 브라우저에서 직접 동작을 확인한다.
-- **정산 계산 시트만은 확인 스크립트가 있다**: `node tools/check-calc-sheet.js`. 구글 시트 API를 흉내 내어 `assets/answers.gs`를 실행하고, 만들어진 시트 함수를 직접 계산해 `voucher-settlement/app.js`의 `compute()`와 같은 값이 나오는지 대조한다. 라벨이 수식으로 읽힐 모양인지도 함께 잡는다. **두 계산 중 한쪽만 고치면 여기서 걸린다.**
+- **정산 계산 시트만은 확인 스크립트가 있다**: `node tools/check-calc-sheet.js`. 구글 시트 API를 흉내 내어 `assets/answers.gs`를 실행하고, 만들어진 시트 함수를 직접 계산해 `voucher-settlement/app.js`의 `compute()`와 같은 값이 나오는지 대조한다. **두 계산 중 한쪽만 고치면 여기서 걸린다.** 함께 잡는 것 두 가지:
+  - 라벨이 수식으로 읽힐 모양인지 (`=`·`+`·`-`·`@`로 시작)
+  - **`setValues`의 칸 수가 범위와 정확히 같은지.** 시트는 넘쳐도 모자라도 「데이터의 열 수가 범위의 열 수와 일치하지 않습니다」로 통째로 거부한다. 열을 하나 빼면서 `W`를 그대로 두는 것이 전형적인 실수다
 - 공개 사이트는 GitHub Pages(`main` 브랜치)에서 자동 배포된다 — https://j-loyalty.github.io/church-bazzar/ . 푸시 후 약 1분이면 반영된다.
 
 ## voucher-settlement 아키텍처
