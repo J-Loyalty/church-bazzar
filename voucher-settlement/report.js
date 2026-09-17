@@ -25,6 +25,10 @@
   set("made-on", now.getFullYear() + "년 " + (now.getMonth() + 1) + "월 " + now.getDate() + "일");
 
   // ---------- 1장 ----------
+  set("h-revenue", money(c.revenue));
+  set("h-cost", money(c.cost));
+  set("h-final", money(c.final));
+
   set("r-received", money(c.received));
   set("r-cash", money(c.cashSum));
   set("r-presale", money(c.presaleBooth));

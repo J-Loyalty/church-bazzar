@@ -16,7 +16,7 @@ body { background: var(--color-canvas); }
   margin: 20px auto 12px;
   padding: 0 16px;
 }
-.toolbar-note { margin: 0; font-size: 16px; color: var(--color-body); max-width: 60ch; }
+.toolbar-note { margin: 0; font-size: 15px; color: var(--color-body); max-width: 60ch; }
 
 .empty {
   max-width: 60ch;
@@ -24,7 +24,7 @@ body { background: var(--color-canvas); }
   padding: 18px 20px;
   border-radius: var(--radius-md);
   background: var(--color-accent-red-soft);
-  font-size: 17px;
+  font-size: 16px;
 }
 
 main { padding-bottom: 60px; }
@@ -41,17 +41,17 @@ main { padding-bottom: 60px; }
 }
 
 /* ---------- 머리 ---------- */
-.doc-eyebrow { margin: 0 0 4px; font-size: 14px; color: var(--color-mute); }
+.doc-eyebrow { margin: 0 0 3px; font-size: 13px; color: var(--color-mute); }
 .doc-head h1 {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 400;
   letter-spacing: -0.02em;
   color: var(--color-ink);
 }
-.meta { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 14px; }
-.meta th, .meta td { border: 1px solid var(--color-hairline-strong); padding: 6px 8px; text-align: left; }
+.meta { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 13px; }
+.meta th, .meta td { border: 1px solid var(--color-hairline-strong); padding: 4px 8px; text-align: left; }
 .meta th { background: var(--color-surface-soft); font-weight: 600; white-space: nowrap; width: 1%; }
 .blank { min-width: 90px; }
 
@@ -65,15 +65,15 @@ main { padding-bottom: 60px; }
 .headline-cell {
   border: 1px solid var(--color-hairline-strong);
   border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  padding: 7px 11px;
   background: var(--color-surface-soft);
 }
 .headline-cell.strong { background: var(--color-surface-card); border-width: 2px; }
-.headline-label { margin: 0 0 4px; font-size: 13px; color: var(--color-mute); font-weight: 600; }
+.headline-label { margin: 0 0 2px; font-size: 12px; color: var(--color-mute); font-weight: 600; }
 .headline-value {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 400;
   color: var(--color-ink);
   font-variant-numeric: tabular-nums;
@@ -81,17 +81,17 @@ main { padding-bottom: 60px; }
 
 /* ---------- 본문 ---------- */
 .sheet h2 {
-  margin: 12px 0 6px;
-  font-size: 17px;
+  margin: 11px 0 5px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-ink);
 }
 .sheet h2:first-of-type { margin-top: 0; }
 
-.ledger, .grid, .sign { width: 100%; border-collapse: collapse; font-size: 15px; }
+.ledger, .grid, .sign { width: 100%; border-collapse: collapse; font-size: 14px; }
 .ledger th, .ledger td, .grid th, .grid td, .sign th, .sign td {
   border: 1px solid var(--color-hairline-strong);
-  padding: 4px 9px;
+  padding: 3px 8px;
 }
 
 /* tokens.css 의 .table-scroll 은 위아래 여백이 20px 이다. 여기서는 종이 두 장에
@@ -102,15 +102,15 @@ main { padding-bottom: 60px; }
 .ledger td.why {
   text-align: left;
   width: auto;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-mute);
 }
 .ledger tr.sum th, .ledger tr.sum td { font-weight: 700; background: var(--color-surface-soft); }
 .ledger tr.total th, .ledger tr.total td {
   font-weight: 700;
-  font-size: 19px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  font-size: 17px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   background: var(--color-surface-soft);
 }
 .ledger.two th { width: 26%; }
@@ -132,18 +132,18 @@ main { padding-bottom: 60px; }
 /* 돌려드릴 곳이 여럿이면 세로로 길어진다. 두 벌씩 나란히 놓아 줄 수를 반으로. */
 #refund-table td:nth-child(3), #refund-table th:nth-child(3) { border-left-width: 2px; }
 
-.note { margin: 7px 0 0; font-size: 14px; color: var(--color-body); }
+.note { margin: 6px 0 0; font-size: 13px; color: var(--color-body); }
 
 .sign { margin-top: 20px; }
 .sign th { background: var(--color-surface-soft); font-weight: 600; white-space: nowrap; }
-.sign td.blank { height: 40px; min-width: 70px; }
+.sign td.blank { height: 36px; min-width: 70px; }
 
 .page-no {
   position: absolute;
   bottom: 6mm;
   right: var(--sheet-pad);
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-mute);
 }
 
