@@ -608,8 +608,9 @@ function decorateCalcSheet(sh, m, W) {
   sh.setColumnWidth(W, 260);   // 확인
   sh.setColumnWidths(3, W - 2, 110);
   // 답 세 칸과 표 머리글을 얼려, 아래로 내려도 무엇을 보는 중인지 놓치지 않게 한다.
+  // **열은 고정하지 않는다** -- 맨 위 답 카드가 여러 칸을 병합한 것이라, 그 가운데를
+  // 가르며 열을 얼리면 시트가 거부한다 (「병합된 셀의 일부만 포함된 열을 고정할 수 없습니다」).
   sh.setFrozenRows(m.boothHead);
-  sh.setFrozenColumns(2);
 }
 
 /** 정산 도구의 현재 내용을 계산 시트의 넣는 칸에 그대로 옮긴다. */

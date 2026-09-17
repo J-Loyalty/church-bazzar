@@ -6,6 +6,8 @@ const grid = new Map();            // "A8" -> {v} | {f}
 // 시트 호출은 한 건씩 왕복한다. 줄마다 칸을 건드리면 수백 번이 되어 시간 제한에
 // 걸리고, 그때 구글은 JSON 대신 오류 HTML 을 돌려준다 -- 「예상과 다른 응답」이 그것.
 let calls = 0;
+// 병합한 칸의 가운데를 가르며 행/열을 얼리면 시트가 거부한다.
+const merges = [];
 const key = (r, c) => colL(c) + r;
 function colL(n) { let s = ''; while (n > 0) { const x = (n - 1) % 26; s = String.fromCharCode(65 + x) + s; n = (n - x - 1) / 26; } return s; }
 
@@ -43,11 +45,13 @@ function Range(r, c, nr, nc) {
       }
       return api;
     },
-    merge: () => api, setFontWeight: () => api, setFontSize: () => api,
+    merge: () => { merges.push({ r, c, nr, nc }); return api; },
+    breakApart: () => { merges.length = 0; return api; },
+    setFontWeight: () => api, setFontSize: () => api,
     setVerticalAlignment: () => api,
     setBackground: () => api, setWrap: () => api, setFontColor: () => api,
     setBorder: () => api, setNumberFormat: () => api, insertCheckboxes: () => api,
-    breakApart: () => api, clearDataValidations: () => api, setHorizontalAlignment: () => api
+    clearDataValidations: () => api, setHorizontalAlignment: () => api
   };
   return api;
 }
@@ -56,8 +60,17 @@ const sheet = {
   clear: () => sheet, clearConditionalFormatRules: () => sheet,
   getMaxRows: () => 200, getMaxColumns: () => 26,
   getRange: (r, c, nr = 1, nc = 1) => { calls++; return Range(r, c, nr, nc); },
-  setColumnWidth: () => sheet, setColumnWidths: () => sheet, setFrozenRows: () => sheet,
-  setRowHeight: () => sheet, setFrozenColumns: () => sheet,
+  setColumnWidth: () => sheet, setColumnWidths: () => sheet, setRowHeight: () => sheet,
+  setFrozenRows: (n) => {
+    const cut = merges.find(m => m.r <= n && n < m.r + m.nr - 1);
+    if (cut) throw new Error(`setFrozenRows(${n}) 가 병합 칸을 가릅니다 (${cut.r}행부터 ${cut.nr}줄 병합)`);
+    return sheet;
+  },
+  setFrozenColumns: (n) => {
+    const cut = merges.find(m => m.c <= n && n < m.c + m.nc - 1);
+    if (cut) throw new Error(`setFrozenColumns(${n}) 가 병합 칸을 가릅니다 (${cut.c}열부터 ${cut.nc}칸 병합)`);
+    return sheet;
+  },
   setConditionalFormatRules: () => sheet
 };
 const rule = { whenFormulaSatisfied: () => rule, setBackground: () => rule, setRanges: () => rule, build: () => ({}) };
