@@ -41,6 +41,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## voucher-settlement 아키텍처
 - 화면은 실제 순서를 따라 네 단계다 — **① 개장 전 / ② 마감 / ③ 결과 / ④ 저장·백업.** 탭이지만 내용을 숨기는 필터가 아니라 시간 순서라, "문서 작성 원칙" 8번의 예외에 해당한다.
+- **답은 맨 위에 둔다.** [결과] 탭은 카드 세 개(대사 / 매출 합계 / 최종 수익금)로 시작하고, 아래 표들은 그 숫자가 나온 과정이다. 수익금을 보려고 끝까지 스크롤하게 두지 않는다. 계산 시트도 같은 이유로 맨 위(`m.answerValue` 줄)에 같은 세 칸을 둔다.
+- **대사는 좌우로 나란히 놓는다**(`.balance-pair`). 「왼쪽과 오른쪽이 같아야 한다」가 요점인데 세로로 이어 붙이면 그 관계가 보이지 않는다.
 - 상태는 `app.js` 최상단의 단일 `state` 객체(`items`, `floats`, `finals`, `cash`, `costs`, `costPaid`, `presales`, `commonIncomes`, `commonCosts`, `desk`)로 관리하며, `localStorage` 키 `cbz_voucher_v1`에 저장된다. 권종은 `DENOMS = [1000, 5000, 10000]`으로 고정.
 - **줄은 품목 단위이고 돈은 조 단위다.** `items`는 `{id, team, name, price}`의 배열로 **한 줄이 한 품목**이며, 4조처럼 한 조가 세 품목을 맡으면 같은 `team`이 세 줄에 되풀이된다. 나머지 맵은 모두 **조 이름을 열쇠로** 쓴다 — 교환권함이 조마다 하나라 정산 단위가 조이기 때문이다.
   - 조 목록은 `teams()`가 `items`에서 뽑는다. 별도 목록을 두지 않는다 — 두 곳이 어긋날 자리를 만들지 않기 위함이다.

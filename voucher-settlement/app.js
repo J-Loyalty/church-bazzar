@@ -783,6 +783,8 @@
     set("r-cost-common", money(c.commonSum));
     set("r-cost", money(c.cost));
     set("r-final-total", money(c.final));
+    set("sum-revenue", money(c.revenue));
+    set("sum-final", money(c.final));
 
     set("r-refund-all", money(c.cost));
     set("r-refund-paid", money(c.paidCost));
@@ -807,19 +809,20 @@
     var blank = c.openTin === 0 && c.closeTin === 0 && c.received === 0;
 
     if (blank) {
-      box.className = "verdict";
-      value.textContent = "아직 입력 전입니다";
-      note.textContent = "[1 개장 전]과 [2 마감]을 채우면 여기에 결과가 나옵니다.";
+      box.className = "summary-card";
+      value.textContent = "입력 전";
+      note.textContent = "[1 개장 전]과 [2 마감]을 채우면 결과가 나옵니다.";
     } else if (c.diff === 0) {
-      box.className = "verdict ok";
-      value.textContent = "맞습니다 — 차이 0원";
-      note.textContent = "나간 교환권과 받은 돈이 같습니다.";
+      box.className = "summary-card ok";
+      value.textContent = "맞습니다";
+      note.textContent = "나간 교환권과 받은 돈이 같습니다 (차이 0원).";
     } else {
-      box.className = "verdict warn";
-      value.textContent = "차이 " + money(c.diff);
+      box.className = "summary-card warn";
+      // 카드 안에서는 금액만 한 줄로 보여 준다. 「차이 -2,725,000원」은 줄이 넘어간다.
+      value.textContent = money(c.diff);
       note.textContent = c.diff > 0
-        ? "받은 돈이 더 많습니다. 저녁 통을 덜 셌거나 금고·계좌이체 금액이 큰지 확인하세요."
-        : "나간 교환권이 더 많습니다. 조별 지급 수량이 빠졌거나 저녁 통을 더 세지 않았는지 확인하세요.";
+        ? "받은 돈이 그만큼 더 많습니다. 저녁 통을 덜 셌거나 금고·계좌이체 금액이 큰지 확인하세요."
+        : "나간 교환권이 그만큼 더 많습니다. 조별 지급 수량이 빠졌거나 저녁 통을 더 세지 않았는지 확인하세요.";
     }
   }
 

@@ -30,6 +30,7 @@ function Range(r, c, nr, nc) {
       return api;
     },
     merge: () => api, setFontWeight: () => api, setFontSize: () => api,
+    setVerticalAlignment: () => api,
     setBackground: () => api, setWrap: () => api, setFontColor: () => api,
     setBorder: () => api, setNumberFormat: () => api, insertCheckboxes: () => api,
     breakApart: () => api, clearDataValidations: () => api, setHorizontalAlignment: () => api
@@ -42,6 +43,7 @@ const sheet = {
   getMaxRows: () => 200, getMaxColumns: () => 26,
   getRange: (r, c, nr = 1, nc = 1) => Range(r, c, nr, nc),
   setColumnWidth: () => sheet, setFrozenRows: () => sheet,
+  setRowHeight: () => sheet, setFrozenColumns: () => sheet,
   setConditionalFormatRules: () => sheet
 };
 const rule = { whenFormulaSatisfied: () => rule, setBackground: () => rule, setRanges: () => rule, build: () => ({}) };
@@ -142,7 +144,11 @@ const got = {
   '미사용': V('B' + m.bUnused), '미사용 비율': V('B' + m.bUnusedPct),
   '매출 합계': V('B' + m.pRevenue), '원가 합계': V('B' + m.pCost),
   '최종 수익금': V('B' + m.pFinal),
-  '이미 지급': V('B' + m.rPaid), '돌려드릴 금액': V('B' + m.rRefund)
+  '이미 지급': V('B' + m.rPaid), '돌려드릴 금액': V('B' + m.rRefund),
+  // 맨 위 답 세 칸 (열자마자 보이는 것)
+  '맨위 대사': V('A' + m.answerValue),
+  '맨위 매출': V('G' + m.answerValue),
+  '맨위 수익금': V('M' + m.answerValue)
 };
 const want = {
   '조1 교환권 매출': 150000, '조2 교환권 매출': 120000,
@@ -155,7 +161,8 @@ const want = {
   '판정': '맞습니다 — 차이 0원',
   '미사용': 150000, '미사용 비율': 150000 / 420000,
   '매출 합계': 770000, '원가 합계': 560000, '최종 수익금': 210000,
-  '이미 지급': 450000, '돌려드릴 금액': 110000
+  '이미 지급': 450000, '돌려드릴 금액': 110000,
+  '맨위 대사': '맞습니다 — 차이 0원', '맨위 매출': 770000, '맨위 수익금': 210000
 };
 let bad = 0;
 for (const k of Object.keys(want)) {

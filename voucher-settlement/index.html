@@ -80,12 +80,11 @@
 
 <!-- ================= 2. 마감 ================= -->
 <section class="tab-panel" id="panel-close">
-  <p class="panel-lead">판매가 끝난 뒤 적는 것입니다.</p>
+  <p class="panel-lead"><strong>판매가 끝난 뒤 적습니다.</strong> 순서가 있습니다 — ① 교환소 <strong>저녁 금고를 먼저</strong> 세고 → ② 조별 제출을 받아 적고 → ③ 공통 수입·비용을 적습니다.</p>
 
   <h2>2-1. 조별 정산</h2>
-  <p class="hint">한 조가 한 줄입니다. 마감에 제출한 <strong>교환권 장수</strong>, 따로 세어 낸 <strong>현금 매출</strong>, 그 조가 <strong>행사 전에 판 금액</strong>을 가로로 채우세요. 교환권에는 아침에 받은 잔돈분도 섞여 있는데, 그건 아래 계산에서 자동으로 빠집니다.</p>
-  <p class="hint"><strong>재료원가는 여기 없습니다</strong> — [1 개장 전]의 등록 표로 옮겼습니다. 장 보면서 미리 알 수 있는 값이기 때문입니다.</p>
-  <p class="hint"><strong>행사전 구매</strong>는 행사 전에 미리 판 몫입니다 (<a href="../doc.html?src=docs/행사전_구매.md">행사전 구매</a> 참고). 교환권을 거치지 않아 대사에는 잡히지 않지만, <strong>그 조의 매출</strong>이므로 여기 적습니다 — 2024년 결산서도 조별로 적었습니다.</p>
+  <p class="hint"><strong>한 조가 한 줄입니다.</strong> 제출한 교환권 장수 · 따로 센 현금 매출 · 그 조가 행사 전에 판 금액을 가로로 채우세요. 아침에 받은 잔돈분은 계산에서 자동으로 빠집니다.</p>
+  <p class="hint"><strong>행사전 구매</strong>는 행사 전에 미리 판 몫입니다 (<a href="../doc.html?src=docs/행사전_구매.md">행사전 구매</a> 참고). 교환권을 안 거쳐 대사에는 안 잡히지만 <strong>그 조의 매출</strong>입니다. <strong>재료원가는 [1 개장 전]</strong>의 등록 표에 있습니다.</p>
   <div class="table-scroll">
     <table class="data-table" id="final-table">
       <thead><tr><th>조</th><th>1,000원</th><th>5,000원</th><th>10,000원</th><th>교환권 합계</th><th>현금 매출</th><th>행사전 구매</th></tr></thead>
@@ -114,15 +113,15 @@
   </div>
 
   <h2>2-3. 공통 수입</h2>
-  <p class="hint"><strong>어느 조에도 붙지 않는 수입</strong>입니다 — 목장쿠폰, 선판매쿠폰, 헌옷 수거 매출, 그 밖의 것. 항목 이름과 금액을 적으면 다음 칸이 저절로 생깁니다. <strong>조에 붙는 매출은 2-1에 적으세요.</strong></p>
-  <p class="hint"><strong>「교환권 판매」에 표시</strong>하면 <strong>교환권을 팔고 받은 돈</strong>이라는 뜻입니다. 목장쿠폰·선판매쿠폰·전도용 교환권이 여기 해당하며, 그 교환권은 <strong>아침에 통을 셀 때 이미 빠져나간 뒤</strong>라 대사 양쪽에 함께 더해야 숫자가 맞습니다. 헌옷 수거처럼 교환권을 거치지 않은 수입은 표시하지 마세요.</p>
+  <p class="hint"><strong>어느 조에도 붙지 않는 수입</strong>입니다 — 목장쿠폰, 선판매쿠폰, 헌옷 수거 매출 등. 마지막 줄을 채우면 다음 줄이 생깁니다. <strong>조에 붙는 매출은 2-1에</strong> 적으세요.</p>
+  <p class="hint"><strong>「교환권 판매」</strong>는 교환권을 팔고 받은 돈이라는 뜻입니다(목장쿠폰·선판매쿠폰·전도용). 그 교환권은 아침에 통을 셀 때 이미 빠져나간 뒤라 <strong>대사 양쪽에 함께</strong> 더해야 맞습니다. 헌옷 수거처럼 교환권을 안 거친 수입은 표시하지 마세요.</p>
   <div id="common-incomes"></div>
   <p class="row-total-line">공통 수입 합계 <strong id="income-sum">0원</strong></p>
   <div class="banner banner-blue">「교환권 판매」로 받은 대금은 <strong>저녁 금고에 합치지 마세요.</strong> 합치면 금고 차액에도 잡혀 같은 돈을 두 번 세게 됩니다. 아침 금고에 넣어두거나 따로 보관하시면 됩니다.</div>
 
   <h2>2-4. 공통 비용</h2>
-  <p class="hint">특정 조에 붙지 않는 지출입니다 — <strong>교환권 인쇄비</strong>, 천막·비품 대여료, 공통 자재비 같은 것. 항목 이름과 금액을 적으면 다음 칸이 저절로 생깁니다.</p>
-  <p class="hint">여기도 <strong>「재정 지급」</strong> 표시가 있습니다. <strong>표시하지 않은 것은 누군가 사비로 먼저 낸 것</strong>으로 보고 「마감 후 돌려드릴 돈」에 넣습니다. 수익 계산에는 둘 다 똑같이 원가로 들어갑니다.</p>
+  <p class="hint"><strong>어느 조에도 붙지 않는 지출</strong>입니다 — 교환권 인쇄비, 천막·비품 대여료 같은 것. 마지막 줄을 채우면 다음 줄이 생깁니다.</p>
+  <p class="hint"><strong>「재정 지급」을 표시하지 않은 것</strong>은 누군가 사비로 먼저 낸 것으로 보고 「마감 후 돌려드릴 돈」에 넣습니다. 수익 계산에는 둘 다 똑같이 원가입니다.</p>
   <div id="common-costs"></div>
   <p class="row-total-line">공통 비용 합계 <strong id="common-sum">0원</strong></p>
 
@@ -134,27 +133,56 @@
 <!-- ================= 3. 결과 ================= -->
 <section class="tab-panel" id="panel-report">
 
-  <div class="verdict" id="verdict">
-    <p class="verdict-label">교환소 대사</p>
-    <p class="verdict-value" id="verdict-value">—</p>
-    <p class="verdict-note" id="verdict-note"></p>
+  <div class="summary-row">
+    <div class="summary-card" id="verdict">
+      <p class="summary-label">교환소 대사</p>
+      <p class="summary-value" id="verdict-value">—</p>
+      <p class="summary-note" id="verdict-note"></p>
+    </div>
+    <div class="summary-card">
+      <p class="summary-label">매출 합계</p>
+      <p class="summary-value" id="sum-revenue">0원</p>
+      <p class="summary-note">들어온 돈 전부</p>
+    </div>
+    <div class="summary-card strong">
+      <p class="summary-label">최종 수익금</p>
+      <p class="summary-value" id="sum-final">0원</p>
+      <p class="summary-note">매출에서 원가를 뺀 것</p>
+    </div>
   </div>
 
   <h2>나간 교환권과 받은 돈</h2>
-  <p class="hint">교환권은 돈을 받아야만 나갑니다. 그래서 이 두 값은 <strong>같아야</strong> 합니다.</p>
+  <p class="hint">교환권은 돈을 받아야만 나갑니다. 그래서 <strong>왼쪽과 오른쪽이 같아야</strong> 합니다.</p>
+  <div class="balance-pair">
+    <div class="balance-side">
+      <h3>나간 교환권</h3>
+      <table class="data-table balance">
+        <tbody>
+          <tr><th>아침 통</th><td id="r-open-tin">0원</td></tr>
+          <tr><th>− 저녁 통</th><td id="r-close-tin">0원</td></tr>
+          <tr><th>− 조별 지급 합계</th><td id="r-float">0원</td></tr>
+          <tr><th>+ 교환권으로 판 공통 수입</th><td id="r-pv1">0원</td></tr>
+          <tr class="row-sum"><th>= 손님에게 팔려 나간 것</th><td id="r-sold">0원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="balance-eq" aria-hidden="true">=</div>
+    <div class="balance-side">
+      <h3>받은 돈</h3>
+      <table class="data-table balance">
+        <tbody>
+          <tr><th>저녁 금고 − 아침 금고</th><td id="r-cash-delta">0원</td></tr>
+          <tr><th>+ 계좌이체</th><td id="r-transfer">0원</td></tr>
+          <tr><th>+ 교환권으로 판 공통 수입의 대금</th><td id="r-pv2">0원</td></tr>
+          <tr class="row-sum"><th>= 그 값으로 받은 돈</th><td id="r-received">0원</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
   <div class="table-scroll">
     <table class="data-table balance">
       <tbody>
-        <tr><th>아침 통</th><td id="r-open-tin">0원</td></tr>
-        <tr><th>− 저녁 통</th><td id="r-close-tin">0원</td></tr>
-        <tr><th>− 조별 지급 합계</th><td id="r-float">0원</td></tr>
-        <tr><th>+ 교환권으로 판 공통 수입</th><td id="r-pv1">0원</td></tr>
-        <tr class="row-sum"><th>= 손님에게 팔려 나간 교환권</th><td id="r-sold">0원</td></tr>
-        <tr><th>저녁 금고 − 아침 금고</th><td id="r-cash-delta">0원</td></tr>
-        <tr><th>+ 계좌이체</th><td id="r-transfer">0원</td></tr>
-        <tr><th>+ 그 대금</th><td id="r-pv2">0원</td></tr>
-        <tr class="row-sum"><th>= 그 값으로 받은 돈</th><td id="r-received">0원</td></tr>
-        <tr class="row-diff"><th>차이</th><td id="r-diff">0원</td></tr>
+        <tr class="row-diff"><th>차이 (0이어야 합니다)</th><td id="r-diff">0원</td></tr>
       </tbody>
     </table>
   </div>
@@ -162,7 +190,7 @@
   <h2>조별 매출</h2>
   <p class="hint">교환권 매출 = 제출한 교환권 − 아침에 받은 잔돈. 여기에 <strong>현금 매출과 행사전 구매</strong>를 더한 것이 그 조가 실제로 판 금액입니다.</p>
   <div class="table-scroll">
-    <table class="data-table">
+    <table class="data-table" id="report-booth-table">
       <thead><tr><th>조</th><th>받은 잔돈</th><th>제출 교환권</th><th>교환권 매출</th><th>현금 매출</th><th>행사전 구매</th><th>매출 합계</th><th>재료원가</th><th>재정 지급</th></tr></thead>
       <tbody id="report-booth-body"></tbody>
       <tfoot><tr><th>합계</th><th id="rb-float">0원</th><th id="rb-final">0원</th><th id="rb-voucher">0원</th><th id="rb-cash">0원</th><th id="rb-presale">0원</th><th id="rb-total">0원</th><th id="rb-cost">0원</th><th></th></tr></tfoot>
@@ -181,8 +209,8 @@
   </div>
   <p class="hint" id="unused-note"></p>
 
-  <h2>최종 수익금</h2>
-  <p class="hint"><strong>들어온 돈(매출)에서 쓴 돈(원가)을 빼면</strong> 교회에 남는 돈이 나옵니다. 2024년 결산서와 같은 방식입니다 (<a href="../doc.html?src=docs/과거_실적.md">과거 실적</a> 참고).</p>
+  <h2>최종 수익금은 어떻게 나왔나</h2>
+  <p class="hint">맨 위 <strong>최종 수익금</strong>이 나온 과정입니다. <strong>들어온 돈(매출)에서 쓴 돈(원가)을 뺀 것</strong>으로, 2024년 결산서와 같은 방식입니다 (<a href="../doc.html?src=docs/과거_실적.md">과거 실적</a> 참고).</p>
   <div class="table-scroll">
     <table class="data-table balance">
       <tbody>

@@ -259,8 +259,12 @@ function calcMap(rows) {
   var CALC_BOOTHS = rows || CALC_MIN_ROWS;
   var m = {};
   m.rows = CALC_BOOTHS;
-  m.boothHead = 7;
-  m.boothTop = 8;
+  // 답 세 개를 맨 위에 둔다. 아래 표들은 그 숫자가 나온 과정이므로, 시트를 열면
+  // 스크롤하지 않고도 「맞는가 / 얼마 벌었나 / 얼마 남았나」가 바로 보여야 한다.
+  m.answerHead = 6;
+  m.answerValue = 7;
+  m.boothHead = 10;
+  m.boothTop = 11;
   m.boothEnd = m.boothTop + CALC_BOOTHS - 1;
   m.boothSum = m.boothEnd + 1;
   m.deskHead = m.boothSum + 3;
@@ -348,8 +352,24 @@ function buildCalcSheet(st, at) {
     .setWrap(true).setFontColor('#8a1c1c');
   put(4, 1, '올린 시각'); put(4, 2, at || '');
 
+  // ----- 맨 위: 답 세 개 -----
+  var card = [[1, 6], [7, 6], [13, 6]];   // [시작 열, 칸 수]
+  sh.getRange(m.answerHead, card[0][0], 1, card[0][1]).merge().setValue('대사 — 맞는가')
+    .setFontWeight('bold').setFontSize(12).setBackground('#efece7');
+  sh.getRange(m.answerHead, card[1][0], 1, card[1][1]).merge().setValue('매출 합계 — 들어온 돈')
+    .setFontWeight('bold').setFontSize(12).setBackground('#efece7');
+  sh.getRange(m.answerHead, card[2][0], 1, card[2][1]).merge().setValue('최종 수익금 — 교회에 남는 돈')
+    .setFontWeight('bold').setFontSize(12).setBackground('#efece7');
+
+  sh.getRange(m.answerValue, card[0][0], 1, card[0][1]).merge();
+  sh.getRange(m.answerValue, card[1][0], 1, card[1][1]).merge();
+  sh.getRange(m.answerValue, card[2][0], 1, card[2][1]).merge();
+  sh.getRange(m.answerValue, 1, 1, W).setFontSize(16).setFontWeight('bold')
+    .setVerticalAlignment('middle');
+  sh.setRowHeight(m.answerValue, 44);
+
   // ----- 1. 조별 입력 -----
-  title(6, '1. 조별 정산 — 한 줄이 한 품목입니다. 한 조가 여러 품목이면 조 이름을 여러 줄에 똑같이 적으세요');
+  title(m.boothHead - 1, '1. 조별 정산 — 한 줄이 한 품목입니다. 한 조가 여러 품목이면 조 이름을 여러 줄에 똑같이 적으세요');
   sh.getRange(m.boothHead, 1, 1, W).setValues([[
     '조', '항목', '단가', '재료원가 (조 총액)', '재정 지급',
     '아침 1,000원', '아침 5,000원', '아침 10,000원', '아침 지급 합계',
@@ -483,6 +503,13 @@ function buildCalcSheet(st, at) {
     .setValue('※ 이 돈을 교환소 금고에서 꺼내지 마세요. 금고에서 나가면 저녁 금고가 줄어 대사가 틀어집니다.')
     .setFontColor('#8a1c1c');
 
+  fx(m.answerValue, card[0][0], '=IF(B' + m.bDiff + '=0,"맞습니다 — 차이 0원","차이 "&TEXT(B' +
+    m.bDiff + ',"#,##0")&"원 — 아래 5번을 보세요")');
+  fx(m.answerValue, card[1][0], '=B' + m.pRevenue);
+  fx(m.answerValue, card[2][0], '=B' + m.pFinal);
+  sh.getRange(m.answerValue, card[1][0]).setNumberFormat('#,##0"원"');
+  sh.getRange(m.answerValue, card[2][0]).setNumberFormat('#,##0"원"');
+
   decorateCalcSheet(sh, m, W);
   if (st) fillCalcSheet(sh, m, st);
   return sh;
@@ -539,19 +566,22 @@ function decorateCalcSheet(sh, m, W) {
 
   // 차이 한 줄에만 색을 건다. 이 시트가 내놓는 가장 중요한 답이다.
   var diff = sh.getRange(m.bDiff, 1, 2, 2);
+  var answer = sh.getRange(m.answerValue, 1, 1, 6);
   var ok = SpreadsheetApp.newConditionalFormatRule()
     .whenFormulaSatisfied('=$B$' + m.bDiff + '=0')
-    .setBackground('#dff3e4').setRanges([diff]).build();
+    .setBackground('#dff3e4').setRanges([diff, answer]).build();
   var bad = SpreadsheetApp.newConditionalFormatRule()
     .whenFormulaSatisfied('=$B$' + m.bDiff + '<>0')
-    .setBackground('#fbe3e3').setRanges([diff]).build();
+    .setBackground('#fbe3e3').setRanges([diff, answer]).build();
   sh.setConditionalFormatRules([ok, bad]);
 
   sh.setColumnWidth(1, 120);
   sh.setColumnWidth(2, 160);
   sh.setColumnWidth(W, 260);   // 확인
   for (var c = 3; c <= W; c++) sh.setColumnWidth(c, 110);
+  // 답 세 칸과 표 머리글을 얼려, 아래로 내려도 무엇을 보는 중인지 놓치지 않게 한다.
   sh.setFrozenRows(m.boothHead);
+  sh.setFrozenColumns(2);
 }
 
 /** 정산 도구의 현재 내용을 계산 시트의 넣는 칸에 그대로 옮긴다. */

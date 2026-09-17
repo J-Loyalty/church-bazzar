@@ -95,6 +95,17 @@ h3 {
 /* 이 앱의 표는 숫자가 많아 가운데 정렬한다 (문서는 왼쪽 정렬이 기본) */
 .data-table th, .data-table td { text-align: center; }
 .data-table td:first-child, .data-table th:first-child { text-align: left; }
+
+/* 조가 열다섯이면 줄을 눈으로 따라가기 어렵다. 한 줄 건너 옅게 깔아 준다. */
+.data-table tbody tr:nth-child(even) { background: var(--color-surface-soft); }
+.data-table tbody tr:nth-child(even) input { background: var(--color-surface-card); }
+
+/* 결과의 조별 매출은 금액만 있는 표라 오른쪽에 맞춰 자릿수를 견주게 한다. */
+#report-booth-body td:not(:first-child),
+#report-booth-table tfoot th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 .data-table input { min-height: 46px; padding: 8px 10px; width: 100%; max-width: 120px; }
 .data-table .col-btn { width: 96px; }
 .data-table tfoot th {
@@ -215,34 +226,73 @@ h3 {
   border-top: 1px solid var(--color-hairline);
 }
 
-/* 결과 탭 맨 위의 한 줄. 이 도구가 내놓는 가장 중요한 답이다. */
-.verdict {
-  border-radius: var(--radius-xl);
-  padding: 26px 28px;
-  margin-bottom: 8px;
-  background: var(--color-surface-soft);
-  border-left: 5px solid var(--color-hairline-strong);
+/* 결과 탭 맨 위. 이 도구가 내놓는 답 세 개를 한눈에 세워, 수익금을 보려고
+   끝까지 스크롤하지 않게 한다. 아래 표들은 그 숫자가 나온 과정이다. */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 30px;
 }
-.verdict-label {
-  margin: 0 0 6px;
-  font-size: 13px;
+.summary-card {
+  border-radius: var(--radius-xl);
+  padding: 20px 22px;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-hairline);
+  border-left: 5px solid var(--color-hairline-strong);
+  min-width: 0;
+}
+.summary-label {
+  margin: 0 0 8px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
   color: var(--color-mute);
 }
-.verdict-value {
+.summary-value {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 300;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.15;
   color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
 }
-.verdict-note { margin: 10px 0 0; font-size: 17px; color: var(--color-body); }
-.verdict.ok { background: var(--color-accent-green-soft); border-left-color: var(--color-accent-green); }
-.verdict.warn { background: var(--color-accent-red-soft); border-left-color: var(--color-accent-red); }
+.summary-note { margin: 8px 0 0; font-size: 15px; color: var(--color-body); }
+.summary-card.strong { background: var(--color-surface-card); border-left-color: var(--color-ink); }
+.summary-card.strong .summary-value { font-weight: 400; }
+.summary-card.ok { background: var(--color-accent-green-soft); border-left-color: var(--color-accent-green); }
+.summary-card.warn { background: var(--color-accent-red-soft); border-left-color: var(--color-accent-red); }
+
+/* 대사는 「왼쪽과 오른쪽이 같아야 한다」가 요점이라 나란히 놓는다.
+   세로로 이어 붙이면 그 관계가 보이지 않는다. */
+.balance-pair {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.balance-side {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  min-width: 0;
+}
+.balance-side h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--color-mute);
+  font-weight: 600;
+}
+.balance-side .data-table { margin: 0; }
+.balance-eq {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--color-mute);
+}
 
 /* 계산 과정을 보여주는 표 — 값은 오른쪽 끝에 맞춰 자릿수가 눈에 들어오게 한다 */
 .data-table.balance th { text-align: left; background: transparent; font-weight: 500; }
@@ -294,8 +344,11 @@ h3 {
   main { padding: 16px 12px 56px; }
   .tab-panel { padding: 16px; }
   h2 { font-size: 22px; }
-  .verdict { padding: 20px; }
-  .verdict-value { font-size: 27px; }
+  .summary-row { grid-template-columns: 1fr; gap: 10px; margin-bottom: 22px; }
+  .summary-card { padding: 16px 18px; }
+  .summary-value { font-size: 26px; }
+  .balance-pair { grid-template-columns: 1fr; }
+  .balance-eq { justify-self: center; font-size: 22px; }
   .data-table th, .data-table td { padding: 9px 6px; font-size: 15px; }
   .data-table input { max-width: none; padding: 8px 6px; }
   .denom-cell { flex: 1 1 100%; }
