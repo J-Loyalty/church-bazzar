@@ -29,7 +29,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `voucher-settlement/` — 교환권 정산 대사(검증) 정적 웹앱. 빌드 도구 없이 파일을 그대로 서빙.
   - `settle.js` — **계산은 여기 한 곳에만 있다** (`SETTLE.compute` 등). 입력 화면과 결산 보고서가 같은 숫자를 내야 하므로 어느 쪽에도 계산을 두지 않는다.
   - `index.html` / `style.css` / `app.js` — 입력 화면 (네 단계 탭)
-  - `report.html` / `report.css` / `report.js` — **결산 보고서.** `settle.js`의 결과를 A4 두 장에 옮기기만 한다. 같은 브라우저의 `localStorage`를 읽으므로 입력한 기기에서 열어야 한다. **두 장을 넘기지 말 것** — 인쇄 가능 높이는 A4 12mm 여백 기준 약 1,032px이고, 지금 1장 990px·2장 981px이다. 내역 표를 늘리면 넘친다
+  - `report.html` / `report.css` / `report.js` — **결산 보고서.** `settle.js`의 결과를 A4 두 장에 옮기기만 한다. 같은 브라우저의 `localStorage`를 읽으므로 입력한 기기에서 열어야 한다. **두 장을 넘기지 말 것** — A4 12mm 여백 기준 인쇄 가능 높이는 약 1,032px이고, **인쇄 폭은 CSS로 약 703px**이다. 화면에서 재면 안 되고 그 폭으로 재야 한다. 지금 1장 946px, 2장은 보통 933px·최악(조 전부 사비 지급) 987px이다.
+  - **좁은 화면용 미디어 쿼리에 `screen`을 반드시 붙일 것** (`@media screen and (max-width: 820px)`). 인쇄 폭이 703px이라 그냥 두면 인쇄에도 걸려 카드와 두 칸 배치가 세로로 쌓이고 **두 장이 네 장이 된다.**
+  - **표에 `break-inside: avoid`를 걸지 말 것.** 긴 표가 남은 자리에 못 들어가면 통째로 다음 장으로 밀려 빈 자리가 생긴다. 줄(`tr`)만 쪼개지지 않게 한다.
+  - 화면에서 표를 감싼 `.table-scroll`은 인쇄에서 `overflow: visible`로 풀어 준다.
 - `.claude/launch.json` — Claude Code 브라우저 프리뷰용 로컬 서버 설정. **저장소 뿌리를 서비스하는 `site` 하나뿐이다** (아래 "실행 / 미리보기" 참고)
 
 ## 실행 / 미리보기

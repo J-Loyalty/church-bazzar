@@ -90,17 +90,28 @@
   fill("cost-body", c.commonCosts,
     function (x) { return x.paid ? "재정 지급" : "돌려드릴 것"; }, "없음");
 
-  // 두 벌씩 한 줄에 놓아 줄 수를 반으로 줄인다 (A4 두 장 안에 들어가야 한다).
+  // 여러 벌을 한 줄에 놓아 줄 수를 줄인다. 조가 모두 사비 지급이면 열다섯 줄이
+  // 넘어가 A4 두 장을 넘기기 때문이다. 많으면 세 벌씩 간다.
   var rb = document.getElementById("refund-body");
+  var per = c.refundRows.length > 10 ? 3 : 2;
+  var head = "";
+  for (var k = 0; k < per; k++) head += "<th>받으실 곳</th><th>금액</th>";
+  document.getElementById("refund-head").innerHTML = "<tr>" + head + "</tr>";
+  document.getElementById("refund-foot").innerHTML =
+    '<tr><th colspan="' + (per * 2 - 1) + '">합계</th><th id="t-refund">0원</th></tr>';
+
   if (!c.refundRows.length) {
-    rb.innerHTML = '<tr><td colspan="4">없습니다. 원가가 모두 교회 재정에서 지급되었습니다.</td></tr>';
+    rb.innerHTML = '<tr><td colspan="' + (per * 2) +
+      '">없습니다. 원가가 모두 교회 재정에서 지급되었습니다.</td></tr>';
   } else {
     var cell = function (r) {
       return r ? "<td>" + esc(r.name) + "</td><td>" + money(r.amount) + "</td>" : "<td></td><td></td>";
     };
     var out = "";
-    for (var i = 0; i < c.refundRows.length; i += 2) {
-      out += "<tr>" + cell(c.refundRows[i]) + cell(c.refundRows[i + 1]) + "</tr>";
+    for (var i = 0; i < c.refundRows.length; i += per) {
+      out += "<tr>";
+      for (var j = 0; j < per; j++) out += cell(c.refundRows[i + j]);
+      out += "</tr>";
     }
     rb.innerHTML = out;
   }
