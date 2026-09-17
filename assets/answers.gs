@@ -336,6 +336,18 @@ function buildCalcSheet(st, at) {
 
   function put(row, col, value) { sh.getRange(row, col).setValue(value); }
   function fx(row, col, formula) { sh.getRange(row, col).setFormula(formula); }
+  // A열 라벨과 B열 수식을 줄마다 따로 쓰지 않고 덩어리로 한 번에 보낸다.
+  function block(top, bottom, entries) {
+    var labels = [], formulas = [];
+    for (var br = top; br <= bottom; br++) {
+      var e = entries[br];
+      labels.push([e ? e[0] : '']);
+      formulas.push([e ? e[1] : '']);
+    }
+    sh.getRange(top, 1, labels.length, 1).setValues(labels);
+    sh.getRange(top, 2, formulas.length, 1).setFormulas(formulas);
+  }
+
   function title(row, text) {
     sh.getRange(row, 1, 1, W).merge().setValue(text)
       .setFontWeight('bold').setFontSize(12).setBackground('#efece7');
@@ -380,16 +392,25 @@ function buildCalcSheet(st, at) {
   // 조 단위 값(잔돈·마감·현금·행사전 구매·재료원가)은 **그 조 첫 줄에만** 적는다.
   // 위쪽에 같은 조 이름이 이미 나왔으면 계산 칸을 비워, 두 번 적은 것이 합계에
   // 섞이지 않게 한다. 실수로 적으면 맨 오른쪽 「확인」 칸이 알려 준다.
+  // 줄마다 칸을 하나씩 건드리면 시트에 수백 번 왕복해 시간 제한에 걸린다.
+  // 열별로 모아 한 번에 보낸다 (70줄 기준 350여 번 -> 5번).
+  var colI = [], colM = [], colN = [], colQ = [], colR = [];
   for (var r = m.boothTop; r <= m.boothEnd; r++) {
     var dup = 'COUNTIF($A$' + m.boothHead + ':$A' + (r - 1) + ',$A' + r + ')>0';
     var head = '=IF($A' + r + '="","",IF(' + dup + ',"",';
-    fx(r, 9, head + 'F' + r + '*1000+G' + r + '*5000+H' + r + '*10000))');
-    fx(r, 13, head + 'J' + r + '*1000+K' + r + '*5000+L' + r + '*10000))');
-    fx(r, 14, head + 'M' + r + '-I' + r + '))');
-    fx(r, 17, head + 'N' + r + '+O' + r + '+P' + r + '))');
-    fx(r, 18, '=IF($A' + r + '="","",IF(NOT(' + dup + '),"",IF(SUM(F' + r + ':H' + r +
-      ',J' + r + ':L' + r + ',O' + r + ':P' + r + ')=0,"","⚠ 조별 숫자는 그 조 첫 줄에만 적으세요")))');
+    colI.push([head + 'F' + r + '*1000+G' + r + '*5000+H' + r + '*10000))']);
+    colM.push([head + 'J' + r + '*1000+K' + r + '*5000+L' + r + '*10000))']);
+    colN.push([head + 'M' + r + '-I' + r + '))']);
+    colQ.push([head + 'N' + r + '+O' + r + '+P' + r + '))']);
+    colR.push(['=IF($A' + r + '="","",IF(NOT(' + dup + '),"",IF(SUM(F' + r + ':H' + r +
+      ',J' + r + ':L' + r + ',O' + r + ':P' + r + ')=0,"","⚠ 조별 숫자는 그 조 첫 줄에만 적으세요")))']);
   }
+  var nRows = colI.length;
+  sh.getRange(m.boothTop, 9, nRows, 1).setFormulas(colI);
+  sh.getRange(m.boothTop, 13, nRows, 1).setFormulas(colM);
+  sh.getRange(m.boothTop, 14, nRows, 1).setFormulas(colN);
+  sh.getRange(m.boothTop, 17, nRows, 1).setFormulas(colQ);
+  sh.getRange(m.boothTop, 18, nRows, 1).setFormulas(colR);
 
   put(m.boothSum, 1, '합계');
   [4, 9, 13, 14, 15, 16, 17].forEach(function (c) {
@@ -443,7 +464,7 @@ function buildCalcSheet(st, at) {
 
   // ----- 4. 대사 -----
   title(m.balTop, '5. 대사 — 나간 교환권과 받은 돈이 같아야 합니다');
-  [
+  blockOf(block, [
     [m.bOpenTin, '아침 통', '=E' + m.openTin],
     [m.bCloseTin, '− 저녁 통', '=E' + m.closeTin],
     [m.bFloat, '− 조별 지급 합계', '=I' + m.boothSum],
@@ -460,7 +481,7 @@ function buildCalcSheet(st, at) {
       '=B' + m.bSold + '-N' + m.boothSum],
     [m.bUnusedPct, '미사용 비율 (2024년 2.5%)',
       '=IF(B' + m.bSold + '=0,"",B' + m.bUnused + '/B' + m.bSold + ')']
-  ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
+  ], m.bOpenTin, m.bUnusedPct);
 
   fx(m.bVerdict, 1, '=IF(B' + m.bDiff + '=0,"맞습니다 — 차이 0원","차이 "&TEXT(B' +
     m.bDiff + ',"#,##0")&"원 — 어딘가 어긋났습니다")');
@@ -472,7 +493,7 @@ function buildCalcSheet(st, at) {
 
   // ----- 5. 최종 수익금 -----
   title(m.profitTop, '6. 최종 수익금 — 매출에서 원가를 뺍니다');
-  [
+  blockOf(block, [
     [m.pDesk, '교환소가 받은 돈', '=B' + m.bReceived],
     [m.pCash, '＋ 조별 현금 매출 합계', '=O' + m.boothSum],
     [m.pPresaleBooth, '＋ 조별 행사전 구매 합계', '=P' + m.boothSum],
@@ -483,7 +504,7 @@ function buildCalcSheet(st, at) {
     [m.pCostCommon, '＋ 공통 비용 합계', '=B' + m.commonSum],
     [m.pCost, '＝ 원가 합계', '=B' + m.pCostBooth + '+B' + m.pCostCommon],
     [m.pFinal, '＝ 최종 수익금 (매출 − 원가)', '=B' + m.pRevenue + '-B' + m.pCost]
-  ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
+  ], m.pDesk, m.pFinal);
   [m.pRevenue, m.pCost, m.pFinal].forEach(function (row) {
     sh.getRange(row, 1, 1, 2).setFontWeight('bold');
   });
@@ -491,13 +512,13 @@ function buildCalcSheet(st, at) {
 
   // ----- 6. 돌려드릴 돈 -----
   title(m.refundTop, '7. 마감 후 돌려드릴 돈 — 재정에서 아직 내지 않은 원가입니다');
-  [
+  blockOf(block, [
     [m.rAll, '원가 합계', '=B' + m.pCost],
     [m.rPaid, '− 재정에서 이미 지급한 몫',
       '=SUMIF(E' + m.boothTop + ':E' + m.boothEnd + ',TRUE,D' + m.boothTop + ':D' + m.boothEnd +
       ')+SUMIF(C' + m.commonTop + ':C' + m.commonEnd + ',TRUE,B' + m.commonTop + ':B' + m.commonEnd + ')'],
     [m.rRefund, '＝ 돌려드릴 금액', '=B' + m.rAll + '-B' + m.rPaid]
-  ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
+  ], m.rAll, m.rRefund);
   sh.getRange(m.rRefund, 1, 1, 2).setFontWeight('bold');
   sh.getRange(m.rRefund + 1, 1, 1, W).merge()
     .setValue('※ 이 돈을 교환소 금고에서 꺼내지 마세요. 금고에서 나가면 저녁 금고가 줄어 대사가 틀어집니다.')
@@ -513,6 +534,13 @@ function buildCalcSheet(st, at) {
   decorateCalcSheet(sh, m, W);
   if (st) fillCalcSheet(sh, m, st);
   return sh;
+}
+
+/** [[줄, 라벨, 수식], ...] 를 줄 번호로 정리해 block() 에 넘긴다. */
+function blockOf(block, list, top, bottom) {
+  var byRow = {};
+  list.forEach(function (row) { byRow[row[0]] = [row[1], row[2]]; });
+  block(top, bottom, byRow);
 }
 
 function colLetter(n) {
@@ -578,7 +606,7 @@ function decorateCalcSheet(sh, m, W) {
   sh.setColumnWidth(1, 120);
   sh.setColumnWidth(2, 160);
   sh.setColumnWidth(W, 260);   // 확인
-  for (var c = 3; c <= W; c++) sh.setColumnWidth(c, 110);
+  sh.setColumnWidths(3, W - 2, 110);
   // 답 세 칸과 표 머리글을 얼려, 아래로 내려도 무엇을 보는 중인지 놓치지 않게 한다.
   sh.setFrozenRows(m.boothHead);
   sh.setFrozenColumns(2);

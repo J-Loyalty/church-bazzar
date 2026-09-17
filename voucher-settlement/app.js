@@ -864,7 +864,17 @@
         try {
           return JSON.parse(body);
         } catch (e) {
-          throw new Error("시트에서 예상과 다른 응답이 왔습니다. 연결 주소가 맞는지 확인해 주세요.");
+          var body2 = body.slice(0, 200).replace(/\s+/g, " ");
+          if (/<!doctype html|<html/i.test(body2)) {
+            if (/accounts\.google\.com|Sign in|로그인/i.test(body2)) {
+              throw new Error("구글 로그인 화면이 돌아왔습니다. Apps Script 배포의 「액세스 권한」을 " +
+                "「모든 사용자」로 바꿔 주세요 (배포 → 배포 관리 → 수정).");
+            }
+            throw new Error("시트가 오류 화면을 돌려줬습니다. 스크립트가 시간 안에 끝나지 못했거나 " +
+              "실행 중 오류가 났을 수 있습니다. 잠시 뒤 다시 시도하고, 그래도 같으면 Apps Script 편집기의 " +
+              "「실행」 기록에서 오류를 확인해 주세요.");
+          }
+          throw new Error("시트에서 예상과 다른 응답이 왔습니다. 연결 주소가 맞는지 확인해 주세요. 받은 내용: " + body2);
         }
       });
     }, function () {

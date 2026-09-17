@@ -3,6 +3,9 @@ const fs = require('fs');
 
 // ---------- 아주 작은 Sheets 흉내 ----------
 const grid = new Map();            // "A8" -> {v} | {f}
+// 시트 호출은 한 건씩 왕복한다. 줄마다 칸을 건드리면 수백 번이 되어 시간 제한에
+// 걸리고, 그때 구글은 JSON 대신 오류 HTML 을 돌려준다 -- 「예상과 다른 응답」이 그것.
+let calls = 0;
 const key = (r, c) => colL(c) + r;
 function colL(n) { let s = ''; while (n > 0) { const x = (n - 1) % 26; s = String.fromCharCode(65 + x) + s; n = (n - x - 1) / 26; } return s; }
 
@@ -18,6 +21,17 @@ function Range(r, c, nr, nc) {
   const api = {
     setValue(v) { grid.set(key(r, c), { v: guard(v, key(r, c)) }); return api; },
     setFormula(f) { grid.set(key(r, c), { f }); return api; },
+    setFormulas(vals) {
+      if (vals.length !== nr) throw new Error(`행 수 불일치(수식) @${key(r, c)}: 범위 ${nr}줄, 값 ${vals.length}줄`);
+      for (let i = 0; i < vals.length; i++) {
+        if (vals[i].length !== nc) throw new Error(`열 수 불일치(수식) @${key(r, c)} ${i + 1}번째 줄`);
+        for (let j = 0; j < nc; j++) {
+          const v = vals[i][j];
+          grid.set(key(r + i, c + j), v === '' ? { v: '' } : { f: v });
+        }
+      }
+      return api;
+    },
     setValues(vals) {
       // 시트는 칸 수가 **정확히** 같아야 한다. 넘쳐도 모자라도 예외가 난다.
       if (vals.length !== nr) throw new Error(`행 수 불일치 @${key(r, c)}: 범위 ${nr}줄, 값 ${vals.length}줄`);
@@ -41,8 +55,8 @@ function Range(r, c, nr, nc) {
 const sheet = {
   clear: () => sheet, clearConditionalFormatRules: () => sheet,
   getMaxRows: () => 200, getMaxColumns: () => 26,
-  getRange: (r, c, nr = 1, nc = 1) => Range(r, c, nr, nc),
-  setColumnWidth: () => sheet, setFrozenRows: () => sheet,
+  getRange: (r, c, nr = 1, nc = 1) => { calls++; return Range(r, c, nr, nc); },
+  setColumnWidth: () => sheet, setColumnWidths: () => sheet, setFrozenRows: () => sheet,
   setRowHeight: () => sheet, setFrozenColumns: () => sheet,
   setConditionalFormatRules: () => sheet
 };
@@ -267,3 +281,12 @@ console.log(bad2.length
   ? 'X 품목 60줄: ' + bad2.join(' / ')
   : `품목 60줄 (15조 x 4품목): 줄 ${rowsNeeded}개, 마지막 줄 ${lastTeam}, 합계 모두 맞음`);
 if (bad2.length) process.exitCode = 1;
+
+// 시트 왕복 횟수. 여기가 늘면 Apps Script 가 시간 제한에 걸려 오류 HTML 을 돌려준다.
+const BUDGET = 400;
+calls = 0;
+global.__build(many, '');
+console.log(calls > BUDGET
+  ? `X 시트 호출 ${calls}회 — ${BUDGET}회를 넘었습니다. 줄마다 쓰지 말고 열 단위로 묶으세요`
+  : `시트 호출 ${calls}회 (한도 ${BUDGET})`);
+if (calls > BUDGET) process.exitCode = 1;

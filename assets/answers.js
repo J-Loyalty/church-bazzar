@@ -48,7 +48,12 @@
         } catch (e) {
           // A wrong address, or a deployment that was never updated, answers with
           // an HTML page. The parse error itself means nothing to a volunteer.
-          throw new Error("저장하는 곳에서 예상과 다른 응답이 왔습니다. 연결 주소가 맞는지 확인해 주세요.");
+          var head = body.slice(0, 200).replace(/\s+/g, " ");
+          if (/accounts\.google\.com|Sign in|로그인/i.test(head)) {
+            throw new Error("구글 로그인 화면이 돌아왔습니다. Apps Script 배포의 「액세스 권한」을 " +
+              "「모든 사용자」로 바꿔 주세요 (배포 → 배포 관리 → 수정).");
+          }
+          throw new Error("저장하는 곳에서 예상과 다른 응답이 왔습니다. 연결 주소가 맞는지 확인해 주세요. 받은 내용: " + head);
         }
       });
     }, function () {
