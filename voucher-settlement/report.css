@@ -86,7 +86,7 @@ main { padding-bottom: 60px; }
   font-weight: 700;
   color: var(--color-ink);
 }
-.sheet h2:first-of-type { margin-top: 0; }
+.sheet > :first-child { margin-top: 0; }
 
 .ledger, .grid, .sign { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ledger th, .ledger td, .grid th, .grid td, .sign th, .sign td {
@@ -130,7 +130,7 @@ main { padding-bottom: 60px; }
 #refund-body td:nth-child(odd), #refund-table thead th:nth-child(odd) { text-align: left; }
 
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.two-col h2 { margin-top: 13px; }
+.two-col h2 { margin-top: 0; }
 
 /* 돌려드릴 곳이 여럿이면 세로로 길어진다. 두 벌씩 나란히 놓아 줄 수를 반으로. */
 #refund-table td:nth-child(3), #refund-table th:nth-child(3) { border-left-width: 2px; }
@@ -194,7 +194,22 @@ main { padding-bottom: 60px; }
   /* 장 경계는 여기서만 정한다. 한 장이 한 .sheet 다. */
   .sheet { break-inside: auto; }
   .sheet + .sheet { break-before: page; }
-  .page-no { position: static; text-align: right; margin-top: 10px; }
+  /* 쪽 번호를 종이 오른쪽 **아래**에 붙인다. 장을 세로 flex 로 두고 쪽 번호에
+     margin-top: auto 를 주면 내용이 짧아도 아래로 밀려 내려간다.
+     높이는 **mm 로 직접** 잡는다 -- `100%` 는 부모 높이가 auto 라 0 으로 풀리고,
+     `vh` 는 종이가 아니라 화면 높이로 잡혀 빈 장이 낀다.
+     250mm 는 A4(여백 10mm 기준 277mm)와 Letter(259mm) **둘 다**에 들어가는 값이다. */
+  .sheet {
+    display: flex;
+    flex-direction: column;
+    min-height: 250mm;
+  }
+  .page-no {
+    position: static;
+    margin: auto 0 0;
+    padding-top: 10px;
+    text-align: right;
+  }
 
   /* 화면에서 표를 감싼 스크롤 상자는 인쇄에서 풀어 준다.
      overflow 가 걸린 채로 두면 칸이 잘리거나 장 나눔이 엉킨다. */
