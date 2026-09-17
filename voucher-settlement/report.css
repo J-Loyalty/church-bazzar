@@ -133,6 +133,7 @@ main { padding-bottom: 60px; }
 #refund-table td:nth-child(3), #refund-table th:nth-child(3) { border-left-width: 2px; }
 
 .note { margin: 6px 0 0; font-size: 13px; color: var(--color-body); }
+.unit { font-size: 13px; font-weight: 400; color: var(--color-mute); }
 
 .sign { margin-top: 20px; }
 .sign th { background: var(--color-surface-soft); font-weight: 600; white-space: nowrap; }
@@ -158,20 +159,35 @@ main { padding-bottom: 60px; }
 }
 
 /* ---------- 인쇄 ---------- */
-@page { size: A4 portrait; margin: 12mm; }
+@page { size: A4 portrait; margin: 10mm; }
 
 @media print {
   .no-print, .topbar { display: none !important; }
-  body { background: #fff; }
-  main { padding: 0; }
+  /* 몸통에 남은 여백이 있으면 맨 뒤에 빈 장이 한 장 더 나온다. */
+  html, body { margin: 0; padding: 0; background: #fff; }
+  main { margin: 0; padding: 0; }
+
+  /* 인쇄 가능한 폭을 다 쓰지 않는다. 프린터·여백 설정에 따라 실제 폭이 조금씩
+     좁아지는데, 꽉 채워 두면 그만큼 오른쪽이 잘린다. 175mm 로 잡아 여유를 남긴다. */
   .sheet {
     width: auto;
+    max-width: 175mm;
     min-height: 0;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
     border: none;
     background: #fff;
+    overflow: hidden;
   }
+  .sheet:last-child { break-after: avoid; }
+
+  /* 칸 너비는 표가 알아서 정하게 둔다. 억지로 고정하면 금액이 칸보다 길어져
+     「9,910,000원」이 두 줄로 접히고 표가 세로로 부풀어 장수가 늘어난다.
+     가장 넓은 표도 175mm 안에 들어가는 것을 확인했다. */
+  .sheet table { max-width: 100%; }
+  /* 금액은 어떤 경우에도 줄을 바꾸지 않는다. */
+  .ledger td, .grid td, .grid tfoot th { white-space: nowrap; }
+  #booth-body td:nth-child(2), .ledger td.why { white-space: normal; }
   /* 장 경계는 여기서만 정한다. 한 장이 한 .sheet 다. */
   .sheet { break-inside: auto; }
   .sheet + .sheet { break-before: page; }

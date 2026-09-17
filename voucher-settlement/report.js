@@ -55,22 +55,25 @@
   }
 
   // ---------- 2장 ----------
+  // 조별 표는 열이 일곱이라 가장 넓다. 칸마다 「원」을 붙이면 그만큼 넓어져
+  // 프린터 여백에 따라 오른쪽이 잘린다. 단위는 제목에 한 번만 적는다.
+  var won = function (n) { return SETTLE.num(n).toLocaleString("ko-KR"); };
   var body = document.getElementById("booth-body");
   body.innerHTML = c.rows.length
     ? c.rows.map(function (r) {
         var names = r.items.map(function (x) { return x.name; }).join(" · ");
         return "<tr><td>" + esc(r.name) + "</td><td>" + esc(names) + "</td><td>" +
-          money(r.voucher) + "</td><td>" + money(r.cash) + "</td><td>" +
-          money(r.presale) + "</td><td>" + money(r.total) + "</td><td>" +
-          money(r.cost) + "</td></tr>";
+          won(r.voucher) + "</td><td>" + won(r.cash) + "</td><td>" +
+          won(r.presale) + "</td><td>" + won(r.total) + "</td><td>" +
+          won(r.cost) + "</td></tr>";
       }).join("")
     : '<tr><td colspan="7">등록된 조가 없습니다.</td></tr>';
 
-  set("t-voucher", money(c.voucherSum));
-  set("t-cash", money(c.cashSum));
-  set("t-presale", money(c.presaleBooth));
-  set("t-total", money(c.totalSum));
-  set("t-cost", money(c.costSum));
+  set("t-voucher", won(c.voucherSum));
+  set("t-cash", won(c.cashSum));
+  set("t-presale", won(c.presaleBooth));
+  set("t-total", won(c.totalSum));
+  set("t-cost", won(c.costSum));
 
   function fill(id, list, cols, emptyText) {
     var el = document.getElementById(id);
