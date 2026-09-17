@@ -236,19 +236,14 @@ function json(obj) {
  * 목적입니다. 그래서 사이트의 계산식을 그대로 시트 함수로 옮겨 적었습니다.
  */
 
-var CALC_ITEMS = 24;    // 품목 줄 수 (한 조가 여러 품목을 맡는다)
-var CALC_BOOTHS = 18;   // 조 줄 수
+var CALC_BOOTHS = 24;   // 한 줄이 한 품목. 한 조가 여러 품목을 맡으므로 넉넉히.
 var CALC_COMMON = 15;   // 공통 비용 줄 수
 
 // 줄 위치를 한곳에 모아 둔다. 표를 손대면 여기만 고치면 된다.
 function calcMap() {
   var m = {};
-  m.itemHead = 7;
-  m.itemTop = 8;
-  m.itemEnd = m.itemTop + CALC_ITEMS - 1;
-  m.itemSum = m.itemEnd + 1;
-  m.boothHead = m.itemSum + 3;
-  m.boothTop = m.boothHead + 1;
+  m.boothHead = 7;
+  m.boothTop = 8;
   m.boothEnd = m.boothTop + CALC_BOOTHS - 1;
   m.boothSum = m.boothEnd + 1;
   m.deskHead = m.boothSum + 3;
@@ -302,7 +297,9 @@ function buildCalcSheet(st, at) {
   var m = calcMap();
   // 가장 넓은 표가 조별 블록(A~N)이다. 재정 지급 칸이 품목 블록으로 옮겨가면서
   // 한 칸 줄었다 -- 머리글 개수와 어긋나면 시트가 통째로 거부한다.
-  var W = 14; // A~N
+  // 표가 하나뿐이라 그 폭이 곧 시트의 폭이다. 머리글 개수와 어긋나면 시트가
+  // 쓰기를 통째로 거부한다 (node tools/check-calc-sheet.js 가 잡는다).
+  var W = 18; // A~R
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SETTLE_CALC);
   if (!sh) sh = ss.insertSheet(SETTLE_CALC);
@@ -331,41 +328,40 @@ function buildCalcSheet(st, at) {
   put(4, 1, '올린 시각'); put(4, 2, at || '');
 
   // ----- 1. 조별 입력 -----
-  title(6, '1. 조와 항목 — 한 줄이 한 품목입니다. 한 조가 여러 품목이면 조 이름을 여러 줄에 똑같이 적으세요');
-  sh.getRange(m.itemHead, 1, 1, 5).setValues([[
-    '조', '항목', '단가', '재료원가 (그 조의 총액)', '재정 지급'
-  ]]).setFontWeight('bold').setBackground('#efece7').setWrap(true);
-  put(m.itemSum, 1, '재료원가 합계');
-  fx(m.itemSum, 4, '=SUM(D' + m.itemTop + ':D' + m.itemEnd + ')');
-  sh.getRange(m.itemSum, 1, 1, 5).setFontWeight('bold').setBackground('#efece7');
-  sh.getRange(m.itemSum + 1, 1, 1, W).merge()
-    .setValue('※ 재료원가는 그 조의 총액입니다. 한 조가 여러 줄이면 첫 줄에만 적으세요 — 줄마다 적으면 그만큼 겹쳐 잡힙니다.')
-    .setFontColor('#8a1c1c');
-
-  title(m.boothHead - 1, '2. 조별 정산 — 한 조가 한 줄입니다. 아침 장수, 마감 장수, 현금 매출, 행사전 구매를 가로로 채우세요');
+  title(6, '1. 조별 정산 — 한 줄이 한 품목입니다. 한 조가 여러 품목이면 조 이름을 여러 줄에 똑같이 적으세요');
   sh.getRange(m.boothHead, 1, 1, W).setValues([[
-    '조', '아침 1,000원', '아침 5,000원', '아침 10,000원', '아침 지급 합계',
+    '조', '항목', '단가', '재료원가 (조 총액)', '재정 지급',
+    '아침 1,000원', '아침 5,000원', '아침 10,000원', '아침 지급 합계',
     '마감 1,000원', '마감 5,000원', '마감 10,000원', '마감 제출 합계',
-    '교환권 매출', '현금 매출', '행사전 구매', '매출 합계', '재료원가 (자동)'
+    '교환권 매출', '현금 매출', '행사전 구매', '매출 합계', '확인'
   ]]).setFontWeight('bold').setBackground('#efece7').setWrap(true);
 
+  // 조 단위 값(잔돈·마감·현금·행사전 구매·재료원가)은 **그 조 첫 줄에만** 적는다.
+  // 위쪽에 같은 조 이름이 이미 나왔으면 계산 칸을 비워, 두 번 적은 것이 합계에
+  // 섞이지 않게 한다. 실수로 적으면 맨 오른쪽 「확인」 칸이 알려 준다.
   for (var r = m.boothTop; r <= m.boothEnd; r++) {
-    fx(r, 5, '=IF($A' + r + '="","",B' + r + '*1000+C' + r + '*5000+D' + r + '*10000)');
-    fx(r, 9, '=IF($A' + r + '="","",F' + r + '*1000+G' + r + '*5000+H' + r + '*10000)');
-    fx(r, 10, '=IF($A' + r + '="","",I' + r + '-E' + r + ')');
-    fx(r, 13, '=IF($A' + r + '="","",J' + r + '+K' + r + '+L' + r + ')');
-    fx(r, 14, '=IF($A' + r + '="","",SUMIF($A$' + m.itemTop + ':$A$' + m.itemEnd +
-      ',$A' + r + ',$D$' + m.itemTop + ':$D$' + m.itemEnd + '))');
+    var dup = 'COUNTIF($A$' + m.boothHead + ':$A' + (r - 1) + ',$A' + r + ')>0';
+    var head = '=IF($A' + r + '="","",IF(' + dup + ',"",';
+    fx(r, 9, head + 'F' + r + '*1000+G' + r + '*5000+H' + r + '*10000))');
+    fx(r, 13, head + 'J' + r + '*1000+K' + r + '*5000+L' + r + '*10000))');
+    fx(r, 14, head + 'M' + r + '-I' + r + '))');
+    fx(r, 17, head + 'N' + r + '+O' + r + '+P' + r + '))');
+    fx(r, 18, '=IF($A' + r + '="","",IF(NOT(' + dup + '),"",IF(SUM(F' + r + ':H' + r +
+      ',J' + r + ':L' + r + ',O' + r + ':P' + r + ')=0,"","⚠ 조별 숫자는 그 조 첫 줄에만 적으세요")))');
   }
+
   put(m.boothSum, 1, '합계');
-  [5, 9, 10, 11, 12, 13, 14].forEach(function (c) {
+  [4, 9, 13, 14, 15, 16, 17].forEach(function (c) {
     var L = colLetter(c);
     fx(m.boothSum, c, '=SUM(' + L + m.boothTop + ':' + L + m.boothEnd + ')');
   });
   sh.getRange(m.boothSum, 1, 1, W).setFontWeight('bold').setBackground('#efece7');
+  sh.getRange(m.boothSum + 1, 1, 1, W).merge()
+    .setValue('※ 항목과 단가는 줄마다, 재료원가와 조별 숫자는 그 조 첫 줄에만 적습니다. 둘째 줄부터 적으면 그만큼 겹쳐 잡힙니다.')
+    .setFontColor('#8a1c1c');
 
   // ----- 2. 교환소 -----
-  title(m.deskHead - 1, '3. 교환소 — 아침과 저녁에 센 것');
+  title(m.deskHead - 1, '2. 교환소 — 아침과 저녁에 센 것');
   sh.getRange(m.deskHead, 1, 1, 5)
     .setValues([['구분', '1,000원', '5,000원', '10,000원', '합계']])
     .setFontWeight('bold').setBackground('#efece7');
@@ -380,7 +376,7 @@ function buildCalcSheet(st, at) {
   put(m.preVoucher, 1, '행사 전에 판 교환권 (원) — 전도용 등');
 
   // ----- 3. 그 밖의 매출·비용 -----
-  title(m.presaleOther - 1, '4. 그 밖의 매출과 비용');
+  title(m.presaleOther - 1, '3. 그 밖의 매출과 비용');
   put(m.presaleOther, 1, '조 구분 없는 행사전 구매 (원) — 조별 몫은 위 1번 표에 적습니다');
   sh.getRange(m.commonHead, 1, 1, 3)
     .setValues([['공통 비용 항목', '금액 (원)', '재정 지급']])
@@ -390,11 +386,11 @@ function buildCalcSheet(st, at) {
   sh.getRange(m.commonSum, 1, 1, 3).setFontWeight('bold').setBackground('#efece7');
 
   // ----- 4. 대사 -----
-  title(m.balTop, '5. 대사 — 나간 교환권과 받은 돈이 같아야 합니다');
+  title(m.balTop, '4. 대사 — 나간 교환권과 받은 돈이 같아야 합니다');
   [
     [m.bOpenTin, '아침 통', '=E' + m.openTin],
     [m.bCloseTin, '− 저녁 통', '=E' + m.closeTin],
-    [m.bFloat, '− 조별 지급 합계', '=E' + m.boothSum],
+    [m.bFloat, '− 조별 지급 합계', '=I' + m.boothSum],
     [m.bPre, '＋ 행사 전에 판 교환권', '=B' + m.preVoucher],
     [m.bSold, '＝ 손님에게 팔려 나간 교환권',
       '=B' + m.bOpenTin + '-B' + m.bCloseTin + '-B' + m.bFloat + '+B' + m.bPre],
@@ -405,7 +401,7 @@ function buildCalcSheet(st, at) {
       '=B' + m.bCashDelta + '+B' + m.bTransfer + '+B' + m.bPre2],
     [m.bDiff, '차이 (0이어야 합니다)', '=B' + m.bReceived + '-B' + m.bSold],
     [m.bUnused, '미사용 교환권 (손님이 쓰지 않고 가져간 몫)',
-      '=B' + m.bSold + '-J' + m.boothSum],
+      '=B' + m.bSold + '-N' + m.boothSum],
     [m.bUnusedPct, '미사용 비율 (2024년 2.5%)',
       '=IF(B' + m.bSold + '=0,"",B' + m.bUnused + '/B' + m.bSold + ')']
   ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
@@ -419,15 +415,15 @@ function buildCalcSheet(st, at) {
   });
 
   // ----- 5. 최종 수익금 -----
-  title(m.profitTop, '6. 최종 수익금 — 매출에서 원가를 뺍니다');
+  title(m.profitTop, '5. 최종 수익금 — 매출에서 원가를 뺍니다');
   [
     [m.pDesk, '교환소가 받은 돈', '=B' + m.bReceived],
-    [m.pCash, '＋ 조별 현금 매출 합계', '=K' + m.boothSum],
-    [m.pPresaleBooth, '＋ 조별 행사전 구매 합계', '=L' + m.boothSum],
+    [m.pCash, '＋ 조별 현금 매출 합계', '=O' + m.boothSum],
+    [m.pPresaleBooth, '＋ 조별 행사전 구매 합계', '=P' + m.boothSum],
     [m.pPresaleOther, '＋ 조 구분 없는 행사전 구매', '=B' + m.presaleOther],
     [m.pRevenue, '＝ 매출 합계',
       '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresaleBooth + '+B' + m.pPresaleOther],
-    [m.pCostBooth, '조별 재료원가 합계', '=D' + m.itemSum],
+    [m.pCostBooth, '조별 재료원가 합계', '=D' + m.boothSum],
     [m.pCostCommon, '＋ 공통 비용 합계', '=B' + m.commonSum],
     [m.pCost, '＝ 원가 합계', '=B' + m.pCostBooth + '+B' + m.pCostCommon],
     [m.pFinal, '＝ 최종 수익금 (매출 − 원가)', '=B' + m.pRevenue + '-B' + m.pCost]
@@ -438,11 +434,11 @@ function buildCalcSheet(st, at) {
   sh.getRange(m.pFinal, 1, 1, 2).setFontSize(12).setBackground('#efece7');
 
   // ----- 6. 돌려드릴 돈 -----
-  title(m.refundTop, '7. 마감 후 돌려드릴 돈 — 재정에서 아직 내지 않은 원가입니다');
+  title(m.refundTop, '6. 마감 후 돌려드릴 돈 — 재정에서 아직 내지 않은 원가입니다');
   [
     [m.rAll, '원가 합계', '=B' + m.pCost],
     [m.rPaid, '− 재정에서 이미 지급한 몫',
-      '=SUMIF(E' + m.itemTop + ':E' + m.itemEnd + ',TRUE,D' + m.itemTop + ':D' + m.itemEnd +
+      '=SUMIF(E' + m.boothTop + ':E' + m.boothEnd + ',TRUE,D' + m.boothTop + ':D' + m.boothEnd +
       ')+SUMIF(C' + m.commonTop + ':C' + m.commonEnd + ',TRUE,B' + m.commonTop + ':B' + m.commonEnd + ')'],
     [m.rRefund, '＝ 돌려드릴 금액', '=B' + m.rAll + '-B' + m.rPaid]
   ].forEach(function (row) { put(row[0], 1, row[1]); fx(row[0], 2, row[2]); });
@@ -468,10 +464,9 @@ function decorateCalcSheet(sh, m, W) {
   var money = '#,##0';
 
   var inputs = [
-    sh.getRange(m.itemTop, 1, CALC_ITEMS, 5),        // 조/항목/단가/재료원가/재정 지급
-    sh.getRange(m.boothTop, 1, CALC_BOOTHS, 4),      // 조 이름 + 아침 장수
-    sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3),      // 마감 장수
-    sh.getRange(m.boothTop, 11, CALC_BOOTHS, 2),     // 현금 매출 + 행사전 구매
+    sh.getRange(m.boothTop, 1, CALC_BOOTHS, 8),      // 조~재정 지급 + 아침 장수
+    sh.getRange(m.boothTop, 10, CALC_BOOTHS, 3),     // 마감 장수
+    sh.getRange(m.boothTop, 15, CALC_BOOTHS, 2),     // 현금 매출 + 행사전 구매
     sh.getRange(m.openTin, 2, 2, 3),                 // 통 장수
     sh.getRange(m.openCash, 2, 4, 1),                // 금고/이체/사전판매
     sh.getRange(m.presaleOther, 2, 1, 1),            // 조 구분 없는 행사전 구매
@@ -481,10 +476,9 @@ function decorateCalcSheet(sh, m, W) {
 
   // 금액 칸 서식
   [
-    sh.getRange(m.itemTop, 3, CALC_ITEMS, 2),
-    sh.getRange(m.itemSum, 4, 1, 1),
-    sh.getRange(m.boothTop, 5, CALC_BOOTHS + 1, 1),
-    sh.getRange(m.boothTop, 9, CALC_BOOTHS + 1, 6),
+    sh.getRange(m.boothTop, 3, CALC_BOOTHS + 1, 2),
+    sh.getRange(m.boothTop, 9, CALC_BOOTHS + 1, 1),
+    sh.getRange(m.boothTop, 13, CALC_BOOTHS + 1, 5),
     sh.getRange(m.openTin, 5, 2, 1),
     sh.getRange(m.openCash, 2, 4, 1),
     sh.getRange(m.presaleOther, 2, 1, 1),
@@ -493,16 +487,15 @@ function decorateCalcSheet(sh, m, W) {
     sh.getRange(m.pDesk, 2, m.pFinal - m.pDesk + 1, 1),
     sh.getRange(m.rAll, 2, 3, 1)
   ].forEach(function (rg) { rg.setNumberFormat(money); });
-  sh.getRange(m.itemTop, 1, CALC_ITEMS, 2).setNumberFormat('@');
-  sh.getRange(m.boothTop, 1, CALC_BOOTHS, 1).setNumberFormat('@');
+  sh.getRange(m.boothTop, 1, CALC_BOOTHS, 2).setNumberFormat('@');
   sh.getRange(m.commonTop, 1, CALC_COMMON, 1).setNumberFormat('@');
-  sh.getRange(m.boothTop, 2, CALC_BOOTHS, 3).setNumberFormat('0');
   sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3).setNumberFormat('0');
+  sh.getRange(m.boothTop, 10, CALC_BOOTHS, 3).setNumberFormat('0');
   sh.getRange(m.openTin, 2, 2, 3).setNumberFormat('0');
   sh.getRange(m.bUnusedPct, 2).setNumberFormat('0.0%');
 
   // 재정 지급은 체크 상자로
-  sh.getRange(m.itemTop, 5, CALC_ITEMS, 1).insertCheckboxes();
+  sh.getRange(m.boothTop, 5, CALC_BOOTHS, 1).insertCheckboxes();
   sh.getRange(m.commonTop, 3, CALC_COMMON, 1).insertCheckboxes();
 
   // 차이 한 줄에만 색을 건다. 이 시트가 내놓는 가장 중요한 답이다.
@@ -515,59 +508,53 @@ function decorateCalcSheet(sh, m, W) {
     .setBackground('#fbe3e3').setRanges([diff]).build();
   sh.setConditionalFormatRules([ok, bad]);
 
-  sh.setColumnWidth(1, 200);
-  sh.setColumnWidth(2, 200);
+  sh.setColumnWidth(1, 120);
+  sh.setColumnWidth(2, 160);
+  sh.setColumnWidth(W, 260);   // 확인
   for (var c = 3; c <= W; c++) sh.setColumnWidth(c, 110);
   sh.setFrozenRows(m.boothHead);
 }
 
 /** 정산 도구의 현재 내용을 계산 시트의 넣는 칸에 그대로 옮긴다. */
 function fillCalcSheet(sh, m, st) {
-  // 품목 블록 -- 한 줄이 한 품목. 재료원가와 재정 지급은 조 단위라
-  // 그 조가 처음 나오는 줄에만 적는다 (줄마다 적으면 겹쳐 잡힌다).
+  // 한 줄이 한 품목이다. 조 단위 값(재료원가·재정 지급·잔돈·마감·현금·행사전 구매)은
+  // 그 조가 처음 나오는 줄에만 적고 나머지 줄은 비운다 -- 줄마다 적으면 겹쳐 잡힌다.
   var items = st.items || [];
   var seen = {};
-  var ir = [];
-  for (var i = 0; i < CALC_ITEMS; i++) {
+  var head = [];   // A~H
+  var mid = [];    // J~L
+  var tail = [];   // O~P
+
+  for (var i = 0; i < CALC_BOOTHS; i++) {
     var it = items[i];
-    if (!it) { ir.push(['', '', '', '', false]); continue; }
+    if (!it) {
+      head.push(['', '', '', '', false, '', '', '']);
+      mid.push(['', '', '']);
+      tail.push(['', '']);
+      continue;
+    }
     var team = String(it.team || '').trim();
     var first = team && !seen[team];
     if (team) seen[team] = true;
-    ir.push([
+
+    var fl = first ? ((st.floats || {})[team] || {}) : null;
+    var fi = first ? ((st.finals || {})[team] || {}) : null;
+
+    head.push([
       String(it.team || ''), String(it.name || ''), num0(it.price),
       first ? num0((st.costs || {})[team]) : '',
-      first ? !!(st.costPaid || {})[team] : false
+      first ? !!(st.costPaid || {})[team] : false,
+      fl ? num0(fl[1000]) : '', fl ? num0(fl[5000]) : '', fl ? num0(fl[10000]) : ''
     ]);
+    mid.push(fi ? [num0(fi[1000]), num0(fi[5000]), num0(fi[10000])] : ['', '', '']);
+    tail.push(first
+      ? [num0((st.cash || {})[team]), num0((st.presales || {})[team])]
+      : ['', '']);
   }
-  sh.getRange(m.itemTop, 1, CALC_ITEMS, 5).setValues(ir);
 
-  // 조별 블록 -- 줄에 적힌 조 이름에서 조 목록을 뽑는다.
-  var teams = [];
-  var got = {};
-  items.forEach(function (x) {
-    var t = String(x && x.team || '').trim();
-    if (!t || got[t]) return;
-    got[t] = true;
-    teams.push(t);
-  });
-
-  var rows = [];
-  for (var j = 0; j < CALC_BOOTHS; j++) {
-    var t2 = teams[j];
-    if (!t2) { rows.push(['', '', '', '', '', '', '', '', '']); continue; }
-    var fl = (st.floats || {})[t2] || {};
-    var fi = (st.finals || {})[t2] || {};
-    rows.push([
-      t2,
-      num0(fl[1000]), num0(fl[5000]), num0(fl[10000]),
-      num0(fi[1000]), num0(fi[5000]), num0(fi[10000]),
-      num0((st.cash || {})[t2]), num0((st.presales || {})[t2])
-    ]);
-  }
-  sh.getRange(m.boothTop, 1, CALC_BOOTHS, 4).setValues(rows.map(function (r) { return r.slice(0, 4); }));
-  sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3).setValues(rows.map(function (r) { return r.slice(4, 7); }));
-  sh.getRange(m.boothTop, 11, CALC_BOOTHS, 2).setValues(rows.map(function (r) { return r.slice(7, 9); }));
+  sh.getRange(m.boothTop, 1, CALC_BOOTHS, 8).setValues(head);
+  sh.getRange(m.boothTop, 10, CALC_BOOTHS, 3).setValues(mid);
+  sh.getRange(m.boothTop, 15, CALC_BOOTHS, 2).setValues(tail);
 
   var d = st.desk || {};
   var tin = function (src) {

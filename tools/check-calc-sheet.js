@@ -79,7 +79,10 @@ function expand(range) {
   for (let r = +m1[2]; r <= +m2[2]; r++) for (let c = c1; c <= c2; c++) out.push(colL(c) + r);
   return out;
 }
-const SUM = rg => expand(rg).reduce((a, k) => a + n(V(k)), 0);
+const SUM = (...args) => args.reduce((a, rg) =>
+  a + (typeof rg === 'string' && rg.includes(':') ? expand(rg).reduce((b, k) => b + n(V(k)), 0) : n(rg)), 0);
+const COUNTIF = (rg, want) => expand(rg).filter(k => V(k) === want).length;
+const NOT = x => !x;
 const SUMIF = (test, want, vals) => {
   const t = expand(test), v = expand(vals);
   return t.reduce((a, k, i) => a + (V(k) === want ? n(V(v[i])) : 0), 0);
@@ -126,12 +129,13 @@ global.__build(st, '2026-10-09 17:00');
 const m = global.__map();
 
 const got = {
-  '조1 교환권 매출': V('J' + m.boothTop), '조2 교환권 매출': V('J' + (m.boothTop + 1)),
-  '조1 매출 합계': V('M' + m.boothTop), '조2 매출 합계': V('M' + (m.boothTop + 1)),
-  '조1 재료원가(자동)': V('N' + m.boothTop), '조2 재료원가(자동)': V('N' + (m.boothTop + 1)),
-  '지급 합계': V('E' + m.boothSum),
-  '현금 합계': V('K' + m.boothSum), '교환권매출 합계': V('J' + m.boothSum),
-  '행사전 구매 합계': V('L' + m.boothSum), '재료비 합계': V('D' + m.itemSum),
+  '조1 교환권 매출': V('N' + m.boothTop), '조2 교환권 매출': V('N' + (m.boothTop + 1)),
+  '조1 매출 합계': V('Q' + m.boothTop), '조2 매출 합계': V('Q' + (m.boothTop + 1)),
+  '2조 둘째 줄 매출': V('Q' + (m.boothTop + 2)),
+  '2조 둘째 줄 확인': V('R' + (m.boothTop + 2)),
+  '지급 합계': V('I' + m.boothSum),
+  '현금 합계': V('O' + m.boothSum), '교환권매출 합계': V('N' + m.boothSum),
+  '행사전 구매 합계': V('P' + m.boothSum), '재료비 합계': V('D' + m.boothSum),
   '팔려 나간 교환권': V('B' + m.bSold), '받은 돈': V('B' + m.bReceived),
   '차이': V('B' + m.bDiff), '판정': V('A' + m.bVerdict),
   '미사용': V('B' + m.bUnused), '미사용 비율': V('B' + m.bUnusedPct),
@@ -142,7 +146,7 @@ const got = {
 const want = {
   '조1 교환권 매출': 150000, '조2 교환권 매출': 120000,
   '조1 매출 합계': 380000, '조2 매출 합계': 240000,
-  '조1 재료원가(자동)': 100000, '조2 재료원가(자동)': 60000,
+  '2조 둘째 줄 매출': '', '2조 둘째 줄 확인': '',
   '지급 합계': 80000,
   '현금 합계': 50000, '교환권매출 합계': 270000,
   '행사전 구매 합계': 300000, '재료비 합계': 160000,
@@ -184,24 +188,22 @@ console.log('빈 양식: 차이', V('B' + m.bDiff), '/ 판정', V('A' + m.bVerdi
 
 // 빈 양식에 손으로 값만 넣어도 되는지 (사이트 없이 쓰는 경우)
 cache.clear();
-// 품목 블록
-grid.set('A' + m.itemTop, { v: '1조' }); grid.set('B' + m.itemTop, { v: '국수' });
-grid.set('C' + m.itemTop, { v: 4000 }); grid.set('D' + m.itemTop, { v: 100000 });
-grid.set('E' + m.itemTop, { v: true });
-grid.set('A' + (m.itemTop + 1), { v: '2조' }); grid.set('B' + (m.itemTop + 1), { v: '닭꼬치' });
-grid.set('C' + (m.itemTop + 1), { v: 3000 }); grid.set('D' + (m.itemTop + 1), { v: 60000 });
-grid.set('A' + (m.itemTop + 2), { v: '2조' }); grid.set('B' + (m.itemTop + 2), { v: '만두' });
-grid.set('C' + (m.itemTop + 2), { v: 3000 });
-// 조별 블록
-grid.set('A' + m.boothTop, { v: '1조' }); grid.set('B' + m.boothTop, { v: 50 });
-grid.set('F' + m.boothTop, { v: 200 });
-grid.set('K' + m.boothTop, { v: 30000 }); grid.set('L' + m.boothTop, { v: 200000 });
-grid.set('A' + (m.boothTop + 1), { v: '2조' }); grid.set('B' + (m.boothTop + 1), { v: 30 });
-grid.set('F' + (m.boothTop + 1), { v: 150 });
-grid.set('K' + (m.boothTop + 1), { v: 20000 }); grid.set('L' + (m.boothTop + 1), { v: 100000 });
+// 한 표에 손으로 적는다: 조·항목·단가·재료원가는 줄마다, 조별 숫자는 첫 줄에만
+function row(r, vals) { Object.keys(vals).forEach(function (c) { grid.set(c + r, { v: vals[c] }); }); }
+row(m.boothTop,     { A: '1조', B: '국수',   C: 4000, D: 100000, E: true,
+                      F: 50, J: 200, O: 30000, P: 200000 });
+row(m.boothTop + 1, { A: '2조', B: '닭꼬치', C: 3000, D: 60000,
+                      F: 30, J: 150, O: 20000, P: 100000 });
+row(m.boothTop + 2, { A: '2조', B: '만두',   C: 3000 });
 grid.set('B' + m.openTin, { v: 500 }); grid.set('B' + m.closeTin, { v: 100 });
 grid.set('B' + m.openCash, { v: 50000 }); grid.set('B' + m.closeCash, { v: 250000 });
 grid.set('B' + m.transfer, { v: 120000 }); grid.set('B' + m.preVoucher, { v: 100000 });
 grid.set('A' + m.commonTop, { v: '교환권 인쇄비' }); grid.set('B' + m.commonTop, { v: 350000 }); grid.set('C' + m.commonTop, { v: true });
 grid.set('A' + (m.commonTop + 1), { v: '천막 대여료' }); grid.set('B' + (m.commonTop + 1), { v: 50000 });
 console.log('손으로 입력: 차이', V('B' + m.bDiff), '/ 수익', V('B' + m.pFinal), '/ 돌려드릴', V('B' + m.rRefund));
+
+// 조별 숫자를 둘째 줄에 잘못 적으면 「확인」 칸이 알려 주는가
+cache.clear();
+grid.set('O' + (m.boothTop + 2), { v: 99999 });
+console.log('둘째 줄 오기입 경고:', V('R' + (m.boothTop + 2)) ? '뜸' : 'X 안 뜸',
+  '/ 합계에 섞였나:', V('Q' + (m.boothTop + 2)) === '' ? '아니오' : 'X 예');
