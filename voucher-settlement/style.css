@@ -101,6 +101,10 @@ h3 {
 /* 이 앱의 표는 숫자가 많아 가운데 정렬한다 (문서는 왼쪽 정렬이 기본) */
 .data-table th, .data-table td { text-align: center; }
 .data-table td:first-child, .data-table th:first-child { text-align: left; }
+/* 조 이름은 줄을 바꾸지 않는다 -- 「의류 새옷」처럼 길어지면 두 줄이 되어
+   표가 들쭉날쭉해진다. 좁은 화면에서는 .table-scroll 안에서 밀린다. */
+.data-table td:first-child { white-space: nowrap; }
+.data-table td:first-child .row-sub { white-space: normal; }
 
 /* 조가 열다섯이면 줄을 눈으로 따라가기 어렵다. 한 줄 건너 옅게 깔아 준다. */
 .data-table tbody tr:nth-child(even) { background: var(--color-surface-soft); }
