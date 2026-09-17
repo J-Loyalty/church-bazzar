@@ -29,7 +29,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `voucher-settlement/` — 교환권 정산 대사(검증) 정적 웹앱. 빌드 도구 없이 파일을 그대로 서빙.
   - `settle.js` — **계산은 여기 한 곳에만 있다** (`SETTLE.compute` 등). 입력 화면과 결산 보고서가 같은 숫자를 내야 하므로 어느 쪽에도 계산을 두지 않는다.
   - `index.html` / `style.css` / `app.js` — 입력 화면 (네 단계 탭)
-  - `report.html` / `report.css` / `report.js` — **결산 보고서.** `settle.js`의 결과를 A4 두 장에 옮기기만 한다. 같은 브라우저의 `localStorage`를 읽으므로 입력한 기기에서 열어야 한다. **두 장을 넘기지 말 것** — A4 12mm 여백 기준 인쇄 가능 높이는 약 1,032px이고, **인쇄 폭은 CSS로 약 703px**이다. 화면에서 재면 안 되고 그 폭으로 재야 한다. 지금 1장 946px, 2장은 보통 933px·최악(조 전부 사비 지급) 987px이다.
+  - `report.html` / `report.css` / `report.js` — **결산 보고서.** `settle.js`의 결과를 A4 두 장에 옮기기만 한다. 같은 브라우저의 `localStorage`를 읽으므로 입력한 기기에서 열어야 한다. **장 나눔을 브라우저에 맡기지 말고 `.sheet` 로 직접 나눈다** — 그래야 화면 미리보기와 인쇄물이 같은 장수로 나온다. 지금 **세 장**이다 (① 매출·원가·수익금 ② 대사·조별 내역 ③ 공통 수입·비용·돌려드릴 돈·확인란).
+  - **높이는 인쇄 폭(CSS 약 703px)에서 재야 한다.** 화면 폭에서 재면 실제보다 짧게 나온다. 인쇄 가능 높이는 A4 12mm 여백 기준 약 1,032px, **Letter 용지면 약 964px**이다. 프린터가 Letter 로 맞춰져 있을 수 있으므로 **한 장을 900px 안쪽**으로 잡는다. 지금 1장 897px·2장 871px·3장 557~630px.
   - **좁은 화면용 미디어 쿼리에 `screen`을 반드시 붙일 것** (`@media screen and (max-width: 820px)`). 인쇄 폭이 703px이라 그냥 두면 인쇄에도 걸려 카드와 두 칸 배치가 세로로 쌓이고 **두 장이 네 장이 된다.**
   - **표에 `break-inside: avoid`를 걸지 말 것.** 긴 표가 남은 자리에 못 들어가면 통째로 다음 장으로 밀려 빈 자리가 생긴다. 줄(`tr`)만 쪼개지지 않게 한다.
   - 화면에서 표를 감싼 `.table-scroll`은 인쇄에서 `overflow: visible`로 풀어 준다.

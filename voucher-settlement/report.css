@@ -45,12 +45,12 @@ main { padding-bottom: 60px; }
 .doc-head h1 {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 400;
   letter-spacing: -0.02em;
   color: var(--color-ink);
 }
-.meta { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 14px; }
+.meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 14px; }
 .meta th, .meta td { border: 1px solid var(--color-hairline-strong); padding: 6px 8px; text-align: left; }
 .meta th { background: var(--color-surface-soft); font-weight: 600; white-space: nowrap; width: 1%; }
 .blank { min-width: 90px; }
@@ -59,13 +59,13 @@ main { padding-bottom: 60px; }
 .headline {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 .headline-cell {
   border: 1px solid var(--color-hairline-strong);
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
+  padding: 12px 14px;
   background: var(--color-surface-soft);
 }
 .headline-cell.strong { background: var(--color-surface-card); border-width: 2px; }
@@ -73,7 +73,7 @@ main { padding-bottom: 60px; }
 .headline-value {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 400;
   color: var(--color-ink);
   font-variant-numeric: tabular-nums;
@@ -81,25 +81,17 @@ main { padding-bottom: 60px; }
 
 /* ---------- 본문 ---------- */
 .sheet h2 {
-  margin: 10px 0 5px;
-  font-size: 17px;
+  margin: 15px 0 7px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--color-ink);
 }
 .sheet h2:first-of-type { margin-top: 0; }
 
-.ledger, .grid, .sign { width: 100%; border-collapse: collapse; font-size: 14px; }
-.ledger th, .ledger td, .sign th, .sign td {
+.ledger, .grid, .sign { width: 100%; border-collapse: collapse; font-size: 15px; }
+.ledger th, .ledger td, .grid th, .grid td, .sign th, .sign td {
   border: 1px solid var(--color-hairline-strong);
   padding: 5px 9px;
-}
-
-/* 2장의 내역 표는 조가 열다섯이면 줄이 길어져 A4 한 장을 넘긴다. 여기만 조금
-   촘촘하게 간다 -- 큰 숫자는 1장에 크게 나와 있고 여기는 뒷받침하는 내역이다. */
-.grid { font-size: 13px; }
-.grid th, .grid td {
-  border: 1px solid var(--color-hairline-strong);
-  padding: 2px 8px;
 }
 
 /* tokens.css 의 .table-scroll 은 위아래 여백이 20px 이다. 여기서는 종이 두 장에
@@ -110,7 +102,7 @@ main { padding-bottom: 60px; }
 .ledger td.why {
   text-align: left;
   width: auto;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-mute);
 }
 .ledger tr.sum th, .ledger tr.sum td { font-weight: 700; background: var(--color-surface-soft); }
@@ -133,9 +125,9 @@ main { padding-bottom: 60px; }
 /* 돌려드릴 곳이 여럿이면 세로로 길어진다. 두 벌씩 나란히 놓아 줄 수를 반으로. */
 #refund-table td:nth-child(3), #refund-table th:nth-child(3) { border-left-width: 2px; }
 
-.note { margin: 6px 0 0; font-size: 13px; color: var(--color-body); }
+.note { margin: 7px 0 0; font-size: 14px; color: var(--color-body); }
 
-.sign { margin-top: 12px; }
+.sign { margin-top: 20px; }
 .sign th { background: var(--color-surface-soft); font-weight: 600; white-space: nowrap; }
 .sign td.blank { height: 40px; min-width: 70px; }
 

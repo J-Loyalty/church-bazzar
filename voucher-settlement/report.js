@@ -93,7 +93,7 @@
   // 여러 벌을 한 줄에 놓아 줄 수를 줄인다. 조가 모두 사비 지급이면 열다섯 줄이
   // 넘어가 A4 두 장을 넘기기 때문이다. 많으면 세 벌씩 간다.
   var rb = document.getElementById("refund-body");
-  var per = c.refundRows.length > 10 ? 3 : 2;
+  var per = c.refundRows.length > 14 ? 3 : 2;
   var head = "";
   for (var k = 0; k < per; k++) head += "<th>받으실 곳</th><th>금액</th>";
   document.getElementById("refund-head").innerHTML = "<tr>" + head + "</tr>";
