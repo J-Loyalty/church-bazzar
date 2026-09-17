@@ -84,6 +84,8 @@ global.Session = { getScriptTimeZone: () => 'Asia/Seoul' };
 global.ContentService = { createTextOutput: () => ({ setMimeType: () => {} }), MimeType: {} };
 
 // ---------- 스크립트 읽어 실행 ----------
+global.window = global;
+(0, eval)(fs.readFileSync('voucher-settlement/settle.js', 'utf8'));
 const src = fs.readFileSync('assets/answers.gs', 'utf8');
 (0, eval)(src + '\n;globalThis.__build = buildCalcSheet; globalThis.__map = calcMap; globalThis.__save = saveSettlement; globalThis.__rows = calcRows;');
 
@@ -214,7 +216,10 @@ const summary = {
   received: 420000, diff: 0, unused: 150000, presale: 200000, presaleVoucher: 100000,
   revenue: 770000, cost: 450000, paidCost: 450000, refund: 0, refundRows: [], final: 320000
 };
-const saved = global.__save({ state: st, summary: summary });
+// 손으로 적은 summary 가 아니라 화면이 실제로 보내는 compute() 결과를 쓴다.
+// 필드 이름이 하나라도 어긋나면 여기서 걸린다.
+const realSummary = global.SETTLE.compute(global.SETTLE.normalize(st));
+const saved = global.__save({ state: st, summary: realSummary });
 if (!saved.ok) { console.log('X 정산 요약 탭:', saved.error); process.exitCode = 1; }
 else console.log('정산 요약 탭: 칸 수 맞음');
 
@@ -294,6 +299,14 @@ console.log(bad2.length
   ? 'X 품목 60줄: ' + bad2.join(' / ')
   : `품목 60줄 (15조 x 4품목): 줄 ${rowsNeeded}개, 마지막 줄 ${lastTeam}, 합계 모두 맞음`);
 if (bad2.length) process.exitCode = 1;
+
+// 큰 자료(15조 60품목)로 「정산」 요약 탭까지 한 번 더 -- 실제 전송과 같은 모양이다.
+cache.clear(); grid.clear();
+const bigSummary = global.SETTLE.compute(global.SETTLE.normalize(many));
+const bigSaved = global.__save({ state: many, summary: bigSummary });
+console.log(bigSaved.ok ? '큰 자료 전송(15조 60품목): 통과'
+  : 'X 큰 자료 전송 실패: ' + bigSaved.error);
+if (!bigSaved.ok) process.exitCode = 1;
 
 // 시트 왕복 횟수. 여기가 늘면 Apps Script 가 시간 제한에 걸려 오류 HTML 을 돌려준다.
 const BUDGET = 400;
