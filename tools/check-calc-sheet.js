@@ -56,7 +56,7 @@ global.ContentService = { createTextOutput: () => ({ setMimeType: () => {} }), M
 
 // ---------- 스크립트 읽어 실행 ----------
 const src = fs.readFileSync('assets/answers.gs', 'utf8');
-(0, eval)(src + '\n;globalThis.__build = buildCalcSheet; globalThis.__map = calcMap; globalThis.__save = saveSettlement;');
+(0, eval)(src + '\n;globalThis.__build = buildCalcSheet; globalThis.__map = calcMap; globalThis.__save = saveSettlement; globalThis.__rows = calcRows;');
 
 // ---------- 식 계산기 ----------
 const cache = new Map();
@@ -207,3 +207,32 @@ cache.clear();
 grid.set('O' + (m.boothTop + 2), { v: 99999 });
 console.log('둘째 줄 오기입 경고:', V('R' + (m.boothTop + 2)) ? '뜸' : 'X 안 뜸',
   '/ 합계에 섞였나:', V('Q' + (m.boothTop + 2)) === '' ? '아니오' : 'X 예');
+
+// 품목이 많아도 뒤쪽 조가 잘리지 않는가. 조가 15개여도 한 조가 서너 품목을
+// 맡으면 줄은 그 몇 배가 된다 -- 줄 수를 고정해 두면 여기서 잘려 나간다.
+cache.clear(); grid.clear();
+const many = { items: [], floats: {}, finals: {}, cash: {}, presales: {}, costs: {},
+               costPaid: {}, commonCosts: [], presale: 0, presaleVoucher: 0,
+               desk: { openTin: {}, closeTin: {}, openCash: 0, closeCash: 0, transfer: 0 } };
+for (let t = 1; t <= 15; t++) {
+  const team = t + '조';
+  for (let k = 1; k <= 4; k++) many.items.push({ id: `x${t}_${k}`, team, name: `품목${k}`, price: 1000 * k });
+  many.floats[team] = { 1000: 10, 5000: 0, 10000: 0 };
+  many.finals[team] = { 1000: 30, 5000: 0, 10000: 0 };
+  many.cash[team] = 1000;
+  many.costs[team] = 2000;
+}
+const rowsNeeded = global.__rows(many);
+global.__build(many, '');
+const mm = global.__map(rowsNeeded);
+const lastTeam = V('A' + (mm.boothTop + many.items.length - 1));
+const bad2 = [];
+if (many.items.length > rowsNeeded) bad2.push('줄이 모자람');
+if (lastTeam !== '15조') bad2.push('마지막 줄이 15조가 아님: ' + JSON.stringify(lastTeam));
+if (n(V('D' + mm.boothSum)) !== 15 * 2000) bad2.push('재료원가 합계 ' + V('D' + mm.boothSum));
+if (n(V('O' + mm.boothSum)) !== 15 * 1000) bad2.push('현금 합계 ' + V('O' + mm.boothSum));
+if (n(V('N' + mm.boothSum)) !== 15 * 20000) bad2.push('교환권 매출 합계 ' + V('N' + mm.boothSum));
+console.log(bad2.length
+  ? 'X 품목 60줄: ' + bad2.join(' / ')
+  : `품목 60줄 (15조 x 4품목): 줄 ${rowsNeeded}개, 마지막 줄 ${lastTeam}, 합계 모두 맞음`);
+if (bad2.length) process.exitCode = 1;

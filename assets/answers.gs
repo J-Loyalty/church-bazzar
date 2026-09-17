@@ -236,12 +236,22 @@ function json(obj) {
  * 목적입니다. 그래서 사이트의 계산식을 그대로 시트 함수로 옮겨 적었습니다.
  */
 
-var CALC_BOOTHS = 24;   // 한 줄이 한 품목. 한 조가 여러 품목을 맡으므로 넉넉히.
+// 한 줄이 한 품목이다. 조가 15개여도 한 조가 서너 품목을 맡으면 줄은 그 몇 배가
+// 된다. 고정해 두면 **뒤쪽 조가 잘려 나가므로** 품목 수에 맞춰 늘린다.
+var CALC_MIN_ROWS = 45;   // 빈 양식 기본 줄 수
+var CALC_SPARE = 10;      // 나중에 손으로 더 적을 여유 줄
 var CALC_COMMON = 15;   // 공통 비용 줄 수
 
 // 줄 위치를 한곳에 모아 둔다. 표를 손대면 여기만 고치면 된다.
-function calcMap() {
+function calcRows(st) {
+  var n = st && st.items && st.items.length ? st.items.length : 0;
+  return Math.max(CALC_MIN_ROWS, n + CALC_SPARE);
+}
+
+function calcMap(rows) {
+  var CALC_BOOTHS = rows || CALC_MIN_ROWS;
   var m = {};
+  m.rows = CALC_BOOTHS;
   m.boothHead = 7;
   m.boothTop = 8;
   m.boothEnd = m.boothTop + CALC_BOOTHS - 1;
@@ -294,9 +304,9 @@ function calcMap() {
  * 함수는 어느 쪽이든 똑같이 들어가므로 빈 양식에 손으로 적어도 결과가 나온다.
  */
 function buildCalcSheet(st, at) {
-  var m = calcMap();
-  // 가장 넓은 표가 조별 블록(A~N)이다. 재정 지급 칸이 품목 블록으로 옮겨가면서
-  // 한 칸 줄었다 -- 머리글 개수와 어긋나면 시트가 통째로 거부한다.
+  // 줄 수는 품목 수에 맞춰 늘어난다. 고정해 두면 뒤쪽 조가 잘린다.
+  var CALC_BOOTHS = calcRows(st);
+  var m = calcMap(CALC_BOOTHS);
   // 표가 하나뿐이라 그 폭이 곧 시트의 폭이다. 머리글 개수와 어긋나면 시트가
   // 쓰기를 통째로 거부한다 (node tools/check-calc-sheet.js 가 잡는다).
   var W = 18; // A~R
@@ -357,7 +367,7 @@ function buildCalcSheet(st, at) {
   });
   sh.getRange(m.boothSum, 1, 1, W).setFontWeight('bold').setBackground('#efece7');
   sh.getRange(m.boothSum + 1, 1, 1, W).merge()
-    .setValue('※ 항목과 단가는 줄마다, 재료원가와 조별 숫자는 그 조 첫 줄에만 적습니다. 둘째 줄부터 적으면 그만큼 겹쳐 잡힙니다.')
+    .setValue('※ 항목과 단가는 줄마다, 재료원가와 조별 숫자는 그 조 첫 줄에만 적습니다. 둘째 줄부터 적으면 그만큼 겹쳐 잡힙니다. 줄이 모자라면 마지막 줄을 복사해 아래에 붙여넣으세요 — 수식이 함께 따라옵니다.')
     .setFontColor('#8a1c1c');
 
   // ----- 2. 교환소 -----
@@ -460,6 +470,7 @@ function colLetter(n) {
 
 /** 넣을 칸과 계산된 칸을 눈으로 구분되게 한다. 이 시트는 처음 보는 사람이 쓴다. */
 function decorateCalcSheet(sh, m, W) {
+  var CALC_BOOTHS = m.rows;
   var IN = '#fff6d8';   // 넣는 칸 (노랑)
   var money = '#,##0';
 
@@ -517,6 +528,7 @@ function decorateCalcSheet(sh, m, W) {
 
 /** 정산 도구의 현재 내용을 계산 시트의 넣는 칸에 그대로 옮긴다. */
 function fillCalcSheet(sh, m, st) {
+  var CALC_BOOTHS = m.rows;
   // 한 줄이 한 품목이다. 조 단위 값(재료원가·재정 지급·잔돈·마감·현금·행사전 구매)은
   // 그 조가 처음 나오는 줄에만 적고 나머지 줄은 비운다 -- 줄마다 적으면 겹쳐 잡힌다.
   var items = st.items || [];
