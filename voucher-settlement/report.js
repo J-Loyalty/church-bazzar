@@ -5,7 +5,10 @@
 
   var STORAGE_KEY = "cbz_voucher_v1";
   var esc = CBZ.esc;
-  var money = SETTLE.money;
+  var money = SETTLE.money;                                   // 문장 안에서 쓰는 「1,000원」
+  // 표 칸에는 단위를 붙이지 않는다. 단위는 절 제목의 「(단위: 원)」에 한 번만 적는다
+  // -- 칸마다 붙이면 표가 그만큼 넓어져 종이에서 오른쪽이 잘린다.
+  var won = function (n) { return SETTLE.num(n).toLocaleString("ko-KR"); };
 
   var state = SETTLE.normalize(CBZ.load(STORAGE_KEY, null));
   var c = SETTLE.compute(state);
@@ -29,22 +32,22 @@
   set("h-cost", money(c.cost));
   set("h-final", money(c.final));
 
-  set("r-received", money(c.received));
-  set("r-cash", money(c.cashSum));
-  set("r-presale", money(c.presaleBooth));
-  set("r-income", money(c.incOther));
-  set("r-revenue", money(c.revenue));
+  set("r-received", won(c.received));
+  set("r-cash", won(c.cashSum));
+  set("r-presale", won(c.presaleBooth));
+  set("r-income", won(c.incOther));
+  set("r-revenue", won(c.revenue));
 
-  set("r-cost-booth", money(c.costSum));
-  set("r-cost-common", money(c.commonSum));
-  set("r-cost", money(c.cost));
+  set("r-cost-booth", won(c.costSum));
+  set("r-cost-common", won(c.commonSum));
+  set("r-cost", won(c.cost));
 
-  set("r-final", money(c.final));
+  set("r-final", won(c.final));
 
-  set("r-sold", money(c.sold));
-  set("r-received2", money(c.received));
-  set("r-diff", money(c.diff));
-  set("r-unused", money(c.unused));
+  set("r-sold", won(c.sold));
+  set("r-received2", won(c.received));
+  set("r-diff", won(c.diff));
+  set("r-unused", won(c.unused));
 
   var verdict = document.getElementById("verdict-line");
   if (c.diff === 0) {
@@ -55,9 +58,6 @@
   }
 
   // ---------- 2장 ----------
-  // 조별 표는 열이 일곱이라 가장 넓다. 칸마다 「원」을 붙이면 그만큼 넓어져
-  // 프린터 여백에 따라 오른쪽이 잘린다. 단위는 제목에 한 번만 적는다.
-  var won = function (n) { return SETTLE.num(n).toLocaleString("ko-KR"); };
   var body = document.getElementById("booth-body");
   body.innerHTML = c.rows.length
     ? c.rows.map(function (r) {
@@ -80,7 +80,7 @@
     var rows = list.filter(function (x) { return String(x.name).trim() || SETTLE.num(x.amount); });
     el.innerHTML = rows.length
       ? rows.map(function (x) {
-          return "<tr><td>" + esc(x.name) + "</td><td>" + money(x.amount) + "</td><td>" +
+          return "<tr><td>" + esc(x.name) + "</td><td>" + won(x.amount) + "</td><td>" +
             cols(x) + "</td></tr>";
         }).join("")
       : '<tr><td colspan="3">' + emptyText + "</td></tr>";
@@ -106,7 +106,7 @@
       '">없습니다. 원가가 모두 교회 재정에서 지급되었습니다.</td></tr>';
   } else {
     var cell = function (r) {
-      return r ? "<td>" + esc(r.name) + "</td><td>" + money(r.amount) + "</td>" : "<td></td><td></td>";
+      return r ? "<td>" + esc(r.name) + "</td><td>" + won(r.amount) + "</td>" : "<td></td><td></td>";
     };
     var out = "";
     for (var i = 0; i < c.refundRows.length; i += per) {
@@ -116,7 +116,7 @@
     }
     rb.innerHTML = out;
   }
-  set("t-refund", money(c.refund));
+  set("t-refund", won(c.refund));
 
   document.getElementById("btn-print").addEventListener("click", function () {
     window.print();
