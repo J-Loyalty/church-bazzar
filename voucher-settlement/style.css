@@ -1,6 +1,9 @@
 /* 정산 도구 전용. 색·글꼴·버튼·표·입력칸은 ../assets/tokens.css 에 있다.
-   본문 폭은 한 곳에서 정해 머리글·탭·본문이 같은 선에서 시작하게 한다. */
-:root { --page-width: 960px; }
+   본문 폭은 한 곳에서 정해 머리글·탭·본문이 같은 선에서 시작하게 한다.
+   문서 화면(1120px)보다 넓다 -- 여기는 읽는 글이 아니라 열이 아홉인 표가 들어가는
+   자리라, 960px 에서는 결과 표가 안쪽에서 가로로 밀렸다. 24"(1920) 화면에서
+   한눈에 들어오는 폭으로 잡았다. 긴 글줄은 아래 max-width 로 따로 막는다. */
+:root { --page-width: 1360px; }
 
 .app-header {
   padding: 24px max(16px, calc((100% - var(--page-width)) / 2 + 16px)) 18px;
@@ -51,6 +54,9 @@ main {
   margin: 0 auto;
   padding: 24px 16px 80px;
 }
+
+/* 폭이 넓어져도 읽는 글은 한 줄이 너무 길어지지 않게 한다. */
+.panel-lead, .tab-panel > .hint { max-width: 90ch; }
 
 .tab-panel {
   background: var(--color-surface-doc);

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바자회 결산 보고서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="report.css">
+<script src="../assets/shared.js"></script>
+<script src="settle.js"></script>
+</head>
+<body>
+
+<nav class="topbar no-print">
+  <a class="home" href="index.html">&larr; 정산 도구</a>
+  <span class="where">결산 보고서</span>
+</nav>
+
+<div class="toolbar no-print">
+  <p class="toolbar-note">정산 도구에 넣은 값으로 만든 <strong>보고용 문서</strong>입니다. A4 두 장에 맞춰져 있습니다.</p>
+  <button type="button" id="btn-print">인쇄하기</button>
+</div>
+
+<p class="empty no-print" id="empty" hidden>
+  아직 입력된 정산 내용이 없습니다. <a href="index.html">정산 도구</a>에서 먼저 값을 넣어 주세요.
+  같은 브라우저에 담긴 값을 읽으므로, 입력한 기기에서 열어야 합니다.
+</p>
+
+<main id="doc" hidden>
+
+<!-- ===================== 1장 ===================== -->
+<section class="sheet">
+
+  <header class="doc-head">
+    <p class="doc-eyebrow">대한예수교장로회 김포남현교회</p>
+    <h1>2026년 이웃돕기 사랑의 바자회 결산 보고서</h1>
+    <div class="table-scroll"><table class="meta">
+      <tbody>
+        <tr>
+          <th>행사일</th><td>2026년 10월 9일 (금)</td>
+          <th>작성일</th><td id="made-on">—</td>
+          <th>작성</th><td class="blank"></td>
+        </tr>
+      </tbody>
+    </table></div>
+  </header>
+
+  <div class="headline">
+    <div class="headline-cell">
+      <p class="headline-label">매출 합계</p>
+      <p class="headline-value" id="h-revenue">0원</p>
+    </div>
+    <div class="headline-cell">
+      <p class="headline-label">원가 합계</p>
+      <p class="headline-value" id="h-cost">0원</p>
+    </div>
+    <div class="headline-cell strong">
+      <p class="headline-label">최종 수익금</p>
+      <p class="headline-value" id="h-final">0원</p>
+    </div>
+  </div>
+
+  <h2>1. 매출</h2>
+  <div class="table-scroll"><table class="ledger">
+    <tbody>
+      <tr><th>교환소가 받은 돈</th><td id="r-received">0원</td><td class="why">현금 금고 차액 + 계좌이체 + 교환권으로 판 공통 수입</td></tr>
+      <tr><th>조별 현금 매출 합계</th><td id="r-cash">0원</td><td class="why">부스에서 현금으로 받은 것</td></tr>
+      <tr><th>조별 행사전 구매 합계</th><td id="r-presale">0원</td><td class="why">행사 전에 미리 판 물품</td></tr>
+      <tr><th>공통 수입 (교환권 판매 제외)</th><td id="r-income">0원</td><td class="why">헌옷 수거 등 어느 조에도 붙지 않는 수입</td></tr>
+      <tr class="sum"><th>매출 합계</th><td id="r-revenue">0원</td><td class="why"></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">조가 모아 온 교환권 총액은 매출에 더하지 않습니다. 그 돈은 이미 「교환소가 받은 돈」에 들어 있어 두 번 세는 것이 됩니다.</p>
+
+  <h2>2. 원가</h2>
+  <div class="table-scroll"><table class="ledger">
+    <tbody>
+      <tr><th>조별 재료원가 합계</th><td id="r-cost-booth">0원</td><td class="why">각 조가 재료에 쓴 돈</td></tr>
+      <tr><th>공통 비용 합계</th><td id="r-cost-common">0원</td><td class="why">교환권 인쇄비·대여료 등</td></tr>
+      <tr class="sum"><th>원가 합계</th><td id="r-cost">0원</td><td class="why"></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>3. 최종 수익금</h2>
+  <div class="table-scroll"><table class="ledger">
+    <tbody>
+      <tr><th>매출 합계</th><td id="r-revenue2">0원</td><td class="why"></td></tr>
+      <tr><th>− 원가 합계</th><td id="r-cost2">0원</td><td class="why"></td></tr>
+      <tr class="total"><th>최종 수익금</th><td id="r-final">0원</td><td class="why">전액 구제 헌금으로 집행</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>4. 교환권 대사</h2>
+  <p class="note" id="verdict-line">—</p>
+  <div class="table-scroll"><table class="ledger two">
+    <tbody>
+      <tr><th>손님에게 팔려 나간 교환권</th><td id="r-sold">0원</td>
+          <th>그 값으로 받은 돈</th><td id="r-received2">0원</td></tr>
+      <tr class="sum"><th>차이</th><td id="r-diff">0원</td>
+          <th>미사용 교환권</th><td id="r-unused">0원</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">미사용 교환권은 손님이 사놓고 쓰지 않은 몫으로, 오류가 아니며 수익에는 이미 들어가 있습니다 (2024년 2.5%).</p>
+
+  <p class="page-no">1 / 2</p>
+</section>
+
+<!-- ===================== 2장 ===================== -->
+<section class="sheet page-break">
+
+  <h2>5. 조별 내역</h2>
+  <div class="table-scroll"><table class="grid" id="booth-table">
+    <thead>
+      <tr><th>조</th><th>항목</th><th>교환권 매출</th><th>현금 매출</th><th>행사전 구매</th><th>매출 합계</th><th>재료원가</th></tr>
+    </thead>
+    <tbody id="booth-body"></tbody>
+    <tfoot>
+      <tr><th>합계</th><th></th><th id="t-voucher">0원</th><th id="t-cash">0원</th><th id="t-presale">0원</th><th id="t-total">0원</th><th id="t-cost">0원</th></tr>
+    </tfoot>
+  </table></div>
+
+  <div class="two-col">
+    <div>
+      <h2>6. 공통 수입</h2>
+      <div class="table-scroll"><table class="grid">
+        <thead><tr><th>항목</th><th>금액</th><th>구분</th></tr></thead>
+        <tbody id="income-body"></tbody>
+      </table></div>
+    </div>
+    <div>
+      <h2>7. 공통 비용</h2>
+      <div class="table-scroll"><table class="grid">
+        <thead><tr><th>항목</th><th>금액</th><th>지급</th></tr></thead>
+        <tbody id="cost-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <h2>8. 마감 후 돌려드릴 돈</h2>
+  <p class="note">원가 가운데 교회 재정에서 아직 내지 않은 몫입니다. 수익금은 이미 원가를 뺀 값이므로 여기서 또 빼지 않습니다.</p>
+  <div class="table-scroll"><table class="grid" id="refund-table">
+    <thead><tr><th>받으실 곳</th><th>금액</th><th>받으실 곳</th><th>금액</th></tr></thead>
+    <tbody id="refund-body"></tbody>
+    <tfoot><tr><th colspan="3">합계</th><th id="t-refund">0원</th></tr></tfoot>
+  </table></div>
+
+  <div class="table-scroll"><table class="sign">
+    <tbody>
+      <tr><th>작성 (재정부)</th><td class="blank"></td><th>확인 (실행위원장)</th><td class="blank"></td><th>승인 (위원장)</th><td class="blank"></td></tr>
+    </tbody>
+  </table></div>
+
+  <p class="page-no">2 / 2</p>
+</section>
+
+</main>
+
+<script src="report.js"></script>
+</body>
+</html>
