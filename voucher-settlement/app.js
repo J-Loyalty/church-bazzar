@@ -21,8 +21,14 @@
       costPaid: {}, // 그 재료원가를 교회 재정에서 이미 냈는가
       commonCosts: [],  // 조에 붙지 않는 지출 [{name, amount, paid}]
       presales: {},      // 조별 행사전 구매 매출
-      presale: 0,        // 어느 조에도 붙지 않는 행사전 구매
-      presaleVoucher: 0, // 행사 전에 판 교환권 (전도용 등) -- 금액
+      // 조에 붙지 않는 수입. voucher 를 켜면 「교환권을 팔고 받은 돈」이라
+      // 대사 양쪽에도 함께 더해진다 (목장쿠폰·선판매쿠폰·전도용 교환권).
+      commonIncomes: [
+        { name: "목장쿠폰", amount: 0, voucher: true },
+        { name: "선판매쿠폰", amount: 0, voucher: true },
+        { name: "헌옷 수거 매출", amount: 0, voucher: false },
+        { name: "기타", amount: 0, voucher: false }
+      ],
       desk: {
         openTin: { 1000: 0, 5000: 0, 10000: 0 },
         closeTin: { 1000: 0, 5000: 0, 10000: 0 },
@@ -81,8 +87,25 @@
           return { name: String(c && c.name || ""), amount: num(c && c.amount), paid: !!(c && c.paid) };
         })
       : [];
-    out.presale = num(p.presale);
-    out.presaleVoucher = num(p.presaleVoucher);
+    // 예전 백업에는 한 칸짜리였다. 목록으로 옮겨 담으면 금액이 그대로 따라온다.
+    if (Array.isArray(p.commonIncomes)) {
+      out.commonIncomes = p.commonIncomes.map(function (c) {
+        return {
+          name: String(c && c.name || ""),
+          amount: num(c && c.amount),
+          voucher: !!(c && c.voucher)
+        };
+      });
+    } else {
+      var moved = [];
+      if (num(p.presaleVoucher)) {
+        moved.push({ name: "행사 전에 판 교환권", amount: num(p.presaleVoucher), voucher: true });
+      }
+      if (num(p.presale)) {
+        moved.push({ name: "조 구분 없는 행사전 구매", amount: num(p.presale), voucher: false });
+      }
+      if (moved.length) out.commonIncomes = moved;
+    }
 
     var d = p.desk || {};
     if (d.openTin || d.closeTin) {
@@ -185,16 +208,18 @@
     var openTin = denomTotal(state.desk.openTin);
     var closeTin = denomTotal(state.desk.closeTin);
     var floatSum = sum("float");
-    var presaleVoucher = num(state.presaleVoucher);
-    var sold = openTin - closeTin - floatSum + presaleVoucher;
+    // 교환권을 팔고 받은 몫은 교환권도 대금도 아침 계수 전에 이미 오갔으므로
+    // 대사 양쪽에 똑같이 더한다. 나머지 공통 수입은 매출에만 더한다.
+    var incomes = state.commonIncomes;
+    var incVoucher = incomes.reduce(function (a, c) { return a + (c.voucher ? num(c.amount) : 0); }, 0);
+    var incOther = incomes.reduce(function (a, c) { return a + (c.voucher ? 0 : num(c.amount)); }, 0);
+
+    var sold = openTin - closeTin - floatSum + incVoucher;
     var cashDelta = num(state.desk.closeCash) - num(state.desk.openCash);
-    var received = cashDelta + num(state.desk.transfer) + presaleVoucher;
-    // 행사전 구매는 2024년 결산서처럼 조별로 잡는다. 어느 조에도 붙지 않는 몫만
-    // 따로 받아 더한다.
-    var presaleOther = num(state.presale);
-    var presaleSum = sum("presale") + presaleOther;
+    var received = cashDelta + num(state.desk.transfer) + incVoucher;
+    // 행사전 구매는 2024년 결산서처럼 조별로 잡는다.
     var commonSum = state.commonCosts.reduce(function (a, c) { return a + num(c.amount); }, 0);
-    var revenue = received + sum("cash") + presaleSum;
+    var revenue = received + sum("cash") + sum("presale") + incOther;
     var cost = sum("cost") + commonSum;
 
     // 원가에는 교회 재정이 이미 낸 몫과 누군가 사비로 먼저 낸 몫이 섞여 있다.
@@ -214,13 +239,14 @@
       rows: rows,
       floatSum: floatSum, finalSum: sum("final"),
       voucherSum: sum("voucher"), cashSum: sum("cash"), totalSum: sum("total"),
-      presaleBooth: sum("presale"), presaleOther: presaleOther,
+      presaleBooth: sum("presale"),
+      commonIncomes: incomes.slice(), incVoucher: incVoucher, incOther: incOther,
       costSum: sum("cost"), commonCosts: state.commonCosts.slice(), commonSum: commonSum,
       openTin: openTin, closeTin: closeTin, sold: sold,
       cashDelta: cashDelta, transfer: num(state.desk.transfer), received: received,
       diff: received - sold,
       unused: sold - sum("voucher"),
-      presale: presaleSum, presaleVoucher: presaleVoucher,
+      presale: sum("presale"), presaleVoucher: incVoucher,
       revenue: revenue, cost: cost,
       refundRows: refundRows, refund: refund, paidCost: cost - refund,
       final: revenue - cost
@@ -511,9 +537,7 @@
   [
     ["open-cash", function (v) { state.desk.openCash = v; }, function () { return state.desk.openCash; }],
     ["close-cash", function (v) { state.desk.closeCash = v; }, function () { return state.desk.closeCash; }],
-    ["transfer", function (v) { state.desk.transfer = v; }, function () { return state.desk.transfer; }],
-    ["presale", function (v) { state.presale = v; }, function () { return state.presale; }],
-    ["presale-voucher", function (v) { state.presaleVoucher = v; }, function () { return state.presaleVoucher; }]
+    ["transfer", function (v) { state.desk.transfer = v; }, function () { return state.desk.transfer; }]
   ].forEach(function (f) {
     var el = document.getElementById(f[0]);
     el.addEventListener("input", function () { f[1](num(el.value)); saveState(); });
@@ -524,8 +548,7 @@
     document.getElementById("open-cash").value = state.desk.openCash;
     document.getElementById("close-cash").value = state.desk.closeCash;
     document.getElementById("transfer").value = state.desk.transfer;
-    document.getElementById("presale").value = state.presale;
-    document.getElementById("presale-voucher").value = state.presaleVoucher;
+
   }
 
   // ---------- 공통 비용 ----------
@@ -617,6 +640,96 @@
     renderCommon();
   });
 
+  // ---------- 공통 수입 ----------
+  // 조에 붙지 않는 수입. 「교환권 판매」를 켜면 교환권을 팔고 받은 돈이라는 뜻이라
+  // 대사 양쪽에도 함께 더해진다 -- 목장쿠폰·선판매쿠폰·전도용 교환권이 그것이다.
+  // 켜지 않은 것(헌옷 수거·기타)은 교환권을 거치지 않으므로 매출에만 더한다.
+  function incomeRow(c, i, real) {
+    return '<div class="cost-row">' +
+      '<input type="text" placeholder="예: 목장쿠폰" aria-label="공통 수입 항목 ' + (i + 1) +
+        '" data-ni="' + i + '" data-nf="name" value="' + esc(c.name) + '">' +
+      '<input type="number" min="0" step="1" inputmode="numeric" aria-label="공통 수입 금액 ' + (i + 1) +
+        '" data-ni="' + i + '" data-nf="amount" value="' + num(c.amount) + '">' +
+      '<label class="check-cell"><input type="checkbox" aria-label="공통 수입 ' + (i + 1) +
+        ' 교환권을 팔고 받은 돈" data-ni="' + i + '" data-nf="voucher"' + (c.voucher ? " checked" : "") +
+        '><span class="check-text">교환권 판매</span></label>' +
+      (real ? '<button class="remove-btn" data-ndel="' + i + '">지우기</button>' : "<span></span>") +
+      "</div>";
+  }
+
+  function renderIncomes() {
+    var box = document.getElementById("common-incomes");
+    var list = state.commonIncomes.slice();
+    var last = list[list.length - 1];
+    if (!list.length || String(last.name).trim() || num(last.amount)) {
+      list.push({ name: "", amount: 0, voucher: false });
+    }
+    var focus = document.activeElement;
+    var keep = focus && focus.dataset && focus.dataset.ni !== undefined
+      ? { i: focus.dataset.ni, f: focus.dataset.nf, start: focus.selectionStart } : null;
+
+    box.innerHTML = '<div class="cost-head"><span>항목</span><span>금액 (원)</span><span>교환권 판매</span><span></span></div>' +
+      list.map(function (c, i) { return incomeRow(c, i, i < state.commonIncomes.length); }).join("");
+    renderIncomeSum();
+
+    if (keep) {
+      var back = box.querySelector('[data-ni="' + keep.i + '"][data-nf="' + keep.f + '"]');
+      if (back) {
+        back.focus();
+        if (back.type === "text" && keep.start != null) back.setSelectionRange(keep.start, keep.start);
+      }
+    }
+  }
+
+  function renderIncomeSum() {
+    document.getElementById("income-sum").textContent =
+      money(state.commonIncomes.reduce(function (a, c) { return a + num(c.amount); }, 0));
+  }
+
+  function growIncomes() {
+    var box = document.getElementById("common-incomes");
+    renderIncomeSum();
+    var rows = box.querySelectorAll(".cost-row");
+    if (rows.length !== state.commonIncomes.length) return;
+    var tail = rows[rows.length - 1].lastElementChild;
+    if (tail && tail.tagName !== "BUTTON") {
+      tail.outerHTML = '<button class="remove-btn" data-ndel="' + (rows.length - 1) + '">지우기</button>';
+    }
+    box.insertAdjacentHTML("beforeend", incomeRow(
+      { name: "", amount: 0, voucher: false }, state.commonIncomes.length, false));
+  }
+
+  document.getElementById("common-incomes").addEventListener("input", function (e) {
+    var el = e.target;
+    if (el.dataset.ni === undefined) return;
+    var i = Number(el.dataset.ni);
+    while (state.commonIncomes.length <= i) {
+      state.commonIncomes.push({ name: "", amount: 0, voucher: false });
+    }
+    if (el.dataset.nf === "name") state.commonIncomes[i].name = el.value;
+    else if (el.dataset.nf === "voucher") state.commonIncomes[i].voucher = el.checked;
+    else state.commonIncomes[i].amount = num(el.value);
+    saveState();
+    growIncomes();
+  });
+
+  document.getElementById("common-incomes").addEventListener("focusout", function (e) {
+    var box = document.getElementById("common-incomes");
+    if (box.contains(e.relatedTarget)) return;
+    CBZ.afterTyping(function () {
+      if (box.contains(document.activeElement)) return;
+      renderIncomes();
+    });
+  });
+
+  document.getElementById("common-incomes").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-ndel]");
+    if (!btn) return;
+    state.commonIncomes.splice(Number(btn.dataset.ndel), 1);
+    saveState();
+    renderIncomes();
+  });
+
   // ---------- 결과 ----------
   function renderReport() {
     var c = compute();
@@ -649,8 +762,8 @@
     set("r-open-tin", money(c.openTin));
     set("r-close-tin", money(c.closeTin));
     set("r-float", money(c.floatSum));
-    set("r-pv1", money(c.presaleVoucher));
-    set("r-pv2", money(c.presaleVoucher));
+    set("r-pv1", money(c.incVoucher));
+    set("r-pv2", money(c.incVoucher));
     set("r-sold", money(c.sold));
     set("r-cash-delta", money(c.cashDelta));
     set("r-transfer", money(c.transfer));
@@ -664,7 +777,7 @@
     set("r-final-desk", money(c.received));
     set("r-final-cash", money(c.cashSum));
     set("r-final-presale-booth", money(c.presaleBooth));
-    set("r-final-presale-other", money(c.presaleOther));
+    set("r-final-income", money(c.incOther));
     set("r-revenue", money(c.revenue));
     set("r-cost-booth", money(c.costSum));
     set("r-cost-common", money(c.commonSum));
@@ -852,7 +965,7 @@
     rows.push(["아침 통", c.openTin]);
     rows.push(["저녁 통", c.closeTin]);
     rows.push(["조별 지급 합계", c.floatSum]);
-    rows.push(["행사 전에 판 교환권", c.presaleVoucher]);
+    rows.push(["교환권으로 판 공통 수입", c.incVoucher]);
     rows.push(["팔려 나간 교환권", c.sold]);
     rows.push(["받은 돈", c.received]);
     rows.push(["차이", c.diff]);
@@ -865,7 +978,11 @@
     rows.push(["교환소가 받은 돈", c.received]);
     rows.push(["조별 현금 매출 합계", c.cashSum]);
     rows.push(["조별 행사전 구매 합계", c.presaleBooth]);
-    rows.push(["조 구분 없는 행사전 구매", c.presaleOther]);
+    rows.push([]);
+    c.commonIncomes.forEach(function (x) {
+      rows.push(["공통 수입 — " + x.name, x.amount, x.voucher ? "교환권 판매" : ""]);
+    });
+    rows.push(["공통 수입 (교환권 외) 합계", c.incOther]);
     rows.push(["매출 합계", c.revenue]);
     rows.push(["조별 재료비 합계", c.costSum]);
     rows.push(["공통 비용 합계", c.commonSum]);
@@ -912,6 +1029,7 @@
   // ---------- 그리기 ----------
   function renderAll() {
     renderItems();
+    renderIncomes();
     renderDenomTable("float-body", state.floats);
     renderDenomTable("final-body", state.finals, true);
     renderFloatSum();

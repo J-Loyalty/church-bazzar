@@ -121,7 +121,8 @@ const st = {
   cash: { '1조': 30000, '2조': 20000 }, presales: { '1조': 200000, '2조': 100000 },
   costs: { '1조': 100000, '2조': 60000 }, costPaid: { '1조': true },
   commonCosts: [{ name: '교환권 인쇄비', amount: 350000, paid: true }, { name: '천막 대여료', amount: 50000, paid: false }],
-  presale: 0, presaleVoucher: 100000,
+  commonIncomes: [{ name: '목장쿠폰', amount: 100000, voucher: true },
+                  { name: '헌옷 수거 매출', amount: 0, voucher: false }],
   desk: { openTin: { 1000: 500, 5000: 0, 10000: 0 }, closeTin: { 1000: 100, 5000: 0, 10000: 0 }, openCash: 50000, closeCash: 250000, transfer: 120000 }
 };
 
@@ -171,7 +172,9 @@ const summary = {
       voucher: 150000, cash: 30000, presale: 200000, total: 380000, cost: 100000, costPaid: true }
   ],
   floatSum: 50000, finalSum: 200000, voucherSum: 150000, cashSum: 30000,
-  presaleBooth: 200000, presaleOther: 0, totalSum: 380000, costSum: 100000,
+  presaleBooth: 200000, incVoucher: 100000, incOther: 0,
+  commonIncomes: [{ name: '목장쿠폰', amount: 100000, voucher: true }],
+  totalSum: 380000, costSum: 100000,
   commonCosts: [{ name: '인쇄비', amount: 350000, paid: true }], commonSum: 350000,
   openTin: 500000, closeTin: 100000, sold: 420000, cashDelta: 200000, transfer: 120000,
   received: 420000, diff: 0, unused: 150000, presale: 200000, presaleVoucher: 100000,
@@ -197,7 +200,9 @@ row(m.boothTop + 1, { A: '2조', B: '닭꼬치', C: 3000, D: 60000,
 row(m.boothTop + 2, { A: '2조', B: '만두',   C: 3000 });
 grid.set('B' + m.openTin, { v: 500 }); grid.set('B' + m.closeTin, { v: 100 });
 grid.set('B' + m.openCash, { v: 50000 }); grid.set('B' + m.closeCash, { v: 250000 });
-grid.set('B' + m.transfer, { v: 120000 }); grid.set('B' + m.preVoucher, { v: 100000 });
+grid.set('B' + m.transfer, { v: 120000 });
+grid.set('A' + m.incomeTop, { v: '목장쿠폰' }); grid.set('B' + m.incomeTop, { v: 100000 });
+grid.set('C' + m.incomeTop, { v: true });
 grid.set('A' + m.commonTop, { v: '교환권 인쇄비' }); grid.set('B' + m.commonTop, { v: 350000 }); grid.set('C' + m.commonTop, { v: true });
 grid.set('A' + (m.commonTop + 1), { v: '천막 대여료' }); grid.set('B' + (m.commonTop + 1), { v: 50000 });
 console.log('손으로 입력: 차이', V('B' + m.bDiff), '/ 수익', V('B' + m.pFinal), '/ 돌려드릴', V('B' + m.rRefund));
@@ -207,6 +212,25 @@ cache.clear();
 grid.set('O' + (m.boothTop + 2), { v: 99999 });
 console.log('둘째 줄 오기입 경고:', V('R' + (m.boothTop + 2)) ? '뜸' : 'X 안 뜸',
   '/ 합계에 섞였나:', V('Q' + (m.boothTop + 2)) === '' ? '아니오' : 'X 예');
+
+// 공통 수입: 「교환권 판매」는 대사 양쪽에, 나머지는 매출에만 들어가는가
+cache.clear();
+const before = { diff: n(V('B' + m.bDiff)), revenue: n(V('B' + m.pFinal)) };
+grid.set('A' + (m.incomeTop + 1), { v: '헌옷 수거 매출' });
+grid.set('B' + (m.incomeTop + 1), { v: 80000 });   // 교환권 판매 아님
+cache.clear();
+const after = { diff: n(V('B' + m.bDiff)), revenue: n(V('B' + m.pFinal)) };
+const incBad = [];
+if (after.diff !== 0) incBad.push('대사가 깨짐 ' + after.diff);
+if (after.revenue - before.revenue !== 80000) incBad.push('수익이 80,000 안 늘어남');
+// 교환권 판매로 켜면 대사 양쪽이 함께 커져 차이는 그대로 0이어야 한다
+grid.set('C' + (m.incomeTop + 1), { v: true });
+cache.clear();
+if (n(V('B' + m.bDiff)) !== 0) incBad.push('교환권 판매로 켜니 대사가 깨짐 ' + V('B' + m.bDiff));
+if (n(V('B' + m.bSold)) !== n(V('B' + m.bReceived))) incBad.push('양쪽이 안 맞음');
+console.log(incBad.length ? 'X 공통 수입: ' + incBad.join(' / ')
+  : '공통 수입: 교환권 외는 매출에만(+80,000), 교환권 판매는 대사 양쪽에 — 차이 0 유지');
+if (incBad.length) process.exitCode = 1;
 
 // 품목이 많아도 뒤쪽 조가 잘리지 않는가. 조가 15개여도 한 조가 서너 품목을
 // 맡으면 줄은 그 몇 배가 된다 -- 줄 수를 고정해 두면 여기서 잘려 나간다.

@@ -135,14 +135,20 @@ function saveSettlement(body) {
   rows.push(['아침 통', s.openTin]);
   rows.push(['저녁 통', s.closeTin]);
   rows.push(['조별 지급 합계', s.floatSum]);
-  rows.push(['행사 전에 판 교환권', s.presaleVoucher]);
+  rows.push(['교환권으로 판 공통 수입', s.incVoucher]);
   rows.push(['팔려 나간 교환권', s.sold]);
   rows.push(['저녁 금고 − 아침 금고', s.cashDelta]);
   rows.push(['계좌이체', s.transfer]);
-  rows.push(['행사 전에 판 교환권 대금', s.presaleVoucher]);
+  rows.push(['그 대금', s.incVoucher]);
   rows.push(['받은 돈', s.received]);
   rows.push(['차이 (0이어야 함)', s.diff]);
   rows.push(['미사용 교환권', s.unused]);
+  rows.push([]);
+  rows.push(['공통 수입', '', '', '', '', '']);
+  (s.commonIncomes || []).forEach(function (x) {
+    rows.push([x.name, x.amount, x.voucher ? '교환권 판매' : '']);
+  });
+  rows.push(['공통 수입 합계', (s.incVoucher || 0) + (s.incOther || 0)]);
   rows.push([]);
   rows.push(['공통 비용', '', '', '', '', '']);
   (s.commonCosts || []).forEach(function (x) {
@@ -154,7 +160,7 @@ function saveSettlement(body) {
   rows.push(['교환소가 받은 돈', s.received]);
   rows.push(['조별 현금 매출 합계', s.cashSum]);
   rows.push(['조별 행사전 구매 합계', s.presaleBooth]);
-  rows.push(['조 구분 없는 행사전 구매', s.presaleOther]);
+  rows.push(['공통 수입 (교환권 판매 제외)', s.incOther]);
   rows.push(['매출 합계', s.revenue]);
   rows.push(['조별 재료비 합계', s.costSum]);
   rows.push(['공통 비용 합계', s.commonSum]);
@@ -240,6 +246,7 @@ function json(obj) {
 // 된다. 고정해 두면 **뒤쪽 조가 잘려 나가므로** 품목 수에 맞춰 늘린다.
 var CALC_MIN_ROWS = 45;   // 빈 양식 기본 줄 수
 var CALC_SPARE = 10;      // 나중에 손으로 더 적을 여유 줄
+var CALC_INCOME = 10;   // 공통 수입 줄 수
 var CALC_COMMON = 15;   // 공통 비용 줄 수
 
 // 줄 위치를 한곳에 모아 둔다. 표를 손대면 여기만 고치면 된다.
@@ -262,9 +269,13 @@ function calcMap(rows) {
   m.openCash = m.closeTin + 2;
   m.closeCash = m.openCash + 1;
   m.transfer = m.closeCash + 1;
-  m.preVoucher = m.transfer + 1;
-  m.presaleOther = m.preVoucher + 3;
-  m.commonHead = m.presaleOther + 2;
+  m.incomeHead = m.transfer + 3;
+  m.incomeTop = m.incomeHead + 1;
+  m.incomeEnd = m.incomeTop + CALC_INCOME - 1;
+  m.incomeSum = m.incomeEnd + 1;
+  m.incomeVoucher = m.incomeSum + 1;
+  m.incomeOther = m.incomeVoucher + 1;
+  m.commonHead = m.incomeOther + 3;
   m.commonTop = m.commonHead + 1;
   m.commonEnd = m.commonTop + CALC_COMMON - 1;
   m.commonSum = m.commonEnd + 1;
@@ -286,8 +297,8 @@ function calcMap(rows) {
   m.pDesk = m.profitTop + 1;
   m.pCash = m.pDesk + 1;
   m.pPresaleBooth = m.pCash + 1;
-  m.pPresaleOther = m.pPresaleBooth + 1;
-  m.pRevenue = m.pPresaleOther + 1;
+  m.pIncome = m.pPresaleBooth + 1;
+  m.pRevenue = m.pIncome + 1;
   m.pCostBooth = m.pRevenue + 1;
   m.pCostCommon = m.pCostBooth + 1;
   m.pCost = m.pCostCommon + 1;
@@ -383,11 +394,26 @@ function buildCalcSheet(st, at) {
   put(m.openCash, 1, '아침 금고 (원)');
   put(m.closeCash, 1, '저녁 금고 (원) — 부스 현금을 받기 전에 센 금액');
   put(m.transfer, 1, '계좌이체 합계 (원) — 당일 교환권 판매분만');
-  put(m.preVoucher, 1, '행사 전에 판 교환권 (원) — 전도용 등');
 
-  // ----- 3. 그 밖의 매출·비용 -----
-  title(m.presaleOther - 1, '3. 그 밖의 매출과 비용');
-  put(m.presaleOther, 1, '조 구분 없는 행사전 구매 (원) — 조별 몫은 위 1번 표에 적습니다');
+  // ----- 3. 공통 수입 -----
+  // 「교환권 판매」를 켠 줄은 교환권을 팔고 받은 돈이라 대사 양쪽에도 더한다.
+  // 그 교환권은 아침에 통을 셀 때 이미 빠져나간 뒤이기 때문이다.
+  title(m.incomeHead - 1, '3. 공통 수입 — 어느 조에도 붙지 않는 수입 (목장쿠폰·선판매쿠폰·헌옷 수거 등)');
+  sh.getRange(m.incomeHead, 1, 1, 3)
+    .setValues([['공통 수입 항목', '금액 (원)', '교환권 판매']])
+    .setFontWeight('bold').setBackground('#efece7');
+  put(m.incomeSum, 1, '공통 수입 합계');
+  fx(m.incomeSum, 2, '=SUM(B' + m.incomeTop + ':B' + m.incomeEnd + ')');
+  put(m.incomeVoucher, 1, '그중 교환권 판매 — 대사 양쪽에 더합니다');
+  fx(m.incomeVoucher, 2, '=SUMIF(C' + m.incomeTop + ':C' + m.incomeEnd +
+    ',TRUE,B' + m.incomeTop + ':B' + m.incomeEnd + ')');
+  put(m.incomeOther, 1, '그 밖의 공통 수입 — 매출에만 더합니다');
+  fx(m.incomeOther, 2, '=B' + m.incomeSum + '-B' + m.incomeVoucher);
+  sh.getRange(m.incomeSum, 1, 3, 3).setFontWeight('bold');
+  sh.getRange(m.incomeSum, 1, 1, 3).setBackground('#efece7');
+
+  // ----- 4. 공통 비용 -----
+  title(m.commonHead - 1, '4. 공통 비용 — 어느 조에도 붙지 않는 지출 (교환권 인쇄비·천막 대여료 등)');
   sh.getRange(m.commonHead, 1, 1, 3)
     .setValues([['공통 비용 항목', '금액 (원)', '재정 지급']])
     .setFontWeight('bold').setBackground('#efece7');
@@ -396,17 +422,17 @@ function buildCalcSheet(st, at) {
   sh.getRange(m.commonSum, 1, 1, 3).setFontWeight('bold').setBackground('#efece7');
 
   // ----- 4. 대사 -----
-  title(m.balTop, '4. 대사 — 나간 교환권과 받은 돈이 같아야 합니다');
+  title(m.balTop, '5. 대사 — 나간 교환권과 받은 돈이 같아야 합니다');
   [
     [m.bOpenTin, '아침 통', '=E' + m.openTin],
     [m.bCloseTin, '− 저녁 통', '=E' + m.closeTin],
     [m.bFloat, '− 조별 지급 합계', '=I' + m.boothSum],
-    [m.bPre, '＋ 행사 전에 판 교환권', '=B' + m.preVoucher],
+    [m.bPre, '＋ 교환권으로 판 공통 수입', '=B' + m.incomeVoucher],
     [m.bSold, '＝ 손님에게 팔려 나간 교환권',
       '=B' + m.bOpenTin + '-B' + m.bCloseTin + '-B' + m.bFloat + '+B' + m.bPre],
     [m.bCashDelta, '저녁 금고 − 아침 금고', '=B' + m.closeCash + '-B' + m.openCash],
     [m.bTransfer, '＋ 계좌이체', '=B' + m.transfer],
-    [m.bPre2, '＋ 행사 전에 판 교환권 대금', '=B' + m.preVoucher],
+    [m.bPre2, '＋ 그 대금', '=B' + m.incomeVoucher],
     [m.bReceived, '＝ 그 값으로 받은 돈',
       '=B' + m.bCashDelta + '+B' + m.bTransfer + '+B' + m.bPre2],
     [m.bDiff, '차이 (0이어야 합니다)', '=B' + m.bReceived + '-B' + m.bSold],
@@ -425,14 +451,14 @@ function buildCalcSheet(st, at) {
   });
 
   // ----- 5. 최종 수익금 -----
-  title(m.profitTop, '5. 최종 수익금 — 매출에서 원가를 뺍니다');
+  title(m.profitTop, '6. 최종 수익금 — 매출에서 원가를 뺍니다');
   [
     [m.pDesk, '교환소가 받은 돈', '=B' + m.bReceived],
     [m.pCash, '＋ 조별 현금 매출 합계', '=O' + m.boothSum],
     [m.pPresaleBooth, '＋ 조별 행사전 구매 합계', '=P' + m.boothSum],
-    [m.pPresaleOther, '＋ 조 구분 없는 행사전 구매', '=B' + m.presaleOther],
+    [m.pIncome, '＋ 공통 수입 (교환권 판매 제외)', '=B' + m.incomeOther],
     [m.pRevenue, '＝ 매출 합계',
-      '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresaleBooth + '+B' + m.pPresaleOther],
+      '=B' + m.pDesk + '+B' + m.pCash + '+B' + m.pPresaleBooth + '+B' + m.pIncome],
     [m.pCostBooth, '조별 재료원가 합계', '=D' + m.boothSum],
     [m.pCostCommon, '＋ 공통 비용 합계', '=B' + m.commonSum],
     [m.pCost, '＝ 원가 합계', '=B' + m.pCostBooth + '+B' + m.pCostCommon],
@@ -444,7 +470,7 @@ function buildCalcSheet(st, at) {
   sh.getRange(m.pFinal, 1, 1, 2).setFontSize(12).setBackground('#efece7');
 
   // ----- 6. 돌려드릴 돈 -----
-  title(m.refundTop, '6. 마감 후 돌려드릴 돈 — 재정에서 아직 내지 않은 원가입니다');
+  title(m.refundTop, '7. 마감 후 돌려드릴 돈 — 재정에서 아직 내지 않은 원가입니다');
   [
     [m.rAll, '원가 합계', '=B' + m.pCost],
     [m.rPaid, '− 재정에서 이미 지급한 몫',
@@ -479,8 +505,8 @@ function decorateCalcSheet(sh, m, W) {
     sh.getRange(m.boothTop, 10, CALC_BOOTHS, 3),     // 마감 장수
     sh.getRange(m.boothTop, 15, CALC_BOOTHS, 2),     // 현금 매출 + 행사전 구매
     sh.getRange(m.openTin, 2, 2, 3),                 // 통 장수
-    sh.getRange(m.openCash, 2, 4, 1),                // 금고/이체/사전판매
-    sh.getRange(m.presaleOther, 2, 1, 1),            // 조 구분 없는 행사전 구매
+    sh.getRange(m.openCash, 2, 3, 1),                // 아침 금고 / 저녁 금고 / 계좌이체
+    sh.getRange(m.incomeTop, 1, CALC_INCOME, 3),     // 공통 수입
     sh.getRange(m.commonTop, 1, CALC_COMMON, 3)      // 공통 비용
   ];
   inputs.forEach(function (rg) { rg.setBackground(IN).setBorder(true, true, true, true, true, true); });
@@ -491,14 +517,15 @@ function decorateCalcSheet(sh, m, W) {
     sh.getRange(m.boothTop, 9, CALC_BOOTHS + 1, 1),
     sh.getRange(m.boothTop, 13, CALC_BOOTHS + 1, 5),
     sh.getRange(m.openTin, 5, 2, 1),
-    sh.getRange(m.openCash, 2, 4, 1),
-    sh.getRange(m.presaleOther, 2, 1, 1),
+    sh.getRange(m.openCash, 2, 3, 1),
+    sh.getRange(m.incomeTop, 2, CALC_INCOME + 3, 1),
     sh.getRange(m.commonTop, 2, CALC_COMMON + 1, 1),
     sh.getRange(m.bOpenTin, 2, m.bUnused - m.bOpenTin + 1, 1),
     sh.getRange(m.pDesk, 2, m.pFinal - m.pDesk + 1, 1),
     sh.getRange(m.rAll, 2, 3, 1)
   ].forEach(function (rg) { rg.setNumberFormat(money); });
   sh.getRange(m.boothTop, 1, CALC_BOOTHS, 2).setNumberFormat('@');
+  sh.getRange(m.incomeTop, 1, CALC_INCOME, 1).setNumberFormat('@');
   sh.getRange(m.commonTop, 1, CALC_COMMON, 1).setNumberFormat('@');
   sh.getRange(m.boothTop, 6, CALC_BOOTHS, 3).setNumberFormat('0');
   sh.getRange(m.boothTop, 10, CALC_BOOTHS, 3).setNumberFormat('0');
@@ -507,6 +534,7 @@ function decorateCalcSheet(sh, m, W) {
 
   // 재정 지급은 체크 상자로
   sh.getRange(m.boothTop, 5, CALC_BOOTHS, 1).insertCheckboxes();
+  sh.getRange(m.incomeTop, 3, CALC_INCOME, 1).insertCheckboxes();
   sh.getRange(m.commonTop, 3, CALC_COMMON, 1).insertCheckboxes();
 
   // 차이 한 줄에만 색을 건다. 이 시트가 내놓는 가장 중요한 답이다.
@@ -578,8 +606,14 @@ function fillCalcSheet(sh, m, st) {
   sh.getRange(m.openCash, 2).setValue(num0(d.openCash));
   sh.getRange(m.closeCash, 2).setValue(num0(d.closeCash));
   sh.getRange(m.transfer, 2).setValue(num0(d.transfer));
-  sh.getRange(m.preVoucher, 2).setValue(num0(st.presaleVoucher));
-  sh.getRange(m.presaleOther, 2).setValue(num0(st.presale));
+
+  var incomes = st.commonIncomes || [];
+  var ic = [];
+  for (var j = 0; j < CALC_INCOME; j++) {
+    var x = incomes[j];
+    ic.push(x ? [String(x.name || ''), num0(x.amount), !!x.voucher] : ['', '', false]);
+  }
+  sh.getRange(m.incomeTop, 1, CALC_INCOME, 3).setValues(ic);
 
   var common = st.commonCosts || [];
   var cc = [];

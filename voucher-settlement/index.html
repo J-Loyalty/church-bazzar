@@ -73,14 +73,6 @@
     </label>
   </div>
 
-  <h2>1-4. 행사 전에 판 교환권</h2>
-  <p class="hint">전도용(펀치) 교환권처럼 <strong>행사 전에 값을 받고 내어준 교환권</strong>의 금액입니다. 그 교환권은 위 「아침 통」을 셀 때 <strong>이미 빠져나간 뒤</strong>이고 대금도 이미 받았으므로, 여기 적지 않으면 <strong>그만큼 매출이 적게 잡힙니다</strong>. 없으면 0으로 두세요.</p>
-  <label class="field-inline">금액 (원)
-    <input type="number" id="presale-voucher" min="0" step="1" inputmode="numeric">
-    <span class="field-help">장수가 아니라 금액입니다</span>
-  </label>
-  <div class="banner banner-blue">받은 대금은 <strong>저녁 금고에 합치지 마세요.</strong> 합치면 금고 차액에도 잡혀 같은 돈을 두 번 세게 됩니다. 아침 금고에 넣어두거나 따로 보관하시면 됩니다.</div>
-
   <div class="panel-foot">
     <button type="button" class="btn-secondary" data-goto="close">마감 입력으로 &rarr;</button>
   </div>
@@ -121,11 +113,12 @@
     </div>
   </div>
 
-  <h2>2-3. 조 구분 없는 행사전 구매</h2>
-  <p class="hint"><strong>먼저 2-1의 조별 칸을 쓰세요.</strong> 여기는 <strong>어느 조에도 넣을 수 없는</strong> 행사전 구매만 적는 자리입니다. 없으면 0으로 두세요.</p>
-  <label class="field-inline">금액 (원)
-    <input type="number" id="presale" min="0" step="1" inputmode="numeric">
-  </label>
+  <h2>2-3. 공통 수입</h2>
+  <p class="hint"><strong>어느 조에도 붙지 않는 수입</strong>입니다 — 목장쿠폰, 선판매쿠폰, 헌옷 수거 매출, 그 밖의 것. 항목 이름과 금액을 적으면 다음 칸이 저절로 생깁니다. <strong>조에 붙는 매출은 2-1에 적으세요.</strong></p>
+  <p class="hint"><strong>「교환권 판매」에 표시</strong>하면 <strong>교환권을 팔고 받은 돈</strong>이라는 뜻입니다. 목장쿠폰·선판매쿠폰·전도용 교환권이 여기 해당하며, 그 교환권은 <strong>아침에 통을 셀 때 이미 빠져나간 뒤</strong>라 대사 양쪽에 함께 더해야 숫자가 맞습니다. 헌옷 수거처럼 교환권을 거치지 않은 수입은 표시하지 마세요.</p>
+  <div id="common-incomes"></div>
+  <p class="row-total-line">공통 수입 합계 <strong id="income-sum">0원</strong></p>
+  <div class="banner banner-blue">「교환권 판매」로 받은 대금은 <strong>저녁 금고에 합치지 마세요.</strong> 합치면 금고 차액에도 잡혀 같은 돈을 두 번 세게 됩니다. 아침 금고에 넣어두거나 따로 보관하시면 됩니다.</div>
 
   <h2>2-4. 공통 비용</h2>
   <p class="hint">특정 조에 붙지 않는 지출입니다 — <strong>교환권 인쇄비</strong>, 천막·비품 대여료, 공통 자재비 같은 것. 항목 이름과 금액을 적으면 다음 칸이 저절로 생깁니다.</p>
@@ -155,11 +148,11 @@
         <tr><th>아침 통</th><td id="r-open-tin">0원</td></tr>
         <tr><th>− 저녁 통</th><td id="r-close-tin">0원</td></tr>
         <tr><th>− 조별 지급 합계</th><td id="r-float">0원</td></tr>
-        <tr><th>+ 행사 전에 판 교환권</th><td id="r-pv1">0원</td></tr>
+        <tr><th>+ 교환권으로 판 공통 수입</th><td id="r-pv1">0원</td></tr>
         <tr class="row-sum"><th>= 손님에게 팔려 나간 교환권</th><td id="r-sold">0원</td></tr>
         <tr><th>저녁 금고 − 아침 금고</th><td id="r-cash-delta">0원</td></tr>
         <tr><th>+ 계좌이체</th><td id="r-transfer">0원</td></tr>
-        <tr><th>+ 행사 전에 판 교환권 대금</th><td id="r-pv2">0원</td></tr>
+        <tr><th>+ 그 대금</th><td id="r-pv2">0원</td></tr>
         <tr class="row-sum"><th>= 그 값으로 받은 돈</th><td id="r-received">0원</td></tr>
         <tr class="row-diff"><th>차이</th><td id="r-diff">0원</td></tr>
       </tbody>
@@ -196,7 +189,7 @@
         <tr><th>교환소가 받은 돈</th><td id="r-final-desk">0원</td></tr>
         <tr><th>+ 조별 현금 매출 합계</th><td id="r-final-cash">0원</td></tr>
         <tr><th>+ 조별 행사전 구매 합계</th><td id="r-final-presale-booth">0원</td></tr>
-        <tr><th>+ 조 구분 없는 행사전 구매</th><td id="r-final-presale-other">0원</td></tr>
+        <tr><th>+ 공통 수입 (교환권 판매 제외)</th><td id="r-final-income">0원</td></tr>
         <tr class="row-sum"><th>= 매출 합계</th><td id="r-revenue">0원</td></tr>
         <tr><th>조별 재료비 합계</th><td id="r-cost-booth">0원</td></tr>
         <tr><th>+ 공통 비용 합계</th><td id="r-cost-common">0원</td></tr>
