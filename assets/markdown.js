@@ -65,7 +65,7 @@
             quoteLines.push(lines[i].replace(/^>\s?/, ""));
             i++;
           }
-          out.push('<div class="banner banner-blue">' + inline(quoteLines.join(" "), baseDir) + "</div>");
+          out.push('<div class="banner banner-blue">' + inline(joinLines(quoteLines), baseDir) + "</div>");
           continue;
         }
 
@@ -73,8 +73,10 @@
         if (/^[-*]\s+/.test(line)) {
           var ulItems = [];
           while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
-            ulItems.push(lines[i].replace(/^[-*]\s+/, ""));
+            var ulItem = [lines[i].replace(/^[-*]\s+/, "")];
             i++;
+            while (i < lines.length && isContinuation(lines[i])) { ulItem.push(lines[i]); i++; }
+            ulItems.push(joinLines(ulItem));
           }
           out.push(renderList(ulItems, false, baseDir));
           continue;
@@ -86,8 +88,10 @@
           var olItems = [];
           var olStart = parseInt(/^(\d+)\./.exec(line)[1], 10);
           while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
-            olItems.push(lines[i].replace(/^\d+\.\s+/, ""));
+            var olItem = [lines[i].replace(/^\d+\.\s+/, "")];
             i++;
+            while (i < lines.length && isContinuation(lines[i])) { olItem.push(lines[i]); i++; }
+            olItems.push(joinLines(olItem));
           }
           out.push(renderList(olItems, true, baseDir, olStart));
           continue;
@@ -109,7 +113,7 @@
           i++;
         }
         if (paraLines.length) {
-          out.push("<p>" + inline(paraLines.join(" "), baseDir) + "</p>");
+          out.push("<p>" + inline(joinLines(paraLines), baseDir) + "</p>");
         } else {
           i++;
         }
@@ -118,11 +122,25 @@
       return out.join("\n");
     }
 
+    // 문장마다 줄을 바꾸고 싶을 때의 약속: 다음 줄을 **두 칸 이상 들여쓴다.**
+    // 들여쓴 줄은 앞 줄과 합쳐지지 않고 줄바꿈(<br>)이 된다. 들여쓰지 않은 줄은 지금까지처럼
+    // 공백 하나로 이어 붙는다. 들여쓴 목록(하위 목록)은 여전히 지원하지 않는다.
+    function isContinuation(line) {
+      return /^\s{2,}\S/.test(line) && !/^\s+([-*]|\d+\.)\s/.test(line) && !/^\s+\|/.test(line);
+    }
+    function joinLines(arr) {
+      var s = arr[0];
+      for (var k = 1; k < arr.length; k++) {
+        s += (/^\s{2,}\S/.test(arr[k]) ? "\n" : " ") + arr[k].trim();
+      }
+      return s;
+    }
+
     function renderList(items, ordered, baseDir, start) {
       var tag = ordered ? "ol" : "ul";
       var html = "<" + tag + (ordered && start > 1 ? ' start="' + start + '"' : "") + ">";
       items.forEach(function (item) {
-        var checkboxMatch = /^\[( |x|X)\]\s+(.*)$/.exec(item);
+        var checkboxMatch = /^\[( |x|X)\]\s+([\s\S]*)$/.exec(item);
         if (checkboxMatch) {
           var checked = checkboxMatch[1].toLowerCase() === "x";
           html += '<li class="checkbox-item"><input type="checkbox" disabled' + (checked ? " checked" : "") + "> " +
@@ -153,7 +171,7 @@
         var resolved = resolveHref(baseDir, href);
         return '<a href="' + resolved + '">' + label + "</a>";
       });
-      return escaped;
+      return escaped.replace(/\n/g, "<br>");
     }
 
     function resolveHref(baseDir, href) {

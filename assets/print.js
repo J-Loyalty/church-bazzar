@@ -4,15 +4,14 @@
   document.getElementById("printed").textContent =
     "인쇄일 " + new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
-  // Left out of the printed bundle by default. Neither is wrong to print -- they
-  // are simply not what someone carries around on the day, and together they are
-  // nine of the bundle's fifty-one pages.
-  var OFF_BY_DEFAULT = {
-    "docs/가치_기준.md": "문서를 쓸 때 쓰는 판단 기준입니다. 행사 당일에는 볼 일이 없습니다.",
-    "docs/확인_필요_체크리스트.md": "아직 정해지지 않은 126가지입니다. 회의 때마다 바뀌므로 종이에 남기면 금세 옛 내용이 됩니다."
-  };
+  // 종이로 찍는 것은 「한 장 요약」 하나다. 나머지는 전자 문서(doc.html)로 본다 --
+  // 문서가 자주 바뀌어 종이에 남기면 금세 옛 내용이 되고, 묶음 전체는 60장쯤 된다.
+  // 다른 문서도 필요하면 아래 고르는 칸에서 켤 수 있다.
+  var PRINT_BY_DEFAULT = { "docs/한장_요약.md": true };
+  var OFF_REASON = "전자 문서로 봅니다.";
 
-  var SELECT_KEY = "cbz_print_v1";
+  // 기본값을 바꿀 때 키를 올린다 -- 옛 선택이 새 기본값을 덮어쓰지 않게.
+  var SELECT_KEY = "cbz_print_v2";
   var cache = {};          // 경로 → 렌더된 HTML. 한 번만 받아온다
   var failed = {};         // 경로 → true. 못 받아온 문서
   var selected = loadSelection();
@@ -20,7 +19,7 @@
   function defaultSelection() {
     var out = {};
     window.SEQUENCE.forEach(function (item) {
-      out[item.path] = !OFF_BY_DEFAULT[item.path];
+      out[item.path] = !!PRINT_BY_DEFAULT[item.path];
     });
     return out;
   }
@@ -50,7 +49,7 @@
     window.NAV.forEach(function (group) {
       html += '<p class="group">' + MD.escapeHtml(group.group) + '</p><div class="items">';
       group.items.forEach(function (item) {
-        var why = OFF_BY_DEFAULT[item.path];
+        var why = PRINT_BY_DEFAULT[item.path] ? "" : OFF_REASON;
         html += '<label><input type="checkbox" data-path="' + MD.escapeHtml(item.path) + '"' +
           (selected[item.path] ? " checked" : "") + "><span>" + MD.escapeHtml(item.label) +
           (why ? '<span class="why">' + MD.escapeHtml(why) + "</span>" : "") + "</span></label>";
@@ -103,6 +102,8 @@
 
   function render() {
     var list = chosen();
+    // 문서가 하나뿐이면 표지와 차례가 따로 두 장을 차지할 이유가 없다.
+    document.querySelector(".sheet").classList.toggle("single", list.length === 1);
     renderToc(list);
     document.getElementById("docs").innerHTML = list.map(function (item) {
       return '<section class="doc">' + (cache[item.path] || "") + "</section>";

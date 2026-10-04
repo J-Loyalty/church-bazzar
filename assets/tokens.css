@@ -333,3 +333,42 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+
+/* ---- 보고서·공유 문서의 모양 (모든 화면 공용) ----
+   회색 책상(.desk) 위에 흰 종이(.paper) 한 장. 종이 맨 위는 소속 → 제목 → 굵은 줄
+   (.masthead). 종이 안의 표는 둥근 모서리 없이 위아래 굵은 선과 줄무늬로 그린다.
+   그림자는 종이에만 쓴다. */
+:root { --color-desk: #ebe9e6; --paper-width: 980px; }
+body.desk { background: var(--color-desk); }
+body.desk .topbar { background: var(--color-desk); border-bottom-color: var(--color-hairline-strong); }
+
+.paper {
+  max-width: var(--paper-width);
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-xs);
+  box-shadow: 0 1px 2px rgba(12, 10, 9, 0.06), 0 8px 24px rgba(12, 10, 9, 0.07);
+  padding: 56px 64px 40px;
+}
+.masthead { padding-bottom: 22px; margin-bottom: 26px; border-bottom: 2px solid var(--color-ink); }
+.org-line { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: 0.02em; color: var(--color-mute); }
+.masthead h1 { margin: 0 0 16px; font-family: var(--font-display); font-size: 40px; font-weight: 300; line-height: 1.18; letter-spacing: -0.03em; color: var(--color-ink); }
+.masthead > :last-child { margin-bottom: 0; }
+.meta-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; font-size: 15px; color: var(--color-mute); }
+.meta-list li { margin: 0; padding: 0 14px; border-left: 1px solid var(--color-hairline-strong); }
+.meta-list li:first-child { padding-left: 0; border-left: none; }
+
+.paper .data-table { border: none; border-top: 2px solid var(--color-ink); border-bottom: 1px solid var(--color-ink); border-radius: 0; background: #fff; }
+.paper .data-table th { background: transparent; border-bottom: 1px solid var(--color-ink); }
+.paper .data-table tbody tr:nth-child(even) td { background: var(--color-canvas-soft); }
+.paper .banner { border-radius: var(--radius-xs); border-left-width: 4px; }
+
+@media (max-width: 860px) {
+  .paper { padding: 28px 20px 24px; }
+  .masthead h1 { font-size: 30px; }
+}
+@media print {
+  body.desk { background: #fff; }
+  .paper { box-shadow: none; border: none; padding: 0; max-width: none; }
+}

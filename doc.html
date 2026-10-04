@@ -13,17 +13,21 @@
 <script src="assets/markdown.js"></script>
 <script src="assets/nav.js"></script>
 </head>
-<body>
+<body class="desk">
 
 <nav class="topbar">
   <a class="home" href="index.html">&larr; 준비 허브</a>
   <span class="where" id="where"></span>
+  <span class="spacer"></span>
+  <button type="button" class="btn-secondary tool" id="btn-copy">링크 복사</button>
+  <button type="button" class="btn-secondary tool" id="btn-print">이 문서 인쇄</button>
+  <span class="tool-msg" id="tool-msg" role="status" aria-live="polite"></span>
 </nav>
 
 <div class="layout">
   <nav class="sidebar" id="sidebar"></nav>
   <div class="article-wrap">
-    <article class="doc-card" id="content">
+    <article class="doc-card paper" id="content">
       <p class="doc-loading">불러오는 중…</p>
     </article>
   </div>

@@ -197,7 +197,7 @@ function saveSettlement(body) {
   return { ok: true, at: at };
 }
 
-/** 「4조 — 닭꼬치 3,000원 · 소떡소떡 2,000원」 처럼 한 칸에 담는다. */
+/** 「6조 — 소떡소떡 2,000원 · 만두 3,000원」 처럼 한 칸에 담는다. */
 function itemLabel(r) {
   return (r.items || []).map(function (x) {
     return x.name + (x.price ? ' ' + Number(x.price).toLocaleString('en-US') + '원' : '');

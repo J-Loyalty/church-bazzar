@@ -1,49 +1,7 @@
-header {
-  position: relative;
-  overflow: hidden;
-  padding: 72px 20px 48px;
-  background: var(--color-canvas);
-  border-bottom: 1px solid var(--color-hairline);
-  text-align: center;
-}
-/* Atmospheric orbs are the only colour in the system, and they are decoration
-   only -- never a fill behind text, never a component background. Held far
-   enough back that near-black ink keeps its contrast. */
-header::before,
-header::after {
-  content: "";
-  position: absolute;
-  border-radius: var(--radius-full);
-  filter: blur(60px);
-  opacity: 0.5;
-  pointer-events: none;
-}
-header::before {
-  width: 320px; height: 320px; top: -140px; left: -80px;
-  background: radial-gradient(circle, var(--grad-mint), transparent 70%);
-}
-header::after {
-  width: 300px; height: 300px; top: -120px; right: -70px;
-  background: radial-gradient(circle, var(--grad-peach), transparent 70%);
-}
-header > * { position: relative; }
-header h1 {
-  margin: 0 0 12px;
-  font-family: var(--font-display);
-  font-size: 44px;
-  font-weight: 300;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  color: var(--color-ink);
-}
-header .when { margin: 0; color: var(--color-ink); font-size: 19px; font-weight: 500; }
-header .where { margin: 6px 0 0; color: var(--color-mute); font-size: 17px; }
-
-main {
-  max-width: 840px;
-  margin: 0 auto;
-  padding: 40px 16px 80px;
-}
+/* 허브도 같은 종이 한 장. 머리(.masthead)·종이(.paper)는 tokens.css */
+:root { --paper-width: 920px; }
+main.paper { margin: 32px auto 56px; }
+.masthead h1 { font-size: 44px; }
 
 section + section { margin-top: 48px; }
 section > h2 {
@@ -68,7 +26,7 @@ section > .lead {
   color: var(--color-on-primary);
   text-decoration: none;
   padding: 26px 28px;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-sm);
   font-weight: 500;
   font-size: 21px;
 }
@@ -99,9 +57,8 @@ section > .lead {
   margin: 0;
   padding: 0;
   background: var(--color-surface-card);
-  border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
 }
 .doc-list li + li { border-top: 1px solid var(--color-hairline-soft); }
 .doc-list a {
@@ -144,8 +101,8 @@ section > .lead {
 .tool {
   display: block;
   background: var(--color-surface-card);
-  border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-xs);
   padding: 20px 22px;
   text-decoration: none;
   color: var(--color-ink);
@@ -173,12 +130,7 @@ footer {
 }
 
 @media (max-width: 600px) {
-  header { padding: 48px 16px 36px; }
-  header h1 { font-size: 33px; }
-  /* The orbs shrink with the screen rather than disappearing -- at desktop
-     size on a phone they stop being atmosphere and become a coloured band. */
-  header::before { width: 210px; height: 210px; top: -105px; left: -60px; }
-  header::after { width: 190px; height: 190px; top: -95px; right: -50px; }
-  main { padding: 28px 16px 64px; }
+  main.paper { margin: 0 0 40px; border-left: none; border-right: none; border-radius: 0; }
+  .masthead h1 { font-size: 33px; }
   .tools { grid-template-columns: 1fr; }
 }

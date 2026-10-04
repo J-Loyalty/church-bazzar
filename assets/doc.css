@@ -70,23 +70,22 @@
   padding: 32px 24px 80px;
 }
 
-.doc-card {
-  max-width: 1120px;
-  background: var(--color-surface-doc);
-  border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-md);
-  padding: 32px;
-}
+.tool-msg { color: var(--color-ink); font-size: 15px; font-weight: 500; }
+.topbar .tool { min-height: 44px; padding: 0 18px; }
 
-.doc-card h1 {
-  font-family: var(--font-display);
-  font-size: 38px;
-  font-weight: 300;
-  letter-spacing: -0.03em;
-  line-height: 1.18;
-  color: var(--color-ink);
-  margin: 0 0 20px;
-}
+/* 문서 머리의 공통 부분(.masthead·.org-line·.meta-list)은 tokens.css */
+.doc-card p.doc-lead { margin: 0 0 18px; font-size: 19px; line-height: 1.7; color: var(--color-ink); }
+
+/* 차례 */
+.doc-toc { margin: 0 0 8px; padding: 16px 20px; background: var(--color-canvas-soft); border: 1px solid var(--color-hairline); border-radius: var(--radius-sm); }
+.doc-card .doc-toc h2 { font-family: var(--font-body); font-size: 14px; font-weight: 600; letter-spacing: 0.08em; color: var(--color-mute); margin: 0 0 6px; padding: 0; border: none; }
+.doc-toc a { text-decoration: none; }
+.doc-toc a:hover { text-decoration: underline; }
+
+.doc-foot { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--color-hairline-strong); font-size: 14px; color: var(--color-mute); }
+
+.doc-card h2 { scroll-margin-top: 16px; }
+
 .doc-card h2 {
   font-family: var(--font-display);
   font-size: 28px;
@@ -110,7 +109,8 @@
 .doc-card p { margin: 0 0 16px; font-size: 17px; line-height: 1.75; }
 .doc-card ul, .doc-card ol { margin: 0 0 16px; padding-left: 24px; font-size: 17px; line-height: 1.75; }
 .doc-card li { margin-bottom: 9px; }
-.doc-card li.checkbox-item { list-style: none; margin-left: -24px; }
+.doc-card li.checkbox-item { list-style: none; margin-left: -24px; padding-left: 26px; text-indent: -26px; }
+/* 한 항목 안에서 줄을 바꾼 문장은 첫 줄의 글자 시작 위치(체크박스 오른쪽)에 맞춘다. */
 .doc-card li.checkbox-item input {
   margin-right: 9px;
   width: 17px;
@@ -129,8 +129,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  max-width: 1120px;
-  margin-top: 24px;
+  max-width: 980px;
+  margin: 24px auto 0;
 }
 .prev-next a {
   flex: 0 1 auto;
@@ -165,6 +165,17 @@
   color: var(--color-mute);
 }
 
+/* 한 문서만 인쇄할 때: 종이에는 머리글과 본문만. 여러 문서를 묶으려면 print.html. */
+@media print {
+  .topbar, .sidebar, .prev-next { display: none !important; }
+  .layout { display: block; }
+  .article-wrap { padding: 0; }
+  .doc-toc { display: none; }
+  .paper .data-table tbody tr:nth-child(even) td { background: transparent; }
+  tr { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+}
+
 @media (max-width: 860px) {
   /* Stacked, the sidebar and the article are full-width rows. Left over from
      the desktop layout, align-items:flex-start sizes them to their content
@@ -181,5 +192,16 @@
   .sidebar-groups { display: none; }
   .sidebar-groups.open { display: block; }
   .article-wrap { padding: 24px 16px 60px; }
-  .doc-card { max-width: none; padding: 20px; }
+  .doc-toc ol { columns: 1; }
 }
+
+/* 위의 `.doc-card p/ul/li` 가 더 구체적이라, 머리·차례의 값은 같은 구체도로 다시 건다. */
+.doc-card .org-line { margin: 0 0 14px; font-size: 15px; line-height: 1.5; }
+.doc-card .meta-list { margin: 0; padding: 0; font-size: 15px; line-height: 1.5; }
+.doc-card .meta-list li { margin: 0; padding: 0 14px; }
+.doc-card .meta-list li:first-child { padding-left: 0; }
+.doc-card .doc-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 32px; font-size: 16px; line-height: 1.5; }
+.doc-card .doc-toc li { margin: 0; padding: 5px 0; }
+@media (max-width: 860px) { .doc-card .doc-toc ol { columns: 1; } }
+
+.doc-card .doc-toc ol.plain { list-style: none; padding-left: 0; }

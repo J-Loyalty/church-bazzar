@@ -51,6 +51,7 @@
 .cover .where { font-size: 17px; color: var(--color-body); margin: 0 0 20px; }
 .cover .printed { font-size: 15px; color: var(--color-mute); margin: 0; }
 
+.sheet.single .cover, .sheet.single .toc { display: none; }
 .toc { margin: 28px 0 0; }
 .toc h2 { font-family: var(--font-display); font-size: 26px; font-weight: 300; letter-spacing: -0.02em; color: var(--color-ink); margin: 0 0 14px; }
 .toc .group { font-size: 15px; font-weight: 700; color: var(--color-mute); margin: 16px 0 6px; }
@@ -69,7 +70,7 @@
 .doc p { margin: 0 0 14px; font-size: 16px; line-height: 1.7; }
 .doc ul, .doc ol { margin: 0 0 14px; padding-left: 24px; font-size: 16px; line-height: 1.7; }
 .doc li { margin-bottom: 7px; }
-.doc li.checkbox-item { list-style: none; margin-left: -24px; }
+.doc li.checkbox-item { list-style: none; margin-left: -24px; padding-left: 23px; text-indent: -23px; }
 .doc li.checkbox-item input { margin-right: 8px; width: 15px; height: 15px; vertical-align: -2px; }
 .doc strong { color: var(--color-ink); font-weight: 700; }
 .doc hr { border: none; border-top: 1px solid var(--color-hairline); margin: 22px 0; }

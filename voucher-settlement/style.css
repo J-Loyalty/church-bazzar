@@ -3,11 +3,10 @@
    문서 화면(1120px)보다 넓다 -- 여기는 읽는 글이 아니라 열이 아홉인 표가 들어가는
    자리라, 960px 에서는 결과 표가 안쪽에서 가로로 밀렸다. 24"(1920) 화면에서
    한눈에 들어오는 폭으로 잡았다. 긴 글줄은 아래 max-width 로 따로 막는다. */
-:root { --page-width: 1360px; }
+:root { --page-width: 1360px; --paper-width: 1360px; }
 
 .app-header {
-  padding: 24px max(16px, calc((100% - var(--page-width)) / 2 + 16px)) 18px;
-  background: var(--color-canvas);
+  padding: 28px max(16px, calc((100% - var(--page-width)) / 2 + 16px)) 18px;
 }
 .app-header h1 {
   margin: 0 0 10px;
@@ -18,14 +17,15 @@
   line-height: 1.2;
   color: var(--color-ink);
 }
+.app-header .org-line { margin-bottom: 8px; }
 .app-sub { margin: 0; color: var(--color-body); font-size: 17px; max-width: 70ch; }
 .app-sub strong { color: var(--color-ink); font-weight: 600; }
 
 /* 단계 탭. 여기서는 탭이 필터가 아니라 실제로 나뉘는 순서다. */
 .tabs {
   padding: 10px max(16px, calc((100% - var(--page-width)) / 2 + 16px));
-  background: var(--color-canvas);
-  border-bottom: 1px solid var(--color-hairline);
+  background: var(--color-desk);
+  border-bottom: 1px solid var(--color-hairline-strong);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -58,18 +58,14 @@ main {
 /* 폭이 넓어져도 읽는 글은 한 줄이 너무 길어지지 않게 한다. */
 .panel-lead, .tab-panel > .hint { max-width: 90ch; }
 
-.tab-panel {
-  background: var(--color-surface-doc);
-  border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
+.tab-panel { padding: 36px 40px 32px; }
 
 .panel-lead {
   margin: 0 0 24px;
   padding: 14px 18px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
+  border-radius: var(--radius-xs);
+  background: var(--color-canvas-soft);
+  border-left: 4px solid var(--color-ink);
   font-size: 17px;
   color: var(--color-ink);
 }
@@ -82,7 +78,7 @@ h2 {
   color: var(--color-ink);
   margin: 36px 0 6px;
   padding-top: 20px;
-  border-top: 1px solid var(--color-hairline);
+  border-top: 1px solid var(--color-hairline-strong);
 }
 h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
 h3 {
@@ -101,7 +97,7 @@ h3 {
 /* 이 앱의 표는 숫자가 많아 가운데 정렬한다 (문서는 왼쪽 정렬이 기본) */
 .data-table th, .data-table td { text-align: center; }
 .data-table td:first-child, .data-table th:first-child { text-align: left; }
-/* 조 이름은 줄을 바꾸지 않는다 -- 「의류 새옷」처럼 길어지면 두 줄이 되어
+/* 조 이름은 줄을 바꾸지 않는다 -- 「의류 헌옷」처럼 길어지면 두 줄이 되어
    표가 들쭉날쭉해진다. 좁은 화면에서는 .table-scroll 안에서 밀린다. */
 .data-table td:first-child { white-space: nowrap; }
 .data-table td:first-child .row-sub { white-space: normal; }
@@ -159,7 +155,7 @@ h3 {
 .count-box {
   background: var(--color-surface-card);
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xs);
   padding: 20px;
   margin-bottom: 14px;
 }
@@ -245,7 +241,7 @@ h3 {
   margin-bottom: 30px;
 }
 .summary-card {
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-xs);
   padding: 20px 22px;
   background: var(--color-surface-soft);
   border: 1px solid var(--color-hairline);
@@ -286,7 +282,7 @@ h3 {
 .balance-side {
   background: var(--color-surface-card);
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xs);
   padding: 16px 18px;
   min-width: 0;
 }
@@ -352,7 +348,7 @@ h3 {
   .tabs { padding: 8px 12px; }
   .topbar { padding: 8px 12px; }
   main { padding: 16px 12px 56px; }
-  .tab-panel { padding: 16px; }
+  .tab-panel { padding: 20px 16px; }
   h2 { font-size: 22px; }
   .summary-row { grid-template-columns: 1fr; gap: 10px; margin-bottom: 22px; }
   .summary-card { padding: 16px 18px; }
