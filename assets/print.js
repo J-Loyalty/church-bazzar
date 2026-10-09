@@ -16,6 +16,19 @@
   var failed = {};         // 경로 → true. 못 받아온 문서
   var selected = loadSelection();
 
+  // 주소에 ?doc=경로 를 붙이면 그 문서 하나만 찍는다 (PDF로 전달할 때).
+  // 이 방식은 고른 선택을 저장하지도 덮어쓰지도 않는다.
+  var onlyDoc = new URLSearchParams(location.search).get("doc");
+  var validOnly = onlyDoc && window.SEQUENCE.some(function (item) { return item.path === onlyDoc; });
+  if (validOnly) {
+    selected = {};
+    window.SEQUENCE.forEach(function (item) { selected[item.path] = item.path === onlyDoc; });
+  }
+
+  // 이 문서들은 절(##)마다 새 장에서 시작한다. 책임자·담당자에게 건네는 문서라
+  // 장을 낱장으로 뽑아 나눠 줄 수 있어야 한다.
+  var SECTION_PAGES = { "docs/운영_안내서.md": true };
+
   function defaultSelection() {
     var out = {};
     window.SEQUENCE.forEach(function (item) {
@@ -37,7 +50,7 @@
     return base;
   }
 
-  function saveSelection() { CBZ.save(SELECT_KEY, selected); }
+  function saveSelection() { if (!validOnly) CBZ.save(SELECT_KEY, selected); }
 
   function chosen() {
     return window.SEQUENCE.filter(function (item) { return selected[item.path]; });
@@ -106,8 +119,13 @@
     document.querySelector(".sheet").classList.toggle("single", list.length === 1);
     renderToc(list);
     document.getElementById("docs").innerHTML = list.map(function (item) {
-      return '<section class="doc">' + (cache[item.path] || "") + "</section>";
+      return '<section class="doc' + (SECTION_PAGES[item.path] ? " sections" : "") + '">' +
+        (cache[item.path] || "") + "</section>";
     }).join("");
+    // 종이·PDF에서는 링크가 쓸모없고 PDF에는 눌리는 링크로 남는다 -- 글자만 남긴다.
+    document.querySelectorAll("#docs a").forEach(function (a) {
+      a.replaceWith(document.createTextNode(a.textContent));
+    });
     setStatus(list);
   }
 

@@ -79,7 +79,10 @@
 .load-error { color: var(--color-accent-red); font-weight: 600; }
 
 /* ---- Print: A4, ink-friendly, one document per sheet ---- */
-@page { size: A4; margin: 17mm 15mm 15mm; }
+@page {
+  size: A4; margin: 17mm 15mm 15mm;
+  @bottom-center { content: counter(page) " / " counter(pages); font-size: 9pt; color: #555; }
+}
 
 @media print {
   .toolbar, .picker { display: none !important; }
@@ -107,6 +110,16 @@
   .doc li { margin-bottom: 3pt; }
   .doc strong { color: #000; }
   .doc del { color: #555; }
+
+  /* 절마다 새 장: 첫 절은 제목 바로 뒤라 건너뛴다. */
+  .doc.sections h2 { break-before: page; margin-top: 0; padding-top: 0; border-top: none; font-size: 15pt; border-bottom: 1.2pt solid #000; padding-bottom: 5pt; }
+  .doc.sections h2:first-of-type { break-before: auto; }
+  .doc.sections h3 { margin-top: 11pt; }
+  /* 한 절이 한 장에 들어가도록 본문을 한 단계 촘촘하게 */
+  .doc.sections p, .doc.sections ul, .doc.sections ol { font-size: 10.5pt; line-height: 1.45; margin-bottom: 6pt; }
+  .doc.sections li { margin-bottom: 2pt; }
+  .doc.sections .data-table { font-size: 9.5pt; }
+  .doc.sections .data-table th, .doc.sections .data-table td { padding: 3pt 5pt; }
 
   h1, h2, h3 { break-after: avoid; }
   tr, li, .banner { break-inside: avoid; }

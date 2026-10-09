@@ -27,6 +27,7 @@
       { path: "docs/정산_절차.md", label: "정산 절차" }
     ]},
     { group: "참고", items: [
+      { path: "docs/운영_안내서.md", label: "운영 안내서" },
       { path: "docs/우천_대책.md", label: "우천 대책" },
       { path: "docs/과거_실적.md", label: "과거 실적" },
       { path: "docs/가치_기준.md", label: "가치 기준" },
